@@ -8,7 +8,7 @@ import sk.stuba.sdg.isbe.services.service.job.RecipeService;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/job/recipe")
+@RequestMapping("api/jobs/recipe")
 public class RecipeApi {
 
     @Autowired
@@ -20,12 +20,7 @@ public class RecipeApi {
     }
 
     @GetMapping("getByTypeOfDevice/{type}")
-    public List<Recipe> getRecipeByTypeOfDevice(@PathVariable String type) {
-        return recipeService.getRecipeByTypeOfDevice(type);
-    }
-
-    @PostMapping("runJobFromRecipe/{recipe}")
-    public void createJobFromRecipe(@PathVariable Recipe recipe) {
-        recipeService.runJobFromRecipe(recipe);
+    public List<Recipe> getRecipesByTypeOfDevice(@PathVariable String type) {
+        return recipeService.getRecipesByTypeOfDevice(type);
     }
 }
