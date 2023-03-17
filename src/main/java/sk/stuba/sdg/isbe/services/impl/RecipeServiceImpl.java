@@ -1,14 +1,15 @@
-package sk.stuba.sdg.isbe.services.service.job;
+package sk.stuba.sdg.isbe.services.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import sk.stuba.sdg.isbe.entities.job.Recipe;
-import sk.stuba.sdg.isbe.services.repository.job.RecipeRepository;
+import sk.stuba.sdg.isbe.domain.model.Recipe;
+import sk.stuba.sdg.isbe.repositories.RecipeRepository;
+import sk.stuba.sdg.isbe.services.RecipeService;
 
 import java.util.List;
 
 @Service
-public class RecipeService {
+public class RecipeServiceImpl implements RecipeService {
 
     @Autowired
     private RecipeRepository recipeRepository;

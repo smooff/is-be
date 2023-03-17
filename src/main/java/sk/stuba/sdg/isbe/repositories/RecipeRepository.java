@@ -1,8 +1,8 @@
-package sk.stuba.sdg.isbe.services.repository.job;
+package sk.stuba.sdg.isbe.repositories;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
-import sk.stuba.sdg.isbe.entities.job.Recipe;
+import sk.stuba.sdg.isbe.domain.model.Recipe;
 
 import java.util.List;
 

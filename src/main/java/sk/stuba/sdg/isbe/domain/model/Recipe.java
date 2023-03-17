@@ -1,4 +1,4 @@
-package sk.stuba.sdg.isbe.entities.job;
+package sk.stuba.sdg.isbe.domain.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;

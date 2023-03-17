@@ -1,4 +1,4 @@
-package sk.stuba.sdg.isbe.entities.job.enums;
+package sk.stuba.sdg.isbe.domain.enums;
 
 public enum JobStatusEnum {
     JOB_FREE,

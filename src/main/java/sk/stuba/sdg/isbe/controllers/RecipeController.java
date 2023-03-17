@@ -1,15 +1,15 @@
-package sk.stuba.sdg.isbe.services.api.job;
+package sk.stuba.sdg.isbe.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import sk.stuba.sdg.isbe.entities.job.Recipe;
-import sk.stuba.sdg.isbe.services.service.job.RecipeService;
+import sk.stuba.sdg.isbe.domain.model.Recipe;
+import sk.stuba.sdg.isbe.services.RecipeService;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("api/jobs/recipe")
-public class RecipeApi {
+public class RecipeController {
 
     @Autowired
     private RecipeService recipeService;

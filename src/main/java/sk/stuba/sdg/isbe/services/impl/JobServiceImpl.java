@@ -1,15 +1,16 @@
-package sk.stuba.sdg.isbe.services.service.job;
+package sk.stuba.sdg.isbe.services.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import sk.stuba.sdg.isbe.entities.job.Job;
-import sk.stuba.sdg.isbe.entities.job.JobStatus;
-import sk.stuba.sdg.isbe.entities.job.Recipe;
-import sk.stuba.sdg.isbe.entities.job.enums.JobStatusEnum;
-import sk.stuba.sdg.isbe.services.repository.job.JobRepository;
+import sk.stuba.sdg.isbe.domain.enums.JobStatusEnum;
+import sk.stuba.sdg.isbe.domain.model.JobStatus;
+import sk.stuba.sdg.isbe.domain.model.Recipe;
+import sk.stuba.sdg.isbe.domain.model.Job;
+import sk.stuba.sdg.isbe.repositories.JobRepository;
+import sk.stuba.sdg.isbe.services.JobService;
 
 @Service
-public class JobService {
+public class JobServiceImpl implements JobService {
 
     @Autowired
     private JobRepository jobRepository;
