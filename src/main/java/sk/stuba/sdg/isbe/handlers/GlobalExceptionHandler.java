@@ -10,7 +10,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import sk.stuba.sdg.isbe.handlers.exceptions.InvalidJobException;
+import sk.stuba.sdg.isbe.handlers.exceptions.InvalidRecipeException;
 import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
+import sk.stuba.sdg.isbe.handlers.exceptions.RecipeExistsException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
@@ -18,13 +21,47 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(NotFoundCustomException.class)
     public ResponseEntity<Object> handleResourceNotFoundException(NotFoundCustomException ex) {
-
-        List<String> details = new ArrayList<String>();
+        List<String> details = new ArrayList<>();
         String message = ex.getMessage();
         details.add(message);
 
-        ApiError err = new ApiError(LocalDateTime.now(),HttpStatus.NOT_FOUND, "Resource not found" ,details);
+        ApiError err = new ApiError(LocalDateTime.now(),HttpStatus.NOT_FOUND, "Resource not found", details);
+        logger.error(message, ex);
 
+        return ResponseEntityBuilder.build(err);
+    }
+
+    @ExceptionHandler(InvalidRecipeException.class)
+    public ResponseEntity<Object> handleInvalidRecipeException(InvalidRecipeException ex) {
+        List<String> details = new ArrayList<>();
+        String message = ex.getMessage();
+        details.add(message);
+
+        ApiError err = new ApiError(LocalDateTime.now(),HttpStatus.FORBIDDEN, "Invalid recipe!", details);
+        logger.error(message, ex);
+
+        return ResponseEntityBuilder.build(err);
+    }
+
+    @ExceptionHandler(InvalidJobException.class)
+    public ResponseEntity<Object> handleInvalidJobException(InvalidJobException ex) {
+        List<String> details = new ArrayList<>();
+        String message = ex.getMessage();
+        details.add(message);
+
+        ApiError err = new ApiError(LocalDateTime.now(),HttpStatus.FORBIDDEN, "Invalid job!", details);
+        logger.error(message, ex);
+
+        return ResponseEntityBuilder.build(err);
+    }
+
+    @ExceptionHandler(RecipeExistsException.class)
+    public ResponseEntity<Object> handleRecipeExistsException(RecipeExistsException ex) {
+        List<String> details = new ArrayList<>();
+        String message = ex.getMessage();
+        details.add(message);
+
+        ApiError err = new ApiError(LocalDateTime.now(),HttpStatus.CONFLICT, "Recipe exists!", details);
         logger.error(message, ex);
 
         return ResponseEntityBuilder.build(err);

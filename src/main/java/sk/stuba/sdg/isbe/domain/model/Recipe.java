@@ -12,7 +12,7 @@ public class Recipe {
     private String name;
     private List<Command> commands;
     private String typeOfDevice;
-    private boolean isSubRecipe;
+    private Boolean isSubRecipe;
 
     public String getId() {
         return id;
@@ -46,11 +46,11 @@ public class Recipe {
         this.typeOfDevice = typeOfDevice;
     }
 
-    public boolean isSubRecipe() {
+    public Boolean isSubRecipe() {
         return isSubRecipe;
     }
 
-    public void setSubRecipe(boolean subRecipe) {
+    public void setSubRecipe(Boolean subRecipe) {
         isSubRecipe = subRecipe;
     }
 }

@@ -10,4 +10,8 @@ import java.util.List;
 public interface RecipeRepository extends MongoRepository<Recipe, String> {
 
     List<Recipe> getRecipesByTypeOfDevice(String typeOfDevice);
+
+    Recipe getRecipeByName(String name);
+
+    List<Recipe> getRecipesByIsSubRecipeAndTypeOfDevice(Boolean isSubRecipe, String typeOfDevice);
 }

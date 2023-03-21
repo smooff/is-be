@@ -19,8 +19,33 @@ public class RecipeController {
         recipeService.createRecipe(recipe);
     }
 
+    @DeleteMapping("delete/{recipe}")
+    public void deleteRecipe(@PathVariable Recipe recipe) {
+        recipeService.deleteRecipe(recipe);
+    }
+
     @GetMapping("getByTypeOfDevice/{type}")
     public List<Recipe> getRecipesByTypeOfDevice(@PathVariable String type) {
         return recipeService.getRecipesByTypeOfDevice(type);
+    }
+
+    @GetMapping("getByName/{name}")
+    public Recipe getRecipeByName(@PathVariable String name) {
+        return recipeService.getRecipeByName(name);
+    }
+
+    @PutMapping("updateRecipe/{recipe}/{recipeWithNewSettings}")
+    public void updateRecipe(@PathVariable Recipe recipe, @PathVariable Recipe recipeWithNewSettings) {
+        recipeService.updateRecipe(recipe, recipeWithNewSettings);
+    }
+
+    @GetMapping("getFullRecipesByDeviceType/{typeOfDevice}")
+    public List<Recipe> getFullRecipes(@PathVariable String typeOfDevice) {
+        return recipeService.getFullRecipes(typeOfDevice);
+    }
+
+    @GetMapping("getSubRecipesByDeviceType/{typeOfDevice}")
+    public List<Recipe> getSubRecipes(@PathVariable String typeOfDevice) {
+        return recipeService.getSubRecipes(typeOfDevice);
     }
 }
