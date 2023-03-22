@@ -1,5 +1,6 @@
 package sk.stuba.sdg.isbe.services;
 
+import org.springframework.http.ResponseEntity;
 import sk.stuba.sdg.isbe.domain.model.Recipe;
 
 import java.util.List;
@@ -8,13 +9,17 @@ public interface RecipeService {
 
     Recipe createRecipe(Recipe recipe);
 
+    Recipe getRecipe(String recipeId);
+
     List<Recipe> getRecipesByTypeOfDevice(String typeOfDevice);
 
     Recipe getRecipeByName(String name);
 
-    Recipe updateRecipe(Recipe recipe, Recipe recipeWithNewSettings);
+    ResponseEntity<Recipe> updateRecipe(String recipeId, Recipe changeRecipe);
 
-    void deleteRecipe(Recipe recipe);
+    ResponseEntity<Recipe> addSubRecipeToRecipe(String recipeId, String subRecipeId);
+
+    ResponseEntity<Recipe> deleteRecipe(String recipeId);
 
     List<Recipe> getFullRecipes(String typeOfDevice);
 

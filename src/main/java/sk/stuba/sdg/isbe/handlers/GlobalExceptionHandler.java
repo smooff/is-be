@@ -10,10 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import sk.stuba.sdg.isbe.handlers.exceptions.InvalidJobException;
-import sk.stuba.sdg.isbe.handlers.exceptions.InvalidRecipeException;
-import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
-import sk.stuba.sdg.isbe.handlers.exceptions.RecipeExistsException;
+import sk.stuba.sdg.isbe.handlers.exceptions.*;
 
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
@@ -62,6 +59,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         details.add(message);
 
         ApiError err = new ApiError(LocalDateTime.now(),HttpStatus.CONFLICT, "Recipe exists!", details);
+        logger.error(message, ex);
+
+        return ResponseEntityBuilder.build(err);
+    }
+
+    @ExceptionHandler(InvalidOperationException.class)
+    public ResponseEntity<Object> handleInvalidOperationException(InvalidOperationException ex) {
+        List<String> details = new ArrayList<>();
+        String message = ex.getMessage();
+        details.add(message);
+
+        ApiError err = new ApiError(LocalDateTime.now(),HttpStatus.FORBIDDEN, "Operation is not permitted!", details);
         logger.error(message, ex);
 
         return ResponseEntityBuilder.build(err);

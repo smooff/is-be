@@ -4,6 +4,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import sk.stuba.sdg.isbe.domain.enums.JobStatusEnum;
 
+import java.util.List;
+
 @Document
 public class JobStatus {
     @Id
@@ -13,6 +15,7 @@ public class JobStatus {
     private Integer currentStep;
     private Integer totalSteps;
     private Integer currentCycle;
+    private List<DataPoint> data;
 
     public String getUid() {
         return uid;
@@ -60,5 +63,13 @@ public class JobStatus {
 
     public void setCurrentCycle(Integer currentCycle) {
         this.currentCycle = currentCycle;
+    }
+
+    public List<DataPoint> getData() {
+        return data;
+    }
+
+    public void setData(List<DataPoint> data) {
+        this.data = data;
     }
 }

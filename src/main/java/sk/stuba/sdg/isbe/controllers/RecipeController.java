@@ -19,9 +19,9 @@ public class RecipeController {
         recipeService.createRecipe(recipe);
     }
 
-    @DeleteMapping("delete/{recipe}")
-    public void deleteRecipe(@PathVariable Recipe recipe) {
-        recipeService.deleteRecipe(recipe);
+    @DeleteMapping("delete/{recipeId}")
+    public void deleteRecipe(@PathVariable String recipeId) {
+        recipeService.deleteRecipe(recipeId);
     }
 
     @GetMapping("getByTypeOfDevice/{type}")
@@ -34,9 +34,14 @@ public class RecipeController {
         return recipeService.getRecipeByName(name);
     }
 
-    @PutMapping("updateRecipe/{recipe}/{recipeWithNewSettings}")
-    public void updateRecipe(@PathVariable Recipe recipe, @PathVariable Recipe recipeWithNewSettings) {
-        recipeService.updateRecipe(recipe, recipeWithNewSettings);
+    @PutMapping("updateRecipe/{recipeId}/{changeRecipe}")
+    public void updateRecipe(@PathVariable String recipeId, @PathVariable Recipe changeRecipe) {
+        recipeService.updateRecipe(recipeId, changeRecipe);
+    }
+
+    @PutMapping("addSubRecipeToRecipe/{recipeId}/{subRecipeId}")
+    public void addSubRecipeToRecipe(@PathVariable String recipeId, @PathVariable String subRecipeId) {
+        recipeService.addSubRecipeToRecipe(recipeId, subRecipeId);
     }
 
     @GetMapping("getFullRecipesByDeviceType/{typeOfDevice}")

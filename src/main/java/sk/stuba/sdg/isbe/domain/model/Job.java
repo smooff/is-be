@@ -3,6 +3,9 @@ package sk.stuba.sdg.isbe.domain.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 @Document
@@ -16,6 +19,9 @@ public class Job {
     private List<Command> commands;
     private boolean toCancel;
     private boolean paused;
+    private Long createdAt;
+    private Long startedAt;
+    private Long finishedAt;
 
     public String getUid() {
         return uid;
@@ -79,5 +85,42 @@ public class Job {
 
     public void setPaused(boolean paused) {
         this.paused = paused;
+    }
+
+    public Long getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Long createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Long getStartedAt() {
+        return startedAt;
+    }
+
+    public void setStartedAt(Long startedAt) {
+        this.startedAt = startedAt;
+    }
+
+    public Long getFinishedAt() {
+        return finishedAt;
+    }
+
+    public void setFinishedAt(Long finishedAt) {
+        this.finishedAt = finishedAt;
+    }
+
+    public String getFormattedTime(long time) {
+        Date date = new Date(time);
+        DateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss.SSS");
+        return formatter.format(date);
+    }
+
+    public boolean isValid() {
+        return this.getName() != null &&
+                this.getCommands() != null &&
+                !this.getCommands().isEmpty() &&
+                this.getNoOfReps() != null;
     }
 }
