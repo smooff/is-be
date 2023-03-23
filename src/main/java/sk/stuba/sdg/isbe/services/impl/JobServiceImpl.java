@@ -4,13 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import sk.stuba.sdg.isbe.domain.enums.JobStatusEnum;
+import sk.stuba.sdg.isbe.domain.model.Command;
 import sk.stuba.sdg.isbe.domain.model.Job;
 import sk.stuba.sdg.isbe.domain.model.JobStatus;
 import sk.stuba.sdg.isbe.domain.model.Recipe;
-import sk.stuba.sdg.isbe.handlers.exceptions.InvalidJobException;
-import sk.stuba.sdg.isbe.handlers.exceptions.InvalidOperationException;
-import sk.stuba.sdg.isbe.handlers.exceptions.InvalidRecipeException;
-import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
+import sk.stuba.sdg.isbe.handlers.exceptions.*;
 import sk.stuba.sdg.isbe.repositories.JobRepository;
 import sk.stuba.sdg.isbe.services.JobService;
 import sk.stuba.sdg.isbe.services.RecipeService;
@@ -34,7 +32,7 @@ public class JobServiceImpl implements JobService {
     public void runJobFromRecipe(String recipeId, int repetitions) {
         Recipe recipe = recipeService.getRecipe(recipeId);
         if (recipe.isSubRecipe()) {
-            throw new InvalidRecipeException("Recipe is only a sub-recipe, can't create a job from it!");
+            throw new InvalidEntityException("Recipe is only a sub-recipe, can't create a job from it!");
         }
 
         JobStatus jobStatus = new JobStatus();
@@ -42,18 +40,29 @@ public class JobServiceImpl implements JobService {
 
         Job job = new Job();
         job.setName("Job: " + recipe.getName());
-        job.setCommands(recipe.getCommands());
+        addCommandsFromRecipes(job, recipe);
         job.setStatus(jobStatus);
-        job.setNoOfCmds(recipe.getCommands().size());
         job.setNoOfReps(repetitions);
 
         runJob(job);
     }
 
+    private void addCommandsFromRecipes(Job job, Recipe recipe) {
+        List<Command> commands = recipe.getCommands() == null ? new ArrayList<>() : recipe.getCommands();
+        job.setCommands(commands);
+        for (String subRecipeId : recipe.getSubRecipeIds()) {
+            Recipe subRecipe = recipeService.getRecipe(subRecipeId);
+            if (subRecipe.getCommands() != null && !subRecipe.getCommands().isEmpty()) {
+                job.getCommands().addAll(subRecipe.getCommands());
+            }
+        }
+        job.setNoOfCmds(job.getCommands().size());
+    }
+
     @Override
     public void runJob(Job job) {
         if (!job.isValid()) {
-            throw new InvalidJobException("Job's body is invalid! Please fill all mandatory fields!");
+            throw new InvalidEntityException("Job's body is invalid! Please fill all mandatory fields!");
         }
         job.setCreatedAt(Instant.now().toEpochMilli());
         jobRepository.save(job);
@@ -90,13 +99,17 @@ public class JobServiceImpl implements JobService {
     @Override
     public ResponseEntity<Job> cancelJob(String jobId) {
         Job job = getJob(jobId);
-        return setJobStatus(job, JobStatusEnum.JOB_CANCELED);
+        job.setToCancel(true);
+        jobRepository.save(job);
+        return ResponseEntity.ok(job);
     }
 
     @Override
     public ResponseEntity<Job> pauseJob(String jobId) {
         Job job = getJob(jobId);
-        return setJobStatus(job, JobStatusEnum.JOB_PAUSED);
+        job.setPaused(true);
+        jobRepository.save(job);
+        return ResponseEntity.ok(job);
     }
 
     @Override
@@ -119,20 +132,11 @@ public class JobServiceImpl implements JobService {
         return jobRepository.getJobsByStartedAtIsNotAndFinishedAtIs(null, null);
     }
 
-    private ResponseEntity<Job> setJobStatus(Job job, JobStatusEnum jobStatus) {
-        if (jobStatus == null) {
-            throw new InvalidJobException("Job does not have any status set, therefore it can't be changed!");
-        }
-        job.getStatus().setCode(jobStatus);
-        jobRepository.save(job);
-
-        return ResponseEntity.ok(job);
-    }
-
-    private Job getJob(String jobId) {
+    @Override
+    public Job getJob(String jobId) {
         Optional<Job> optionalJob = jobRepository.findById(jobId);
         if (optionalJob.isEmpty()) {
-            throw new NotFoundCustomException("Job with ID: " + jobId + " was not found!");
+            throw new NotFoundCustomException("Job with ID: '" + jobId + "' was not found!");
         }
         return optionalJob.get();
     }

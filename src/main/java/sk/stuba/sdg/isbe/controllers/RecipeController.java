@@ -1,6 +1,7 @@
 package sk.stuba.sdg.isbe.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sk.stuba.sdg.isbe.domain.model.Recipe;
 import sk.stuba.sdg.isbe.services.RecipeService;
@@ -15,13 +16,23 @@ public class RecipeController {
     private RecipeService recipeService;
 
     @PostMapping("create/{recipe}")
-    public void createRecipe(@PathVariable Recipe recipe) {
-        recipeService.createRecipe(recipe);
+    public Recipe createRecipe(@PathVariable Recipe recipe) {
+         return recipeService.createRecipe(recipe);
     }
 
     @DeleteMapping("delete/{recipeId}")
-    public void deleteRecipe(@PathVariable String recipeId) {
-        recipeService.deleteRecipe(recipeId);
+    public ResponseEntity<Recipe> deleteRecipe(@PathVariable String recipeId) {
+        return recipeService.deleteRecipe(recipeId);
+    }
+
+    @PutMapping("addCommandToRecipe/{recipeId}/{commandId}")
+    public Recipe addCommandToRecipe(@PathVariable String recipeId, @PathVariable String commandId) {
+        return recipeService.addCommandToRecipe(recipeId, commandId);
+    }
+
+    @DeleteMapping("removeCommandFromRecipe/{recipeId}/{commandId}")
+    public Recipe removeCommandFromRecipe(@PathVariable String recipeId, @PathVariable String commandId) {
+        return recipeService.removeCommandFromRecipe(recipeId, commandId);
     }
 
     @GetMapping("getByTypeOfDevice/{type}")
@@ -42,6 +53,16 @@ public class RecipeController {
     @PutMapping("addSubRecipeToRecipe/{recipeId}/{subRecipeId}")
     public void addSubRecipeToRecipe(@PathVariable String recipeId, @PathVariable String subRecipeId) {
         recipeService.addSubRecipeToRecipe(recipeId, subRecipeId);
+    }
+
+    @DeleteMapping("removeSubRecipeFromRecipe/{recipeId}/{subRecipeId}")
+    public void removeSubRecipeFromRecipe(@PathVariable String recipeId, @PathVariable String subRecipeId) {
+        recipeService.removeSubRecipeFromRecipe(recipeId, subRecipeId);
+    }
+
+    @GetMapping("getAllRecipes")
+    public List<Recipe> getAllRecipes() {
+        return recipeService.getAllRecipes();
     }
 
     @GetMapping("getFullRecipesByDeviceType/{typeOfDevice}")

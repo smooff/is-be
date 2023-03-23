@@ -13,6 +13,7 @@ public class Recipe {
     private List<Command> commands;
     private String typeOfDevice;
     private Boolean isSubRecipe;
+    private List<String> subRecipeIds;
 
     public String getId() {
         return id;
@@ -52,5 +53,13 @@ public class Recipe {
 
     public void setSubRecipe(Boolean subRecipe) {
         isSubRecipe = subRecipe;
+    }
+
+    public List<String> getSubRecipeIds() {
+        return subRecipeIds;
+    }
+
+    public void setSubRecipeIds(List<String> subRecipeIds) {
+        this.subRecipeIds = subRecipeIds;
     }
 }

@@ -28,37 +28,25 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntityBuilder.build(err);
     }
 
-    @ExceptionHandler(InvalidRecipeException.class)
-    public ResponseEntity<Object> handleInvalidRecipeException(InvalidRecipeException ex) {
+    @ExceptionHandler(InvalidEntityException.class)
+    public ResponseEntity<Object> handleInvalidEntityException(InvalidEntityException ex) {
         List<String> details = new ArrayList<>();
         String message = ex.getMessage();
         details.add(message);
 
-        ApiError err = new ApiError(LocalDateTime.now(),HttpStatus.FORBIDDEN, "Invalid recipe!", details);
+        ApiError err = new ApiError(LocalDateTime.now(),HttpStatus.FORBIDDEN, "Invalid entity!", details);
         logger.error(message, ex);
 
         return ResponseEntityBuilder.build(err);
     }
 
-    @ExceptionHandler(InvalidJobException.class)
-    public ResponseEntity<Object> handleInvalidJobException(InvalidJobException ex) {
+    @ExceptionHandler(EntityExistsException.class)
+    public ResponseEntity<Object> handleRecipeExistsException(EntityExistsException ex) {
         List<String> details = new ArrayList<>();
         String message = ex.getMessage();
         details.add(message);
 
-        ApiError err = new ApiError(LocalDateTime.now(),HttpStatus.FORBIDDEN, "Invalid job!", details);
-        logger.error(message, ex);
-
-        return ResponseEntityBuilder.build(err);
-    }
-
-    @ExceptionHandler(RecipeExistsException.class)
-    public ResponseEntity<Object> handleRecipeExistsException(RecipeExistsException ex) {
-        List<String> details = new ArrayList<>();
-        String message = ex.getMessage();
-        details.add(message);
-
-        ApiError err = new ApiError(LocalDateTime.now(),HttpStatus.CONFLICT, "Recipe exists!", details);
+        ApiError err = new ApiError(LocalDateTime.now(),HttpStatus.CONFLICT, "Entity exists!", details);
         logger.error(message, ex);
 
         return ResponseEntityBuilder.build(err);

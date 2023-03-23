@@ -12,7 +12,7 @@ import java.util.List;
 public class JobController {
 
     @Autowired
-    JobService jobService;
+    private JobService jobService;
 
     @PostMapping("runFromRecipe/{recipeId}/{repetitions}")
     public void createJobFromRecipe(@PathVariable String recipeId, @PathVariable int repetitions) {
@@ -22,6 +22,11 @@ public class JobController {
     @PostMapping("runJob/{job}")
     public void runJob(@PathVariable Job job) {
         jobService.runJob(job);
+    }
+
+    @GetMapping("getJobById/{jobId}")
+    public Job getJob(@PathVariable String jobId) {
+        return jobService.getJob(jobId);
     }
 
     @PutMapping("skipCycle/{jobId}")

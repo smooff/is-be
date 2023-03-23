@@ -6,4 +6,5 @@ import sk.stuba.sdg.isbe.domain.model.Command;
 
 @Repository
 public interface CommandRepository extends MongoRepository<Command, String> {
+    Command getCommandByName(String name);
 }

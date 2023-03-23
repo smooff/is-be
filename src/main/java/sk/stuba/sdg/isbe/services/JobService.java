@@ -11,6 +11,8 @@ public interface JobService {
 
     void runJob(Job job);
 
+    Job getJob(String jobId);
+
     ResponseEntity<Job> skipCycle(String jobId);
 
     ResponseEntity<Job> skipStep(String jobId);

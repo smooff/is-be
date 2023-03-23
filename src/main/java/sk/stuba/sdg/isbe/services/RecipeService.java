@@ -11,6 +11,10 @@ public interface RecipeService {
 
     Recipe getRecipe(String recipeId);
 
+    Recipe addCommandToRecipe(String recipeId, String commandId);
+
+    Recipe removeCommandFromRecipe(String recipeId, String commandId);
+
     List<Recipe> getRecipesByTypeOfDevice(String typeOfDevice);
 
     Recipe getRecipeByName(String name);
@@ -19,7 +23,11 @@ public interface RecipeService {
 
     ResponseEntity<Recipe> addSubRecipeToRecipe(String recipeId, String subRecipeId);
 
+    ResponseEntity<Recipe> removeSubRecipeFromRecipe(String recipeId, String subRecipeId);
+
     ResponseEntity<Recipe> deleteRecipe(String recipeId);
+
+    List<Recipe> getAllRecipes();
 
     List<Recipe> getFullRecipes(String typeOfDevice);
 
