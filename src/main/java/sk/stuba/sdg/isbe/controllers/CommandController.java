@@ -19,7 +19,7 @@ public class CommandController {
 
     @GetMapping("getCommandById/{commandId}")
     public Command getCommand(@PathVariable String commandId) {
-        return commandService.getCommandById(commandId);
+        return commandService.getCommandById(commandId, false);
     }
 
     @GetMapping("getCommandByName/{commandName}")

@@ -9,9 +9,9 @@ import java.util.List;
 @Repository
 public interface RecipeRepository extends MongoRepository<Recipe, String> {
 
-    List<Recipe> getRecipesByTypeOfDevice(String typeOfDevice);
+    List<Recipe> getRecipesByTypeOfDeviceAndDeactivated(String typeOfDevice, boolean deactivated);
 
-    Recipe getRecipeByName(String name);
+    Recipe getRecipeByNameAndDeactivated(String name, boolean deactivated);
 
-    List<Recipe> getRecipesByIsSubRecipeAndTypeOfDevice(Boolean isSubRecipe, String typeOfDevice);
+    List<Recipe> getRecipesByIsSubRecipeAndTypeOfDeviceAndDeactivated(Boolean isSubRecipe, String typeOfDevice, boolean deactivated);
 }

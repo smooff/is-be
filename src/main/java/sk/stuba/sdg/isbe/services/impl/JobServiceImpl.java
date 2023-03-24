@@ -6,9 +6,10 @@ import org.springframework.stereotype.Service;
 import sk.stuba.sdg.isbe.domain.enums.JobStatusEnum;
 import sk.stuba.sdg.isbe.domain.model.Command;
 import sk.stuba.sdg.isbe.domain.model.Job;
-import sk.stuba.sdg.isbe.domain.model.JobStatus;
 import sk.stuba.sdg.isbe.domain.model.Recipe;
-import sk.stuba.sdg.isbe.handlers.exceptions.*;
+import sk.stuba.sdg.isbe.handlers.exceptions.InvalidEntityException;
+import sk.stuba.sdg.isbe.handlers.exceptions.InvalidOperationException;
+import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
 import sk.stuba.sdg.isbe.repositories.JobRepository;
 import sk.stuba.sdg.isbe.services.JobService;
 import sk.stuba.sdg.isbe.services.RecipeService;
@@ -29,43 +30,46 @@ public class JobServiceImpl implements JobService {
     private RecipeService recipeService;
 
     @Override
-    public void runJobFromRecipe(String recipeId, int repetitions) {
+    public Job runJobFromRecipe(String recipeId, int repetitions) {
         Recipe recipe = recipeService.getRecipe(recipeId);
         if (recipe.isSubRecipe()) {
             throw new InvalidEntityException("Recipe is only a sub-recipe, can't create a job from it!");
         }
 
-        JobStatus jobStatus = new JobStatus();
-        jobStatus.setCode(JobStatusEnum.JOB_PENDING);
+        if (recipe.isDeactivated()) {
+            throw new InvalidEntityException("Recipe is deactivated, can't create a job from it!");
+        }
 
         Job job = new Job();
         job.setName("Job: " + recipe.getName());
         addCommandsFromRecipes(job, recipe);
-        job.setStatus(jobStatus);
         job.setNoOfReps(repetitions);
 
-        runJob(job);
+        return runJob(job);
     }
 
     private void addCommandsFromRecipes(Job job, Recipe recipe) {
         List<Command> commands = recipe.getCommands() == null ? new ArrayList<>() : recipe.getCommands();
         job.setCommands(commands);
-        for (String subRecipeId : recipe.getSubRecipeIds()) {
-            Recipe subRecipe = recipeService.getRecipe(subRecipeId);
-            if (subRecipe.getCommands() != null && !subRecipe.getCommands().isEmpty()) {
-                job.getCommands().addAll(subRecipe.getCommands());
+
+        if (recipe.getSubRecipes() != null) {
+            for (Recipe subRecipe : recipe.getSubRecipes()) {
+                if (subRecipe.getCommands() != null && !subRecipe.getCommands().isEmpty()) {
+                    job.getCommands().addAll(subRecipe.getCommands());
+                }
             }
         }
+
         job.setNoOfCmds(job.getCommands().size());
     }
 
     @Override
-    public void runJob(Job job) {
+    public Job runJob(Job job) {
         if (!job.isValid()) {
             throw new InvalidEntityException("Job's body is invalid! Please fill all mandatory fields!");
         }
         job.setCreatedAt(Instant.now().toEpochMilli());
-        jobRepository.save(job);
+        return jobRepository.save(job);
     }
 
     @Override
@@ -73,6 +77,7 @@ public class JobServiceImpl implements JobService {
         Job job = getJob(jobId);
         Integer currentCycle = job.getStatus().getCurrentCycle();
         Integer maxCycles = job.getNoOfReps();
+
         if (Objects.equals(currentCycle, maxCycles)) {
             throw new InvalidOperationException("Last cycle is under process, can't skip current one!");
         }
@@ -87,6 +92,7 @@ public class JobServiceImpl implements JobService {
         Job job = getJob(jobId);
         Integer currentStep = job.getStatus().getCurrentStep();
         Integer maxSteps = job.getStatus().getTotalSteps();
+
         if (Objects.equals(currentStep, maxSteps)) {
             throw new InvalidOperationException("Last step is under process, can't skip current one!");
         }
@@ -108,6 +114,14 @@ public class JobServiceImpl implements JobService {
     public ResponseEntity<Job> pauseJob(String jobId) {
         Job job = getJob(jobId);
         job.setPaused(true);
+        jobRepository.save(job);
+        return ResponseEntity.ok(job);
+    }
+
+    @Override
+    public ResponseEntity<Job> continueJob(String jobId) {
+        Job job = getJob(jobId);
+        job.setPaused(false);
         jobRepository.save(job);
         return ResponseEntity.ok(job);
     }

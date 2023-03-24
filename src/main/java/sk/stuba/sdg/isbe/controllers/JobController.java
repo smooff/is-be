@@ -1,5 +1,6 @@
 package sk.stuba.sdg.isbe.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import sk.stuba.sdg.isbe.domain.model.Job;
@@ -14,16 +15,19 @@ public class JobController {
     @Autowired
     private JobService jobService;
 
+    @Operation(summary = "Run a job created from a recipe with repetitions")
     @PostMapping("runFromRecipe/{recipeId}/{repetitions}")
-    public void createJobFromRecipe(@PathVariable String recipeId, @PathVariable int repetitions) {
-        jobService.runJobFromRecipe(recipeId, repetitions);
+    public Job createJobFromRecipe(@PathVariable String recipeId, @PathVariable int repetitions) {
+        return jobService.runJobFromRecipe(recipeId, repetitions);
     }
 
+    @Operation(summary = "Run a job")
     @PostMapping("runJob/{job}")
-    public void runJob(@PathVariable Job job) {
-        jobService.runJob(job);
+    public Job runJob(@PathVariable Job job) {
+        return jobService.runJob(job);
     }
 
+    @Operation(summary = "Get job by its ID")
     @GetMapping("getJobById/{jobId}")
     public Job getJob(@PathVariable String jobId) {
         return jobService.getJob(jobId);
@@ -47,6 +51,11 @@ public class JobController {
     @PutMapping("cancelJob/{jobId}")
     public void cancelJob(@PathVariable String jobId) {
         jobService.cancelJob(jobId);
+    }
+
+    @PutMapping("continueJob/{jobId}")
+    public void continueJob(@PathVariable String jobId) {
+        jobService.continueJob(jobId);
     }
 
     @GetMapping("getFinishedJobs")

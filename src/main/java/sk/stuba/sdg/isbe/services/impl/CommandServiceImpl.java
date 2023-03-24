@@ -6,6 +6,7 @@ import sk.stuba.sdg.isbe.domain.model.Command;
 import sk.stuba.sdg.isbe.domain.model.Recipe;
 import sk.stuba.sdg.isbe.handlers.exceptions.EntityExistsException;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidEntityException;
+import sk.stuba.sdg.isbe.handlers.exceptions.InvalidOperationException;
 import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
 import sk.stuba.sdg.isbe.repositories.CommandRepository;
 import sk.stuba.sdg.isbe.services.CommandService;
@@ -40,8 +41,8 @@ public class CommandServiceImpl implements CommandService {
     }
 
     @Override
-    public Command getCommandById(String commandId) {
-        Optional<Command> optionalCommand = commandRepository.findById(commandId);
+    public Command getCommandById(String commandId, boolean deactivated) {
+        Optional<Command> optionalCommand = commandRepository.getCommandByIdAndDeactivated(commandId, false);
         if (optionalCommand.isEmpty()) {
             throw new NotFoundCustomException("Command with ID: '" + commandId + "' was not found!");
         }
@@ -50,7 +51,7 @@ public class CommandServiceImpl implements CommandService {
 
     @Override
     public Command getCommandByName(String name) {
-        Command command = commandRepository.getCommandByName(name);
+        Command command = commandRepository.getCommandByNameAndDeactivated(name, false);
         if (command == null) {
             throw new NotFoundCustomException("Command with name: '" + name + "' not found!");
         }
@@ -59,19 +60,24 @@ public class CommandServiceImpl implements CommandService {
 
     @Override
     public Command deleteCommand(String commandId) {
-        Command command = getCommandById(commandId);
+        Command command = getCommandById(commandId, false);
         List<Recipe> recipes = recipeService.getAllRecipes();
 
         for (Recipe recipe : recipes) {
             if (recipe.getCommands() != null) {
-                recipeService.removeCommandFromRecipe(recipe.getId(), commandId);
+                for (Command recipeCommand : recipe.getCommands()) {
+                    if (recipeCommand.getId().equals(commandId)) {
+                        throw new InvalidOperationException("Command is used in Recipe + " + recipe.getName() + "!");
+                    }
+                }
             }
         }
-        commandRepository.delete(command);
+        command.setDeactivated(true);
+        commandRepository.save(command);
         return command;
     }
 
     private boolean commandExists(String name) {
-        return commandRepository.getCommandByName(name) != null;
+        return commandRepository.getCommandByNameAndDeactivated(name, false) != null;
     }
 }

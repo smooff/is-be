@@ -11,6 +11,7 @@ public class Command {
     private String id;
     private String name;
     private List<Integer> params;
+    private boolean deactivated;
 
     public String getId() {
         return id;
@@ -34,5 +35,13 @@ public class Command {
 
     public void setParams(List<Integer> params) {
         this.params = params;
+    }
+
+    public boolean isDeactivated() {
+        return deactivated;
+    }
+
+    public void setDeactivated(boolean deactivated) {
+        this.deactivated = deactivated;
     }
 }

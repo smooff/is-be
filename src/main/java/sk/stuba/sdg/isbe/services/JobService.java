@@ -7,9 +7,9 @@ import java.util.List;
 
 public interface JobService {
 
-    void runJobFromRecipe(String recipeId, int repetitions);
+    Job runJobFromRecipe(String recipeId, int repetitions);
 
-    void runJob(Job job);
+    Job runJob(Job job);
 
     Job getJob(String jobId);
 
@@ -20,6 +20,8 @@ public interface JobService {
     ResponseEntity<Job> cancelJob(String jobId);
 
     ResponseEntity<Job> pauseJob(String jobId);
+
+    ResponseEntity<Job> continueJob(String jobId);
 
     List<Job> getFinishedJobsByStatus();
 

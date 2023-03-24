@@ -13,7 +13,8 @@ public class Recipe {
     private List<Command> commands;
     private String typeOfDevice;
     private Boolean isSubRecipe;
-    private List<String> subRecipeIds;
+    private List<Recipe> subRecipes;
+    private boolean deactivated;
 
     public String getId() {
         return id;
@@ -55,11 +56,19 @@ public class Recipe {
         isSubRecipe = subRecipe;
     }
 
-    public List<String> getSubRecipeIds() {
-        return subRecipeIds;
+    public List<Recipe> getSubRecipes() {
+        return subRecipes;
     }
 
-    public void setSubRecipeIds(List<String> subRecipeIds) {
-        this.subRecipeIds = subRecipeIds;
+    public void setSubRecipes(List<Recipe> subRecipes) {
+        this.subRecipes = subRecipes;
+    }
+
+    public boolean isDeactivated() {
+        return deactivated;
+    }
+
+    public void setDeactivated(boolean deactivated) {
+        this.deactivated = deactivated;
     }
 }
