@@ -29,7 +29,7 @@ public class CommandServiceImpl implements CommandService {
         if (command.getName() == null || command.getName().isEmpty()) {
             throw new InvalidEntityException("Name of the command is not valid!");
         }
-        if (commandExists(command.getName())) {
+        if (commandWithNameExists(command.getName())) {
             throw new EntityExistsException("Command with name: '" + command.getName() + "' already exists!");
         }
         if (command.getParams() == null || command.getParams().isEmpty()) {
@@ -41,7 +41,7 @@ public class CommandServiceImpl implements CommandService {
     }
 
     @Override
-    public Command getCommandById(String commandId, boolean deactivated) {
+    public Command getCommandById(String commandId) {
         Optional<Command> optionalCommand = commandRepository.getCommandByIdAndDeactivated(commandId, false);
         if (optionalCommand.isEmpty()) {
             throw new NotFoundCustomException("Command with ID: '" + commandId + "' was not found!");
@@ -60,7 +60,7 @@ public class CommandServiceImpl implements CommandService {
 
     @Override
     public Command deleteCommand(String commandId) {
-        Command command = getCommandById(commandId, false);
+        Command command = getCommandById(commandId);
         List<Recipe> recipes = recipeService.getAllRecipes();
 
         for (Recipe recipe : recipes) {
@@ -77,7 +77,7 @@ public class CommandServiceImpl implements CommandService {
         return command;
     }
 
-    private boolean commandExists(String name) {
+    private boolean commandWithNameExists(String name) {
         return commandRepository.getCommandByNameAndDeactivated(name, false) != null;
     }
 }

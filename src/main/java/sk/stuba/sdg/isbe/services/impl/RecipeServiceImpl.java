@@ -31,12 +31,16 @@ public class RecipeServiceImpl implements RecipeService {
             throw new InvalidEntityException("Recipe has no name set!");
         }
 
-        if (activeRecipeWithNameExists(recipe.getName())) {
+        if (recipeWithNameExists(recipe.getName())) {
             throw new InvalidEntityException("Recipe with name: '" + recipe.getName() + "' already exists!");
         }
 
         if (recipe.getTypeOfDevice() == null || recipe.getTypeOfDevice().equals(EMPTY_STRING)) {
             throw new InvalidEntityException("Type of device for recipe is missing!");
+        }
+
+        if (recipe.isSubRecipe() == null) {
+            throw new InvalidEntityException("Recipe's sub-recipe status not defined!");
         }
 
         recipeRepository.save(recipe);
@@ -61,7 +65,7 @@ public class RecipeServiceImpl implements RecipeService {
     public ResponseEntity<Recipe> updateRecipe(String recipeId, Recipe changeRecipe) {
         Recipe recipe = getRecipe(recipeId);
 
-        if (!recipe.getName().equals(changeRecipe.getName()) && activeRecipeWithNameExists(changeRecipe.getName())) {
+        if (!recipe.getName().equals(changeRecipe.getName()) && recipeWithNameExists(changeRecipe.getName())) {
             throw new EntityExistsException("Recipe with name: '" + changeRecipe.getName() + "' already exists!");
         }
 
@@ -159,12 +163,11 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     public Recipe addCommandToRecipe(String recipeId, String commandId) {
         Recipe recipe = getRecipe(recipeId);
-        Command command = commandService.getCommandById(commandId, false);
+        Command command = commandService.getCommandById(commandId);
 
         if (command.isDeactivated()) {
             throw new InvalidOperationException("Command is deactivated!");
         }
-
         if (command.getName() == null || command.getName().isEmpty()) {
             throw new InvalidOperationException("Command does not have any name set!");
         }
@@ -184,13 +187,14 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     public Recipe removeCommandFromRecipe(String recipeId, String commandId) {
         Recipe recipe = getRecipe(recipeId);
-        Command command = commandService.getCommandById(commandId, false);
 
         if (recipe.getCommands() == null && recipe.getCommands().isEmpty()) {
-            throw new NotFoundCustomException("Command: '" + command.getName() + "' is not contained by this recipe!");
+            throw new NotFoundCustomException("Recipe does not contain any commands!");
         }
 
+        Command command = commandService.getCommandById(commandId);
         List<Command> commandsToRemove = new ArrayList<>();
+
         for (Command commandInRecipe : recipe.getCommands()) {
             if (commandInRecipe.getId().equals(commandId)) {
                 commandsToRemove.add(commandInRecipe);
@@ -206,7 +210,7 @@ public class RecipeServiceImpl implements RecipeService {
         throw new NotFoundCustomException("Recipe does not contain command with ID: " + command.getId());
     }
 
-    private boolean activeRecipeWithNameExists(String name) {
+    private boolean recipeWithNameExists(String name) {
         return recipeRepository.getRecipeByNameAndDeactivated(name, false) != null;
     }
 }

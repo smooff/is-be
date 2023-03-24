@@ -6,7 +6,7 @@ public interface CommandService {
 
     Command createCommand(Command command);
 
-    Command getCommandById(String commandId, boolean deactivated);
+    Command getCommandById(String commandId);
 
     Command getCommandByName(String name);
 
