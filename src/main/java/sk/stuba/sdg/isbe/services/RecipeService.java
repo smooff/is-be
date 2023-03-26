@@ -1,6 +1,7 @@
 package sk.stuba.sdg.isbe.services;
 
 import org.springframework.http.ResponseEntity;
+import sk.stuba.sdg.isbe.domain.model.Command;
 import sk.stuba.sdg.isbe.domain.model.Recipe;
 
 import java.util.List;
@@ -32,4 +33,6 @@ public interface RecipeService {
     List<Recipe> getFullRecipes(String typeOfDevice);
 
     List<Recipe> getSubRecipes(String typeOfDevice);
+
+    List<Recipe> getRecipesContainingCommand(Command command);
 }

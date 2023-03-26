@@ -3,6 +3,7 @@ package sk.stuba.sdg.isbe.services.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import sk.stuba.sdg.isbe.domain.enums.DeviceTypeEnum;
 import sk.stuba.sdg.isbe.domain.model.Command;
 import sk.stuba.sdg.isbe.domain.model.Recipe;
 import sk.stuba.sdg.isbe.handlers.exceptions.EntityExistsException;
@@ -12,6 +13,7 @@ import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
 import sk.stuba.sdg.isbe.repositories.RecipeRepository;
 import sk.stuba.sdg.isbe.services.CommandService;
 import sk.stuba.sdg.isbe.services.RecipeService;
+import sk.stuba.sdg.isbe.utilities.DeviceTypeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +54,8 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public List<Recipe> getRecipesByTypeOfDevice(String typeOfDevice) {
-        return recipeRepository.getRecipesByTypeOfDeviceAndDeactivated(typeOfDevice.toUpperCase(), false);
+        DeviceTypeEnum deviceType = DeviceTypeUtils.getDeviceTypeEnum(typeOfDevice);
+        return recipeRepository.getRecipesByTypeOfDeviceAndDeactivated(deviceType, false);
     }
 
     @Override
@@ -166,12 +169,19 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public List<Recipe> getFullRecipes(String typeOfDevice) {
-        return recipeRepository.getRecipesByIsSubRecipeAndTypeOfDeviceAndDeactivated(false, typeOfDevice.toUpperCase(), false);
+        DeviceTypeEnum deviceType = DeviceTypeUtils.getDeviceTypeEnum(typeOfDevice);
+        return recipeRepository.getRecipesByIsSubRecipeAndTypeOfDeviceAndDeactivated(false, deviceType, false);
     }
 
     @Override
     public List<Recipe> getSubRecipes(String typeOfDevice) {
-        return recipeRepository.getRecipesByIsSubRecipeAndTypeOfDeviceAndDeactivated(true, typeOfDevice.toUpperCase(), false);
+        DeviceTypeEnum deviceType = DeviceTypeUtils.getDeviceTypeEnum(typeOfDevice);
+        return recipeRepository.getRecipesByIsSubRecipeAndTypeOfDeviceAndDeactivated(true, deviceType, false);
+    }
+
+    @Override
+    public List<Recipe> getRecipesContainingCommand(Command command) {
+        return recipeRepository.getRecipesByCommandsContaining(command);
     }
 
     @Override
@@ -222,6 +232,7 @@ public class RecipeServiceImpl implements RecipeService {
         if (recipe.getCommands().get(index).getId().equals(commandId)) {
             recipe.getCommands().remove(index);
             recipeRepository.save(recipe);
+            return recipe;
         }
 
         List<String> commandIndexes = new ArrayList<>();
@@ -233,8 +244,8 @@ public class RecipeServiceImpl implements RecipeService {
             currentIndex++;
         }
 
-        if (!commandIndexes.isEmpty()) {
-            return recipe;
+        if (commandIndexes.isEmpty()) {
+            throw new NotFoundCustomException("Provided recipe does not contain any sub-recipe with ID '" + commandId + "' !");
         }
         throw new NotFoundCustomException("Command not found on index: " + index + "!"
                 + " Commands with this ID can be found on indexes: " + String.join(", ", commandIndexes));

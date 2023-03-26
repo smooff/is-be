@@ -61,6 +61,7 @@ public class JobServiceImpl implements JobService {
     }
 
     private void addCommandsFromRecipes(Job job, Recipe recipe) {
+        job.setCommands(new ArrayList<>());
         addCommandsRecursively(job, recipe);
 
         if (job.getCommands().isEmpty()) {
@@ -70,20 +71,16 @@ public class JobServiceImpl implements JobService {
     }
 
     private void addCommandsRecursively(Job job, Recipe recipe) {
-        if (job.getCommands() == null) {
-            job.setCommands(new ArrayList<>());
+        if (recipe.getCommands() != null && !recipe.getCommands().isEmpty()) {
+            job.getCommands().addAll(recipe.getCommands());
         }
 
-        if (recipe.getCommands() != null) {
-            recipe.getCommands().forEach(command -> job.getCommands().add(command));
+        if (recipe.getSubRecipes() == null) {
+            return;
         }
 
-        if (recipe.getSubRecipes() != null) {
-            for (Recipe subRecipe : recipe.getSubRecipes()) {
-                if (subRecipe.getCommands() != null && !subRecipe.getCommands().isEmpty()) {
-                    addCommandsRecursively(job, subRecipe);
-                }
-            }
+        for (Recipe subRecipe : recipe.getSubRecipes()) {
+            addCommandsRecursively(job, subRecipe);
         }
     }
 

@@ -62,18 +62,10 @@ public class CommandServiceImpl implements CommandService {
     @Override
     public Command deleteCommand(String commandId) {
         Command command = getCommandById(commandId);
-        List<Recipe> recipes = recipeService.getAllRecipes();
+        List<Recipe> recipesUsingCommand = recipeService.getRecipesContainingCommand(command);
         List<String> recipeNames = new ArrayList<>();
+        recipesUsingCommand.forEach(recipe -> recipeNames.add(recipe.getName()));
 
-        for (Recipe recipe : recipes) {
-            if (recipe.getCommands() != null) {
-                for (Command recipeCommand : recipe.getCommands()) {
-                    if (recipeCommand.getId().equals(commandId)) {
-                        recipeNames.add(recipe.getName());
-                    }
-                }
-            }
-        }
         if (!recipeNames.isEmpty()) {
             throw new InvalidOperationException("Command is used in Recipes: \n" + String.join("\n", recipeNames) + "\nRemove commands from recipes to be able to delete them!");
         }
