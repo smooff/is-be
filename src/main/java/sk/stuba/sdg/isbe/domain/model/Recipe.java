@@ -1,6 +1,7 @@
 package sk.stuba.sdg.isbe.domain.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import sk.stuba.sdg.isbe.domain.enums.DeviceTypeEnum;
 
@@ -11,8 +12,10 @@ public class Recipe {
     @Id
     private String id;
     private String name;
-    private List<String> commandIds;
-    private List<String> subRecipeIds;
+    @DBRef
+    private List<Command> commands;
+    @DBRef
+    private List<Recipe> subRecipes;
     private DeviceTypeEnum typeOfDevice;
     private Boolean isSubRecipe;
     private boolean deactivated;
@@ -33,12 +36,12 @@ public class Recipe {
         this.name = name;
     }
 
-    public List<String> getCommandIds() {
-        return commandIds;
+    public List<Command> getCommands() {
+        return commands;
     }
 
-    public void setCommandIds(List<String> commandIds) {
-        this.commandIds = commandIds;
+    public void setCommands(List<Command> commands) {
+        this.commands = commands;
     }
 
     public DeviceTypeEnum getTypeOfDevice() {
@@ -57,12 +60,12 @@ public class Recipe {
         isSubRecipe = subRecipe;
     }
 
-    public List<String> getSubRecipeIds() {
-        return subRecipeIds;
+    public List<Recipe> getSubRecipes() {
+        return subRecipes;
     }
 
-    public void setSubRecipeIds(List<String> subRecipeIds) {
-        this.subRecipeIds = subRecipeIds;
+    public void setSubRecipes(List<Recipe> subRecipes) {
+        this.subRecipes = subRecipes;
     }
 
     public boolean isDeactivated() {

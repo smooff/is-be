@@ -30,9 +30,9 @@ public class RecipeController {
         return recipeService.addCommandToRecipe(recipeId, commandId);
     }
 
-    @DeleteMapping("removeCommandFromRecipe/{recipeId}/{commandId}")
-    public Recipe removeCommandFromRecipe(@PathVariable String recipeId, @PathVariable String commandId) {
-        return recipeService.removeCommandFromRecipe(recipeId, commandId);
+    @DeleteMapping("removeCommandFromRecipe/{recipeId}/{commandId}/{index}")
+    public Recipe removeCommandFromRecipe(@PathVariable String recipeId, @PathVariable String commandId, @PathVariable int index) {
+        return recipeService.removeCommandFromRecipe(recipeId, commandId, index);
     }
 
     @GetMapping("getByTypeOfDevice/{type}")

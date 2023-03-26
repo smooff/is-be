@@ -10,7 +10,6 @@ import sk.stuba.sdg.isbe.handlers.exceptions.InvalidEntityException;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidOperationException;
 import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
 import sk.stuba.sdg.isbe.repositories.JobRepository;
-import sk.stuba.sdg.isbe.services.CommandService;
 import sk.stuba.sdg.isbe.services.JobService;
 import sk.stuba.sdg.isbe.services.RecipeService;
 
@@ -28,9 +27,6 @@ public class JobServiceImpl implements JobService {
 
     @Autowired
     private RecipeService recipeService;
-
-    @Autowired
-    private CommandService commandService;
 
     @Override
     public Job runJobFromRecipe(String recipeId, int repetitions) {
@@ -54,10 +50,12 @@ public class JobServiceImpl implements JobService {
         if (repetitions < 0) {
             throw new IllegalArgumentException("Repetitions must be equal to or greater than 0!");
         }
+
+        job.setNoOfReps(repetitions);
         if (!job.isValid()) {
             throw new InvalidEntityException("Job's body is invalid! Please fill all mandatory fields!");
         }
-        job.setNoOfReps(repetitions);
+
         job.setCreatedAt(Instant.now().toEpochMilli());
         return jobRepository.save(job);
     }
@@ -76,14 +74,13 @@ public class JobServiceImpl implements JobService {
             job.setCommands(new ArrayList<>());
         }
 
-        if (recipe.getCommandIds() != null) {
-            recipe.getCommandIds().forEach(cId -> job.getCommands().add(commandService.getCommandById(cId)));
+        if (recipe.getCommands() != null) {
+            recipe.getCommands().forEach(command -> job.getCommands().add(command));
         }
 
-        if (recipe.getSubRecipeIds() != null) {
-            for (String subRecipeId : recipe.getSubRecipeIds()) {
-                Recipe subRecipe = recipeService.getRecipe(subRecipeId);
-                if (subRecipe.getCommandIds() != null && !subRecipe.getCommandIds().isEmpty()) {
+        if (recipe.getSubRecipes() != null) {
+            for (Recipe subRecipe : recipe.getSubRecipes()) {
+                if (subRecipe.getCommands() != null && !subRecipe.getCommands().isEmpty()) {
                     addCommandsRecursively(job, subRecipe);
                 }
             }

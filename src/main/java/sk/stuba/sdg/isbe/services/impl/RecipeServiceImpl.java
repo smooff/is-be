@@ -68,6 +68,10 @@ public class RecipeServiceImpl implements RecipeService {
     public ResponseEntity<Recipe> updateRecipe(String recipeId, Recipe changeRecipe) {
         Recipe recipe = getRecipe(recipeId);
 
+        if (changeRecipe == null) {
+            throw new InvalidEntityException("Recipe with changes is null!");
+        }
+
         if (!recipe.getName().equals(changeRecipe.getName()) && recipeWithNameExists(changeRecipe.getName())) {
             throw new EntityExistsException("Recipe with name: '" + changeRecipe.getName() + "' already exists!");
         }
@@ -75,8 +79,8 @@ public class RecipeServiceImpl implements RecipeService {
         if (changeRecipe.getName() != null) {
             recipe.setName(changeRecipe.getName());
         }
-        if (changeRecipe.getCommandIds() != null) {
-            recipe.setCommandIds(changeRecipe.getCommandIds());
+        if (changeRecipe.getCommands() != null) {
+            recipe.setCommands(changeRecipe.getCommands());
         }
         if (changeRecipe.getTypeOfDevice() != null) {
             recipe.setTypeOfDevice(changeRecipe.getTypeOfDevice());
@@ -84,8 +88,8 @@ public class RecipeServiceImpl implements RecipeService {
         if (changeRecipe.isSubRecipe() != null) {
             recipe.setSubRecipe(changeRecipe.isSubRecipe());
         }
-        if (changeRecipe.getSubRecipeIds() != null) {
-            recipe.setSubRecipeIds(changeRecipe.getSubRecipeIds());
+        if (changeRecipe.getSubRecipes() != null) {
+            recipe.setSubRecipes(changeRecipe.getSubRecipes());
         }
 
         recipeRepository.save(recipe);
@@ -100,11 +104,11 @@ public class RecipeServiceImpl implements RecipeService {
         if (recipe.getTypeOfDevice() != subRecipe.getTypeOfDevice()) {
             throw new InvalidEntityException("Device types of the recipes do not match!");
         }
-        if (recipe.getSubRecipeIds() == null) {
-            recipe.setSubRecipeIds(new ArrayList<>());
+        if (recipe.getSubRecipes() == null) {
+            recipe.setSubRecipes(new ArrayList<>());
         }
 
-        recipe.getSubRecipeIds().add(subRecipe.getId());
+        recipe.getSubRecipes().add(subRecipe);
         recipeRepository.save(recipe);
 
         return ResponseEntity.ok(recipe);
@@ -117,24 +121,24 @@ public class RecipeServiceImpl implements RecipeService {
             throw new NullPointerException("ID of sub-recipe must not be null!");
         }
 
-        if (recipe.getSubRecipeIds() == null || recipe.getSubRecipeIds().isEmpty()) {
+        if (recipe.getSubRecipes() == null || recipe.getSubRecipes().isEmpty()) {
             throw new NotFoundCustomException("Provided recipe does not contain any sub-recipes!");
         }
 
-        if (index < 0 || index > recipe.getSubRecipeIds().size() - 1) {
+        if (index < 0 || index > recipe.getSubRecipes().size() - 1) {
             throw new IndexOutOfBoundsException("Provided index of subRecipe is not valid!");
         }
 
-        if (recipe.getSubRecipeIds().get(index).equals(subRecipeId)) {
-            recipe.getSubRecipeIds().remove(index);
+        if (recipe.getSubRecipes().get(index).getId().equals(subRecipeId)) {
+            recipe.getSubRecipes().remove(index);
             recipeRepository.save(recipe);
             return ResponseEntity.ok(recipe);
         }
 
         List<String> subRecipeIndexes = new ArrayList<>();
         int currentIndex = 0;
-        for (String subRecipeOfRecipeId : recipe.getSubRecipeIds()) {
-            if (subRecipeOfRecipeId.equals(subRecipeId)) {
+        for (Recipe subRecipeOfRecipe : recipe.getSubRecipes()) {
+            if (subRecipeOfRecipe.getId().equals(subRecipeId)) {
                 subRecipeIndexes.add(String.valueOf(currentIndex));
             }
             currentIndex++;
@@ -144,7 +148,7 @@ public class RecipeServiceImpl implements RecipeService {
         }
 
         throw new NotFoundCustomException("Sub-recipe not found on index: " + index + "!"
-                                          + "Sub-recipes with this ID can be found on indexes: " + String.join(", ", subRecipeIndexes));
+                                          + " Sub-recipes with this ID can be found on indexes: " + String.join(", ", subRecipeIndexes));
     }
 
     @Override
@@ -194,38 +198,46 @@ public class RecipeServiceImpl implements RecipeService {
             throw new InvalidOperationException("Command does not have any parameters!");
         }
 
-        if (recipe.getCommandIds() == null) {
-            recipe.setCommandIds(List.of(command.getId()));
+        if (recipe.getCommands() == null) {
+            recipe.setCommands(List.of(command));
         } else {
-            recipe.getCommandIds().add(command.getId());
+            recipe.getCommands().add(command);
         }
         recipeRepository.save(recipe);
         return recipe;
     }
 
     @Override
-    public Recipe removeCommandFromRecipe(String recipeId, String commandId) {
+    public Recipe removeCommandFromRecipe(String recipeId, String commandId, int index) {
         Recipe recipe = getRecipe(recipeId);
 
-        if (recipe.getCommandIds() == null && recipe.getCommandIds().isEmpty()) {
+        if (recipe.getCommands() == null && recipe.getCommands().isEmpty()) {
             throw new NotFoundCustomException("Recipe does not contain any commands!");
         }
 
-        List<String> commandIds = new ArrayList<>();
-
-        for (String commandIdInRecipe : recipe.getCommandIds()) {
-            if (commandIdInRecipe.equals(commandId)) {
-                commandIds.add(commandId);
-            }
+        if (index > 0 || index > recipe.getCommands().size() - 1) {
+            throw new IndexOutOfBoundsException("Index of command is out of bounds!");
         }
 
-        recipe.getCommandIds().removeAll(commandIds);
-        recipeRepository.save(recipe);
+        if (recipe.getCommands().get(index).getId().equals(commandId)) {
+            recipe.getCommands().remove(index);
+            recipeRepository.save(recipe);
+        }
 
-        if (!commandIds.isEmpty()) {
+        List<String> commandIndexes = new ArrayList<>();
+        int currentIndex = 0;
+        for (Command command : recipe.getCommands()) {
+            if (command.getId().equals(commandId)) {
+                commandIndexes.add(String.valueOf(currentIndex));
+            }
+            currentIndex++;
+        }
+
+        if (!commandIndexes.isEmpty()) {
             return recipe;
         }
-        throw new NotFoundCustomException("Recipe does not contain command with ID: " + commandId);
+        throw new NotFoundCustomException("Command not found on index: " + index + "!"
+                + " Commands with this ID can be found on indexes: " + String.join(", ", commandIndexes));
     }
 
     private boolean recipeWithNameExists(String name) {

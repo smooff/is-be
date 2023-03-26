@@ -1,6 +1,7 @@
 package sk.stuba.sdg.isbe.domain.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import sk.stuba.sdg.isbe.domain.enums.JobStatusEnum;
 
@@ -15,6 +16,7 @@ public class JobStatus {
     private Integer currentStep;
     private Integer totalSteps;
     private Integer currentCycle;
+    @DBRef
     private List<DataPoint> data;
 
     public String getUid() {

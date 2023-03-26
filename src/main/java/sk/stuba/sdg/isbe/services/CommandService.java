@@ -11,4 +11,6 @@ public interface CommandService {
     Command getCommandByName(String name);
 
     Command deleteCommand(String commandId);
+
+    Command updateCommand(String commandId, Command updateCommand);
 }

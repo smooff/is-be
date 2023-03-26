@@ -13,7 +13,7 @@ public interface RecipeService {
 
     Recipe addCommandToRecipe(String recipeId, String commandId);
 
-    Recipe removeCommandFromRecipe(String recipeId, String commandId);
+    Recipe removeCommandFromRecipe(String recipeId, String commandId, int index);
 
     List<Recipe> getRecipesByTypeOfDevice(String typeOfDevice);
 

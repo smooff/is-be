@@ -66,9 +66,9 @@ public class CommandServiceImpl implements CommandService {
         List<String> recipeNames = new ArrayList<>();
 
         for (Recipe recipe : recipes) {
-            if (recipe.getCommandIds() != null) {
-                for (String recipeCommandId : recipe.getCommandIds()) {
-                    if (recipeCommandId.equals(commandId)) {
+            if (recipe.getCommands() != null) {
+                for (Command recipeCommand : recipe.getCommands()) {
+                    if (recipeCommand.getId().equals(commandId)) {
                         recipeNames.add(recipe.getName());
                     }
                 }
@@ -78,6 +78,25 @@ public class CommandServiceImpl implements CommandService {
             throw new InvalidOperationException("Command is used in Recipes: \n" + String.join("\n", recipeNames) + "\nRemove commands from recipes to be able to delete them!");
         }
         command.setDeactivated(true);
+        commandRepository.save(command);
+        return command;
+    }
+
+    @Override
+    public Command updateCommand(String commandId, Command updateCommand) {
+        Command command = getCommandById(commandId);
+
+        if (updateCommand == null) {
+            throw new InvalidEntityException("Command with changes is null!");
+        }
+
+        if (!command.getName().equals(updateCommand.getName()) && commandWithNameExists(updateCommand.getName())) {
+            throw new EntityExistsException("Recipe with name: '" + updateCommand.getName() + "' already exists!");
+        }
+        if (updateCommand.getParams() != null) {
+            command.setParams(updateCommand.getParams());
+        }
+
         commandRepository.save(command);
         return command;
     }

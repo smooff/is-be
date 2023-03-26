@@ -75,13 +75,13 @@ public class CommandServiceTests {
         commandService.createCommand(command);
         Recipe recipe = new Recipe();
         recipe.setSubRecipe(false);
-        recipe.setCommandIds(List.of(command.getId()));
+        recipe.setCommands(List.of(command));
         recipe.setName("recipeUsingCommand " + Instant.now().toEpochMilli());
         recipe.setTypeOfDevice(DeviceTypeEnum.ESP32);
         recipeService.createRecipe(recipe);
         Recipe recipe2 = new Recipe();
         recipe2.setSubRecipe(false);
-        recipe2.setCommandIds(List.of(command.getId()));
+        recipe2.setCommands(List.of(command));
         recipe2.setName("recipeUsingCommand1 " + Instant.now().toEpochMilli());
         recipe2.setTypeOfDevice(DeviceTypeEnum.ESP32);
         recipeService.createRecipe(recipe2);

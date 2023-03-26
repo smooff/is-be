@@ -135,8 +135,8 @@ public class RecipeServiceTests {
 
         recipeService.addCommandToRecipe(recipe.getId(), command.getId());
         Recipe recipeFromDb = recipeService.getRecipe(recipe.getId());
-        assertNotNull(recipeFromDb.getCommandIds());
-        assertFalse(recipeFromDb.getCommandIds().isEmpty());
+        assertNotNull(recipeFromDb.getCommands());
+        assertFalse(recipeFromDb.getCommands().isEmpty());
 
         recipeRepository.delete(recipe);
         commandRepository.delete(command);
@@ -165,7 +165,7 @@ public class RecipeServiceTests {
         assertEquals(expected, exception.getMessage());
 
         updateRecipe.setName("updatedRecipe " + Instant.now().toEpochMilli());
-        updateRecipe.setSubRecipeIds(List.of(recipe2.getId()));
+        updateRecipe.setSubRecipes(List.of(recipe2));
         updateRecipe.setSubRecipe(true);
         updateRecipe.setTypeOfDevice(DeviceTypeEnum.SDG_CUBE);
         recipeService.updateRecipe(recipe.getId(), updateRecipe);
@@ -201,7 +201,7 @@ public class RecipeServiceTests {
 
         recipeService.addSubRecipeToRecipe(recipe.getId(), recipe2.getId());
         Recipe recipeDb = recipeService.getRecipe(recipe.getId());
-        assertEquals(1, recipeDb.getSubRecipeIds().size());
+        assertEquals(1, recipeDb.getSubRecipes().size());
 
         recipeRepository.delete(recipe);
         recipeRepository.delete(recipe2);
@@ -233,9 +233,12 @@ public class RecipeServiceTests {
         assertEquals(expected, exception.getMessage());
 
         Recipe subRecipe = new Recipe();
-        subRecipe.setId("asd");
-        recipe.setSubRecipeIds(List.of(subRecipe.getId()));
-        recipeService.updateRecipe(recipe.getId(), recipe);
+        subRecipe.setName("asd" + Instant.now().toEpochMilli());
+        subRecipe.setTypeOfDevice(DeviceTypeEnum.ESP32);
+        subRecipe.setSubRecipe(true);
+        recipeService.createRecipe(subRecipe);
+        recipeService.addSubRecipeToRecipe(recipe.getId(), subRecipe.getId());
+
         expected = "Provided recipe does not contain any sub-recipe with ID '" + recipe2.getId() + "' !";
         exception = assertThrows(NotFoundCustomException.class, () -> {
             recipeService.removeSubRecipeFromRecipe(recipe.getId(), recipe2.getId(), 0);
@@ -252,7 +255,7 @@ public class RecipeServiceTests {
 
         recipeService.removeSubRecipeFromRecipe(recipe.getId(), recipe2.getId(), 1);
         Recipe recipeDb = recipeService.getRecipe(recipe.getId());
-        assertEquals(2, recipeDb.getSubRecipeIds().size());
+        assertEquals(2, recipeDb.getSubRecipes().size());
 
         recipeRepository.delete(recipe);
         recipeRepository.delete(recipe2);

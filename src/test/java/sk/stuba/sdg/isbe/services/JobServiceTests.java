@@ -48,16 +48,10 @@ public class JobServiceTests {
         recipe.setTypeOfDevice(DeviceTypeEnum.ESP32);
         recipeService.createRecipe(recipe);
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            jobService.runJobFromRecipe(recipe.getId(), -1);
-        });
-        String expected = "Repetitions must be equal to or greater than 0!";
-        assertEquals(expected, exception.getMessage());
-
-        exception = assertThrows(InvalidEntityException.class, () -> {
+        Exception exception = assertThrows(InvalidEntityException.class, () -> {
             jobService.runJobFromRecipe(recipe.getId(), 0);
         });
-        expected = "Recipe is only a sub-recipe, can't create a job from it!";
+        String expected = "Recipe is only a sub-recipe, can't create a job from it!";
         assertEquals(expected, exception.getMessage());
 
         recipe.setSubRecipe(false);
@@ -73,14 +67,20 @@ public class JobServiceTests {
         command.setParams(List.of(1,2,3));
         commandService.createCommand(command);
 
-        recipe.setCommandIds(List.of(command.getId()));
+        recipe.setCommands(List.of(command));
         recipeService.updateRecipe(recipe.getId(), recipe);
+
+        exception = assertThrows(IllegalArgumentException.class, () -> {
+            jobService.runJobFromRecipe(recipe.getId(), -1);
+        });
+        expected = "Repetitions must be equal to or greater than 0!";
+        assertEquals(expected, exception.getMessage());
 
         Recipe subRecipe = new Recipe();
         subRecipe.setSubRecipe(true);
         subRecipe.setName("SubRecipe" + Instant.now().toEpochMilli());
         subRecipe.setTypeOfDevice(DeviceTypeEnum.ESP32);
-        subRecipe.setCommandIds(List.of(command.getId(), command.getId()));
+        subRecipe.setCommands(List.of(command, command));
         recipeService.createRecipe(subRecipe);
         recipeService.addSubRecipeToRecipe(recipe.getId(), subRecipe.getId());
         recipeService.addSubRecipeToRecipe(recipe.getId(), subRecipe.getId());
@@ -89,7 +89,7 @@ public class JobServiceTests {
         subSubRecipe.setSubRecipe(false);
         subSubRecipe.setName("SubSubRecipe" + Instant.now().toEpochMilli());
         subSubRecipe.setTypeOfDevice(DeviceTypeEnum.ESP32);
-        subSubRecipe.setCommandIds(List.of(command.getId()));
+        subSubRecipe.setCommands(List.of(command));
         recipeService.createRecipe(subSubRecipe);
 
         recipeService.addSubRecipeToRecipe(subRecipe.getId(), subSubRecipe.getId());
@@ -124,6 +124,8 @@ public class JobServiceTests {
         Job jobDb = jobService.skipCycle(job.getUid()).getBody();
         assertNotNull(jobDb);
         assertEquals(2, jobDb.getStatus().getCurrentCycle());
+
+        jobRepository.delete(job);
     }
 
     @Test
@@ -146,5 +148,7 @@ public class JobServiceTests {
         Job jobDb = jobService.skipStep(job.getUid()).getBody();
         assertNotNull(jobDb);
         assertEquals(2, jobDb.getStatus().getCurrentStep());
+
+        jobRepository.delete(job);
     }
 }

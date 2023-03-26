@@ -31,4 +31,9 @@ public class CommandController {
     public Command deleteCommand(@PathVariable String commandId) {
         return commandService.deleteCommand(commandId);
     }
+
+    @PutMapping("update/{commandId}/{updateCommand}")
+    public Command updateCommand(@PathVariable String commandId, @PathVariable Command updateCommand) {
+        return commandService.updateCommand(commandId, updateCommand);
+    }
 }
