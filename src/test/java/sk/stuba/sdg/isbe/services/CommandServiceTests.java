@@ -3,11 +3,15 @@ package sk.stuba.sdg.isbe.services;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import sk.stuba.sdg.isbe.domain.enums.DeviceTypeEnum;
 import sk.stuba.sdg.isbe.domain.model.Command;
+import sk.stuba.sdg.isbe.domain.model.Recipe;
 import sk.stuba.sdg.isbe.handlers.exceptions.EntityExistsException;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidEntityException;
+import sk.stuba.sdg.isbe.handlers.exceptions.InvalidOperationException;
 import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
 import sk.stuba.sdg.isbe.repositories.CommandRepository;
+import sk.stuba.sdg.isbe.repositories.RecipeRepository;
 
 import java.time.Instant;
 import java.util.List;
@@ -21,6 +25,10 @@ public class CommandServiceTests {
     private CommandService commandService;
     @Autowired
     private CommandRepository commandRepository;
+    @Autowired
+    private RecipeService recipeService;
+    @Autowired
+    private RecipeRepository recipeRepository;
 
     @Test
     void testCreateCommand() {
@@ -64,7 +72,29 @@ public class CommandServiceTests {
         String expected = "Command with ID: '" + command.getId() + "' was not found!";
         assertEquals(expected, exception.getMessage());
 
+        commandService.createCommand(command);
+        Recipe recipe = new Recipe();
+        recipe.setSubRecipe(false);
+        recipe.setCommandIds(List.of(command.getId()));
+        recipe.setName("recipeUsingCommand " + Instant.now().toEpochMilli());
+        recipe.setTypeOfDevice(DeviceTypeEnum.ESP32);
+        recipeService.createRecipe(recipe);
+        Recipe recipe2 = new Recipe();
+        recipe2.setSubRecipe(false);
+        recipe2.setCommandIds(List.of(command.getId()));
+        recipe2.setName("recipeUsingCommand1 " + Instant.now().toEpochMilli());
+        recipe2.setTypeOfDevice(DeviceTypeEnum.ESP32);
+        recipeService.createRecipe(recipe2);
+
+        exception = assertThrows(InvalidOperationException.class, () -> {
+            commandService.deleteCommand(command.getId());
+        });
+        expected = "Command is used in Recipes: \n" + String.join("\n", recipe.getName(), recipe2.getName()) + "\nRemove commands from recipes to be able to delete them!";
+        assertEquals(expected, exception.getMessage());
+
         commandRepository.delete(command);
+        recipeRepository.delete(recipe);
+        recipeRepository.delete(recipe2);
     }
 
     @Test

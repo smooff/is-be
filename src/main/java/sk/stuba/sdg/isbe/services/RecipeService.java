@@ -23,7 +23,7 @@ public interface RecipeService {
 
     ResponseEntity<Recipe> addSubRecipeToRecipe(String recipeId, String subRecipeId);
 
-    ResponseEntity<Recipe> removeSubRecipeFromRecipe(String recipeId, String subRecipeId);
+    ResponseEntity<Recipe> removeSubRecipeFromRecipe(String recipeId, String subRecipeId, int index);
 
     ResponseEntity<Recipe> deleteRecipe(String recipeId);
 

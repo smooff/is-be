@@ -55,9 +55,9 @@ public class RecipeController {
         recipeService.addSubRecipeToRecipe(recipeId, subRecipeId);
     }
 
-    @DeleteMapping("removeSubRecipeFromRecipe/{recipeId}/{subRecipeId}")
-    public void removeSubRecipeFromRecipe(@PathVariable String recipeId, @PathVariable String subRecipeId) {
-        recipeService.removeSubRecipeFromRecipe(recipeId, subRecipeId);
+    @DeleteMapping("removeSubRecipeFromRecipe/{recipeId}/{subRecipeId}/{index}")
+    public void removeSubRecipeFromRecipe(@PathVariable String recipeId, @PathVariable String subRecipeId, @PathVariable int index) {
+        recipeService.removeSubRecipeFromRecipe(recipeId, subRecipeId, index);
     }
 
     @GetMapping("getAllRecipes")

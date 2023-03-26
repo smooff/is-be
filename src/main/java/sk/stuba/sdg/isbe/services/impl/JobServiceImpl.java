@@ -4,13 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import sk.stuba.sdg.isbe.domain.enums.JobStatusEnum;
-import sk.stuba.sdg.isbe.domain.model.Command;
 import sk.stuba.sdg.isbe.domain.model.Job;
 import sk.stuba.sdg.isbe.domain.model.Recipe;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidEntityException;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidOperationException;
 import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
 import sk.stuba.sdg.isbe.repositories.JobRepository;
+import sk.stuba.sdg.isbe.services.CommandService;
 import sk.stuba.sdg.isbe.services.JobService;
 import sk.stuba.sdg.isbe.services.RecipeService;
 
@@ -29,13 +29,15 @@ public class JobServiceImpl implements JobService {
     @Autowired
     private RecipeService recipeService;
 
+    @Autowired
+    private CommandService commandService;
+
     @Override
     public Job runJobFromRecipe(String recipeId, int repetitions) {
         Recipe recipe = recipeService.getRecipe(recipeId);
         if (recipe.isSubRecipe()) {
             throw new InvalidEntityException("Recipe is only a sub-recipe, can't create a job from it!");
         }
-
         if (recipe.isDeactivated()) {
             throw new InvalidEntityException("Recipe is deactivated, can't create a job from it!");
         }
@@ -43,33 +45,49 @@ public class JobServiceImpl implements JobService {
         Job job = new Job();
         job.setName("Job: " + recipe.getName());
         addCommandsFromRecipes(job, recipe);
-        job.setNoOfReps(repetitions);
 
-        return runJob(job);
-    }
-
-    private void addCommandsFromRecipes(Job job, Recipe recipe) {
-        List<Command> commands = recipe.getCommands() == null ? new ArrayList<>() : recipe.getCommands();
-        job.setCommands(commands);
-
-        if (recipe.getSubRecipes() != null) {
-            for (Recipe subRecipe : recipe.getSubRecipes()) {
-                if (subRecipe.getCommands() != null && !subRecipe.getCommands().isEmpty()) {
-                    job.getCommands().addAll(subRecipe.getCommands());
-                }
-            }
-        }
-
-        job.setNoOfCmds(job.getCommands().size());
+        return runJob(job, repetitions);
     }
 
     @Override
-    public Job runJob(Job job) {
+    public Job runJob(Job job, int repetitions) {
+        if (repetitions < 0) {
+            throw new IllegalArgumentException("Repetitions must be equal to or greater than 0!");
+        }
         if (!job.isValid()) {
             throw new InvalidEntityException("Job's body is invalid! Please fill all mandatory fields!");
         }
+        job.setNoOfReps(repetitions);
         job.setCreatedAt(Instant.now().toEpochMilli());
         return jobRepository.save(job);
+    }
+
+    private void addCommandsFromRecipes(Job job, Recipe recipe) {
+        addCommandsRecursively(job, recipe);
+
+        if (job.getCommands().isEmpty()) {
+            throw new InvalidEntityException("The recipe and its sub-recipes do not contain any commands!");
+        }
+        job.setNoOfCmds(job.getCommands().size());
+    }
+
+    private void addCommandsRecursively(Job job, Recipe recipe) {
+        if (job.getCommands() == null) {
+            job.setCommands(new ArrayList<>());
+        }
+
+        if (recipe.getCommandIds() != null) {
+            recipe.getCommandIds().forEach(cId -> job.getCommands().add(commandService.getCommandById(cId)));
+        }
+
+        if (recipe.getSubRecipeIds() != null) {
+            for (String subRecipeId : recipe.getSubRecipeIds()) {
+                Recipe subRecipe = recipeService.getRecipe(subRecipeId);
+                if (subRecipe.getCommandIds() != null && !subRecipe.getCommandIds().isEmpty()) {
+                    addCommandsRecursively(job, subRecipe);
+                }
+            }
+        }
     }
 
     @Override

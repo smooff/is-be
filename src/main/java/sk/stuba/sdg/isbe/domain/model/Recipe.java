@@ -2,6 +2,7 @@ package sk.stuba.sdg.isbe.domain.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import sk.stuba.sdg.isbe.domain.enums.DeviceTypeEnum;
 
 import java.util.List;
 
@@ -10,10 +11,10 @@ public class Recipe {
     @Id
     private String id;
     private String name;
-    private List<Command> commands;
-    private String typeOfDevice;
+    private List<String> commandIds;
+    private List<String> subRecipeIds;
+    private DeviceTypeEnum typeOfDevice;
     private Boolean isSubRecipe;
-    private List<Recipe> subRecipes;
     private boolean deactivated;
 
     public String getId() {
@@ -32,19 +33,19 @@ public class Recipe {
         this.name = name;
     }
 
-    public List<Command> getCommands() {
-        return commands;
+    public List<String> getCommandIds() {
+        return commandIds;
     }
 
-    public void setCommands(List<Command> commands) {
-        this.commands = commands;
+    public void setCommandIds(List<String> commandIds) {
+        this.commandIds = commandIds;
     }
 
-    public String getTypeOfDevice() {
+    public DeviceTypeEnum getTypeOfDevice() {
         return typeOfDevice;
     }
 
-    public void setTypeOfDevice(String typeOfDevice) {
+    public void setTypeOfDevice(DeviceTypeEnum typeOfDevice) {
         this.typeOfDevice = typeOfDevice;
     }
 
@@ -56,12 +57,12 @@ public class Recipe {
         isSubRecipe = subRecipe;
     }
 
-    public List<Recipe> getSubRecipes() {
-        return subRecipes;
+    public List<String> getSubRecipeIds() {
+        return subRecipeIds;
     }
 
-    public void setSubRecipes(List<Recipe> subRecipes) {
-        this.subRecipes = subRecipes;
+    public void setSubRecipeIds(List<String> subRecipeIds) {
+        this.subRecipeIds = subRecipeIds;
     }
 
     public boolean isDeactivated() {

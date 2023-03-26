@@ -12,6 +12,7 @@ import sk.stuba.sdg.isbe.repositories.CommandRepository;
 import sk.stuba.sdg.isbe.services.CommandService;
 import sk.stuba.sdg.isbe.services.RecipeService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -62,15 +63,19 @@ public class CommandServiceImpl implements CommandService {
     public Command deleteCommand(String commandId) {
         Command command = getCommandById(commandId);
         List<Recipe> recipes = recipeService.getAllRecipes();
+        List<String> recipeNames = new ArrayList<>();
 
         for (Recipe recipe : recipes) {
-            if (recipe.getCommands() != null) {
-                for (Command recipeCommand : recipe.getCommands()) {
-                    if (recipeCommand.getId().equals(commandId)) {
-                        throw new InvalidOperationException("Command is used in Recipe + " + recipe.getName() + "!");
+            if (recipe.getCommandIds() != null) {
+                for (String recipeCommandId : recipe.getCommandIds()) {
+                    if (recipeCommandId.equals(commandId)) {
+                        recipeNames.add(recipe.getName());
                     }
                 }
             }
+        }
+        if (!recipeNames.isEmpty()) {
+            throw new InvalidOperationException("Command is used in Recipes: \n" + String.join("\n", recipeNames) + "\nRemove commands from recipes to be able to delete them!");
         }
         command.setDeactivated(true);
         commandRepository.save(command);

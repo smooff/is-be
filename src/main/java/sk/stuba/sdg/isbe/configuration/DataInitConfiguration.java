@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import sk.stuba.sdg.isbe.controllers.CommandController;
 import sk.stuba.sdg.isbe.controllers.JobController;
 import sk.stuba.sdg.isbe.controllers.RecipeController;
+import sk.stuba.sdg.isbe.domain.enums.DeviceTypeEnum;
 import sk.stuba.sdg.isbe.domain.model.Recipe;
 
 import java.time.Instant;
@@ -27,7 +28,7 @@ public class DataInitConfiguration {
         Recipe active = new Recipe();
         active.setName("activeRecipe " + Instant.now().toEpochMilli());
         active.setDeactivated(false);
-        active.setTypeOfDevice("device");
+        active.setTypeOfDevice(DeviceTypeEnum.ESP32);
         active.setSubRecipe(false);
     }
 }

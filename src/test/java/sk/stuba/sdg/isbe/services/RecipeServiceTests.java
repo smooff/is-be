@@ -3,8 +3,10 @@ package sk.stuba.sdg.isbe.services;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import sk.stuba.sdg.isbe.domain.enums.DeviceTypeEnum;
 import sk.stuba.sdg.isbe.domain.model.Command;
 import sk.stuba.sdg.isbe.domain.model.Recipe;
+import sk.stuba.sdg.isbe.handlers.exceptions.EntityExistsException;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidEntityException;
 import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
 import sk.stuba.sdg.isbe.repositories.CommandRepository;
@@ -46,7 +48,7 @@ public class RecipeServiceTests {
         expected = "Type of device for recipe is missing!";
         assertEquals(expected, exception.getMessage());
 
-        recipe.setTypeOfDevice("device");
+        recipe.setTypeOfDevice(DeviceTypeEnum.ESP32);
         exception = assertThrows(InvalidEntityException.class, () -> {
             recipeService.createRecipe(recipe);
         });
@@ -69,23 +71,23 @@ public class RecipeServiceTests {
         Recipe active = new Recipe();
         active.setName("activeRecipe " + Instant.now().toEpochMilli());
         active.setDeactivated(false);
-        active.setTypeOfDevice("device");
+        active.setTypeOfDevice(DeviceTypeEnum.ESP32);
         active.setSubRecipe(false);
         Recipe deactivated = new Recipe();
         deactivated.setName("inactiveRecipe " + Instant.now().toEpochMilli());
         deactivated.setDeactivated(true);
-        deactivated.setTypeOfDevice("device");
+        deactivated.setTypeOfDevice(DeviceTypeEnum.ESP32);
         deactivated.setSubRecipe(false);
         recipeService.createRecipe(active);
         recipeService.createRecipe(deactivated);
 
-        List<Recipe> recipeList = recipeService.getFullRecipes("device");
+        List<Recipe> recipeList = recipeService.getFullRecipes("ESP32");
         recipeList.forEach(r -> {
             assertFalse(r.isDeactivated());
             assertFalse(r.isSubRecipe());
         });
 
-        recipeList = recipeService.getSubRecipes("device");
+        recipeList = recipeService.getSubRecipes("ESP32");
         recipeList.forEach(r -> {
             assertFalse(r.isDeactivated());
             assertTrue(r.isSubRecipe());
@@ -100,7 +102,7 @@ public class RecipeServiceTests {
         Recipe recipe = new Recipe();
         recipe.setName("recipe " + Instant.now().toEpochMilli());
         recipe.setSubRecipe(false);
-        recipe.setTypeOfDevice("device");
+        recipe.setTypeOfDevice(DeviceTypeEnum.ESP32);
         recipeService.createRecipe(recipe);
         recipeService.deleteRecipe(recipe.getId());
         Recipe recipeFromDb = recipeService.getRecipe(recipe.getId());
@@ -113,7 +115,7 @@ public class RecipeServiceTests {
         Recipe recipe = new Recipe();
         recipe.setName("recipe " + Instant.now().toEpochMilli());
         recipe.setSubRecipe(false);
-        recipe.setTypeOfDevice("device");
+        recipe.setTypeOfDevice(DeviceTypeEnum.ESP32);
         recipeService.createRecipe(recipe);
 
         Command command = new Command();
@@ -133,10 +135,126 @@ public class RecipeServiceTests {
 
         recipeService.addCommandToRecipe(recipe.getId(), command.getId());
         Recipe recipeFromDb = recipeService.getRecipe(recipe.getId());
-        assertNotNull(recipeFromDb.getCommands());
-        assertFalse(recipeFromDb.getCommands().isEmpty());
+        assertNotNull(recipeFromDb.getCommandIds());
+        assertFalse(recipeFromDb.getCommandIds().isEmpty());
 
         recipeRepository.delete(recipe);
         commandRepository.delete(command);
+    }
+
+    @Test
+    void testUpdateRecipe() {
+        Recipe recipe = new Recipe();
+        recipe.setName("recipe " + Instant.now().toEpochMilli());
+        recipe.setSubRecipe(false);
+        recipe.setTypeOfDevice(DeviceTypeEnum.ESP32);
+        Recipe recipe2 = new Recipe();
+        recipe2.setName("recipe2 " + Instant.now().toEpochMilli());
+        recipe2.setSubRecipe(false);
+        recipe2.setTypeOfDevice(DeviceTypeEnum.ESP32);
+        recipeService.createRecipe(recipe);
+        recipeService.createRecipe(recipe2);
+
+        Recipe updateRecipe = new Recipe();
+        updateRecipe.setName(recipe2.getName());
+
+        String expected = "Recipe with name: '" + updateRecipe.getName() + "' already exists!";
+        Exception exception = assertThrows(EntityExistsException.class, () -> {
+            recipeService.updateRecipe(recipe.getId(), updateRecipe);
+        });
+        assertEquals(expected, exception.getMessage());
+
+        updateRecipe.setName("updatedRecipe " + Instant.now().toEpochMilli());
+        updateRecipe.setSubRecipeIds(List.of(recipe2.getId()));
+        updateRecipe.setSubRecipe(true);
+        updateRecipe.setTypeOfDevice(DeviceTypeEnum.SDG_CUBE);
+        recipeService.updateRecipe(recipe.getId(), updateRecipe);
+        Recipe recipeDb = recipeService.getRecipe(recipe.getId());
+        assertNotNull(recipeDb);
+        assertEquals(recipeDb.getName(), updateRecipe.getName());
+        assertEquals(recipeDb.isSubRecipe(), updateRecipe.isSubRecipe());
+
+        recipeRepository.delete(recipeDb);
+        recipeRepository.delete(recipe2);
+    }
+
+    @Test
+    void testAddSubRecipeToRecipe() {
+        Recipe recipe = new Recipe();
+        recipe.setName("recipe " + Instant.now().toEpochMilli());
+        recipe.setSubRecipe(false);
+        recipe.setTypeOfDevice(DeviceTypeEnum.ESP32);
+        Recipe recipe2 = new Recipe();
+        recipe2.setName("recipe2 " + Instant.now().toEpochMilli());
+        recipe2.setSubRecipe(false);
+        recipe2.setTypeOfDevice(DeviceTypeEnum.SDG_CUBE);
+        recipeService.createRecipe(recipe);
+        recipeService.createRecipe(recipe2);
+
+        String expected = "Device types of the recipes do not match!";
+        Exception exception = assertThrows(InvalidEntityException.class, () -> {
+            recipeService.addSubRecipeToRecipe(recipe.getId(), recipe2.getId());
+        });
+        assertEquals(expected, exception.getMessage());
+        recipe2.setTypeOfDevice(DeviceTypeEnum.ESP32);
+        recipeRepository.save(recipe2);
+
+        recipeService.addSubRecipeToRecipe(recipe.getId(), recipe2.getId());
+        Recipe recipeDb = recipeService.getRecipe(recipe.getId());
+        assertEquals(1, recipeDb.getSubRecipeIds().size());
+
+        recipeRepository.delete(recipe);
+        recipeRepository.delete(recipe2);
+    }
+
+    @Test
+    void testRemoveSubRecipeFromRecipe() {
+        Recipe recipe = new Recipe();
+        recipe.setName("recipe " + Instant.now().toEpochMilli());
+        recipe.setSubRecipe(false);
+        recipe.setTypeOfDevice(DeviceTypeEnum.ESP32);
+        Recipe recipe2 = new Recipe();
+        recipe2.setName("recipe2 " + Instant.now().toEpochMilli());
+        recipe2.setSubRecipe(false);
+        recipe2.setTypeOfDevice(DeviceTypeEnum.ESP32);
+        recipeService.createRecipe(recipe);
+        recipeService.createRecipe(recipe2);
+
+        String expected = "ID of sub-recipe must not be null!";
+        Exception exception = assertThrows(NullPointerException.class, () -> {
+            recipeService.removeSubRecipeFromRecipe(recipe.getId(), null, 0);
+        });
+        assertEquals(expected, exception.getMessage());
+
+        expected = "Provided recipe does not contain any sub-recipes!";
+        exception = assertThrows(NotFoundCustomException.class, () -> {
+            recipeService.removeSubRecipeFromRecipe(recipe.getId(), recipe2.getId(), 0);
+        });
+        assertEquals(expected, exception.getMessage());
+
+        Recipe subRecipe = new Recipe();
+        subRecipe.setId("asd");
+        recipe.setSubRecipeIds(List.of(subRecipe.getId()));
+        recipeService.updateRecipe(recipe.getId(), recipe);
+        expected = "Provided recipe does not contain any sub-recipe with ID '" + recipe2.getId() + "' !";
+        exception = assertThrows(NotFoundCustomException.class, () -> {
+            recipeService.removeSubRecipeFromRecipe(recipe.getId(), recipe2.getId(), 0);
+        });
+        assertEquals(expected, exception.getMessage());
+
+        recipeService.addSubRecipeToRecipe(recipe.getId(), recipe2.getId());
+        recipeService.addSubRecipeToRecipe(recipe.getId(), recipe2.getId());
+        expected = "Sub-recipe not found on index: " + 0 + "! Sub-recipes with this ID can be found on indexes: " + String.join(", ", List.of("1","2"));
+        exception = assertThrows(NotFoundCustomException.class, () -> {
+            recipeService.removeSubRecipeFromRecipe(recipe.getId(), recipe2.getId(), 0);
+        });
+        assertEquals(expected, exception.getMessage());
+
+        recipeService.removeSubRecipeFromRecipe(recipe.getId(), recipe2.getId(), 1);
+        Recipe recipeDb = recipeService.getRecipe(recipe.getId());
+        assertEquals(2, recipeDb.getSubRecipeIds().size());
+
+        recipeRepository.delete(recipe);
+        recipeRepository.delete(recipe2);
     }
 }

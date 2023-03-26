@@ -22,9 +22,9 @@ public class JobController {
     }
 
     @Operation(summary = "Run a job")
-    @PostMapping("runJob/{job}")
-    public Job runJob(@PathVariable Job job) {
-        return jobService.runJob(job);
+    @PostMapping("runJob/{job}/{repetitions}")
+    public Job runJob(@PathVariable Job job, @PathVariable int repetitions) {
+        return jobService.runJob(job, repetitions);
     }
 
     @Operation(summary = "Get job by its ID")
