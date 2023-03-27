@@ -30,4 +30,6 @@ public interface JobService {
     List<Job> getFinishedJobs();
 
     List<Job> getRunningJobs();
+
+    List<Job> getJobsByStatus(String status);
 }

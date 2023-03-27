@@ -10,6 +10,7 @@ import sk.stuba.sdg.isbe.domain.model.Job;
 import sk.stuba.sdg.isbe.domain.model.JobStatus;
 import sk.stuba.sdg.isbe.domain.model.Recipe;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidEntityException;
+import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
 import sk.stuba.sdg.isbe.repositories.CommandRepository;
 import sk.stuba.sdg.isbe.repositories.JobRepository;
 import sk.stuba.sdg.isbe.repositories.RecipeRepository;
@@ -117,7 +118,6 @@ public class JobServiceTests {
         Job job = new Job();
         job.setName("Job" + Instant.now().toEpochMilli());
         job.setCommands(List.of(command));
-        job.setNoOfReps(1);
         job.setStatus(jobStatus);
 
         jobService.runJob(job, 0);
@@ -150,5 +150,49 @@ public class JobServiceTests {
         assertEquals(2, jobDb.getStatus().getCurrentStep());
 
         jobRepository.delete(job);
+    }
+
+    @Test
+    void testGetJobsByStatus() {
+        Command command = new Command();
+        command.setName("Command" + Instant.now().toEpochMilli());
+        command.setParams(List.of(1,2,3));
+
+        JobStatus jobStatus = new JobStatus();
+        jobStatus.setRetCode(JobStatusEnum.JOB_PENDING);
+        jobStatus.setCurrentStep(1);
+
+        Job job = new Job();
+        job.setName("Job" + Instant.now().toEpochMilli());
+        job.setCommands(List.of(command));
+        job.setNoOfReps(1);
+        job.setStatus(jobStatus);
+
+        JobStatus jobStatus2 = new JobStatus();
+        jobStatus2.setRetCode(JobStatusEnum.JOB_DONE);
+        jobStatus2.setCurrentStep(1);
+
+        Job job2 = new Job();
+        job2.setName("Job" + Instant.now().toEpochMilli());
+        job2.setCommands(List.of(command));
+        job2.setNoOfReps(1);
+        job2.setStatus(jobStatus2);
+
+        jobService.runJob(job, 0);
+        jobService.runJob(job2, 0);
+
+        Exception exception = assertThrows(NotFoundCustomException.class, () -> {
+            jobService.getJobsByStatus("WRONG_STATUS");
+        });
+        String expected = "Job status: '" + "WRONG_STATUS" + "' does not exist!";
+        assertEquals(expected, exception.getMessage());
+
+        List<Job> doneJobs = jobService.getJobsByStatus("JOB_DONE");
+        List<Job> pendingJobs = jobService.getJobsByStatus("JOB_PENDING");
+        assertFalse(doneJobs.isEmpty());
+        assertFalse(pendingJobs.isEmpty());
+
+        jobRepository.delete(job);
+        jobRepository.delete(job2);
     }
 }

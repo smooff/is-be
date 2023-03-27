@@ -12,6 +12,7 @@ import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
 import sk.stuba.sdg.isbe.repositories.JobRepository;
 import sk.stuba.sdg.isbe.services.JobService;
 import sk.stuba.sdg.isbe.services.RecipeService;
+import sk.stuba.sdg.isbe.utilities.JobStatusUtils;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -140,12 +141,12 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public List<Job> getFinishedJobsByStatus() {
-        return getJobByStatus(JobStatusEnum.JOB_DONE);
+        return getJobsByStatus("JOB_DONE");
     }
 
     @Override
     public List<Job> getRunningJobsByStatus() {
-        return getJobByStatus(JobStatusEnum.JOB_PROCESSING);
+        return getJobsByStatus("JOB_PROCESSING");
     }
 
     @Override
@@ -167,12 +168,14 @@ public class JobServiceImpl implements JobService {
         return optionalJob.get();
     }
 
-    private List<Job> getJobByStatus(JobStatusEnum status) {
+    @Override
+    public List<Job> getJobsByStatus(String status) {
+        JobStatusEnum jobStatus = JobStatusUtils.getJobStatusEnum(status);
         List<Job> allJobs = jobRepository.findAll();
         List<Job> jobsByStatus = new ArrayList<>();
 
         for (Job job : allJobs) {
-            if (job.getStatus().getRetCode() == status) {
+            if (job.getStatus().getRetCode() == jobStatus) {
                 jobsByStatus.add(job);
             }
         }

@@ -77,4 +77,9 @@ public class JobController {
     public List<Job> getRunningJobsByStatus() {
         return jobService.getRunningJobsByStatus();
     }
+
+    @GetMapping("getJobByStatus/{status}")
+    public List<Job> getJobsByStatus(@PathVariable String status) {
+        return jobService.getJobsByStatus(status);
+    }
 }
