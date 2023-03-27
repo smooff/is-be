@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class JobServiceImpl implements JobService {
@@ -75,7 +76,6 @@ public class JobServiceImpl implements JobService {
         if (recipe.getCommands() != null && !recipe.getCommands().isEmpty()) {
             job.getCommands().addAll(recipe.getCommands());
         }
-
         if (recipe.getSubRecipes() == null) {
             return;
         }
@@ -172,13 +172,6 @@ public class JobServiceImpl implements JobService {
     public List<Job> getJobsByStatus(String status) {
         JobStatusEnum jobStatus = JobStatusUtils.getJobStatusEnum(status);
         List<Job> allJobs = jobRepository.findAll();
-        List<Job> jobsByStatus = new ArrayList<>();
-
-        for (Job job : allJobs) {
-            if (job.getStatus().getRetCode() == jobStatus) {
-                jobsByStatus.add(job);
-            }
-        }
-        return jobsByStatus;
+        return allJobs.stream().filter(job -> job.getStatus().getRetCode() == jobStatus).collect(Collectors.toList());
     }
 }

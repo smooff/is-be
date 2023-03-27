@@ -35,15 +35,12 @@ public class RecipeServiceImpl implements RecipeService {
         if (recipe.getName() == null || recipe.getName().equals(EMPTY_STRING)) {
             throw new InvalidEntityException("Recipe has no name set!");
         }
-
         if (recipeWithNameExists(recipe.getName())) {
             throw new InvalidEntityException("Recipe with name: '" + recipe.getName() + "' already exists!");
         }
-
         if (recipe.getTypeOfDevice() == null) {
             throw new InvalidEntityException("Type of device for recipe is missing!");
         }
-
         if (recipe.isSubRecipe() == null) {
             throw new InvalidEntityException("Recipe's sub-recipe status not defined!");
         }
@@ -224,7 +221,6 @@ public class RecipeServiceImpl implements RecipeService {
         if (recipe.getCommands() == null && recipe.getCommands().isEmpty()) {
             throw new NotFoundCustomException("Recipe does not contain any commands!");
         }
-
         if (index > 0 || index > recipe.getCommands().size() - 1) {
             throw new IndexOutOfBoundsException("Index of command is out of bounds!");
         }
