@@ -4,6 +4,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import sk.stuba.sdg.isbe.domain.enums.DeviceTypeEnum;
 
+import java.util.List;
+
 @Document
 public class Device {
     @Id
@@ -14,6 +16,24 @@ public class Device {
     private String version;
     private String firmware;
     private Long addAt;
+    private List<Job> Jobs;
+    private List<JobStatus> JobsStatus;
+
+    public List<JobStatus> getJobsStatus() {
+        return JobsStatus;
+    }
+
+    public void setJobsStatus(List<JobStatus> jobsStatus) {
+        JobsStatus = jobsStatus;
+    }
+
+    public List<Job> getJobs() {
+        return Jobs;
+    }
+
+    public void setJobs(List<Job> jobs) {
+        Jobs = jobs;
+    }
 
     public String getUid() {
         return uid;
