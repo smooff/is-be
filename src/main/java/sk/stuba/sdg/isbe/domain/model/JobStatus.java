@@ -19,6 +19,7 @@ public class JobStatus {
     private Integer currentCycle;
     @DBRef
     private List<DataPoint> data;
+    private Long createdAt;
 
     public String getUid() {
         return uid;
@@ -82,5 +83,13 @@ public class JobStatus {
 
     public void setData(List<DataPoint> data) {
         this.data = data;
+    }
+
+    public Long getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Long createdAt) {
+        this.createdAt = createdAt;
     }
 }

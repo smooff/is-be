@@ -5,14 +5,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import sk.stuba.sdg.isbe.domain.enums.JobStatusEnum;
 import sk.stuba.sdg.isbe.domain.model.Job;
+import sk.stuba.sdg.isbe.domain.model.JobStatus;
 import sk.stuba.sdg.isbe.domain.model.Recipe;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidEntityException;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidOperationException;
 import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
 import sk.stuba.sdg.isbe.repositories.DeviceRepository;
 import sk.stuba.sdg.isbe.repositories.JobRepository;
+import sk.stuba.sdg.isbe.repositories.JobStatusRepository;
 import sk.stuba.sdg.isbe.services.DeviceService;
 import sk.stuba.sdg.isbe.services.JobService;
+import sk.stuba.sdg.isbe.services.JobStatusService;
 import sk.stuba.sdg.isbe.services.RecipeService;
 import sk.stuba.sdg.isbe.utilities.JobStatusUtils;
 
@@ -31,6 +34,9 @@ public class JobServiceImpl implements JobService {
 
     @Autowired
     private DeviceService deviceService;
+
+    @Autowired
+    private JobStatusService jobStatusService;
 
     @Override
     public Job runJobFromRecipe(String recipeId, String deviceId, int repetitions) {
@@ -63,10 +69,19 @@ public class JobServiceImpl implements JobService {
             job.setUid(UUID.randomUUID().toString());
         }
 
+        // create jobStatus for this new created job
+        JobStatus jobStatus = new JobStatus();
+        jobStatus.setRetCode(JobStatusEnum.JOB_PENDING);
+        jobStatus.setCode(JobStatusEnum.JOB_FREE);
+        job.setStatus(jobStatus);
+        jobStatusService.createJobStatus(jobStatus);
+
         job.setCreatedAt(Instant.now().toEpochMilli());
         jobRepository.save(job);
-        
+
+        // add job as running on device by device uid
         deviceService.addJobToDevice(deviceId, job.getUid());
+
         return job;
     }
 

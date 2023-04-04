@@ -1,6 +1,7 @@
 package sk.stuba.sdg.isbe.domain.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.text.DateFormat;
@@ -15,6 +16,7 @@ public class Job {
     private String name;
     private Integer noOfCmds;
     private Integer noOfReps;
+    @DBRef
     private JobStatus status;
     private List<Command> commands;
     private boolean toCancel;

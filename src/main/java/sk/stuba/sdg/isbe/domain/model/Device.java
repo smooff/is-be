@@ -20,16 +20,7 @@ public class Device {
     private Long addAt;
     @DBRef
     private List<Job> Jobs = new ArrayList<>();
-    private List<JobStatus> JobsStatus;
     private boolean deactivated;
-
-    public List<JobStatus> getJobsStatus() {
-        return JobsStatus;
-    }
-
-    public void setJobsStatus(List<JobStatus> jobsStatus) {
-        JobsStatus = jobsStatus;
-    }
 
     public List<Job> getJobs() {
         return Jobs;
