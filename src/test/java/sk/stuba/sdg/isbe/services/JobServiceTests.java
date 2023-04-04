@@ -50,7 +50,7 @@ public class JobServiceTests {
         recipeService.createRecipe(recipe);
 
         Exception exception = assertThrows(InvalidEntityException.class, () -> {
-            jobService.runJobFromRecipe(recipe.getId(), 0);
+            jobService.runJobFromRecipe(recipe.getId(), "d1", 0);
         });
         String expected = "Recipe is only a sub-recipe, can't create a job from it!";
         assertEquals(expected, exception.getMessage());
@@ -58,7 +58,7 @@ public class JobServiceTests {
         recipe.setSubRecipe(false);
         recipeService.updateRecipe(recipe.getId(), recipe);
         exception = assertThrows(InvalidEntityException.class, () -> {
-            jobService.runJobFromRecipe(recipe.getId(), 1);
+            jobService.runJobFromRecipe(recipe.getId(),"d1", 1);
         });
         expected = "The recipe and its sub-recipes do not contain any commands!";
         assertEquals(expected, exception.getMessage());
@@ -72,7 +72,7 @@ public class JobServiceTests {
         recipeService.updateRecipe(recipe.getId(), recipe);
 
         exception = assertThrows(IllegalArgumentException.class, () -> {
-            jobService.runJobFromRecipe(recipe.getId(), -1);
+            jobService.runJobFromRecipe(recipe.getId(),"d1", -1);
         });
         expected = "Repetitions must be equal to or greater than 0!";
         assertEquals(expected, exception.getMessage());
@@ -95,7 +95,7 @@ public class JobServiceTests {
 
         recipeService.addSubRecipeToRecipe(subRecipe.getId(), subSubRecipe.getId());
 
-        Job job = jobService.runJobFromRecipe(recipe.getId(), 1);
+        Job job = jobService.runJobFromRecipe(recipe.getId(),"d1", 1);
         assertEquals(7, job.getCommands().size());
 
         commandRepository.delete(command);
@@ -120,7 +120,7 @@ public class JobServiceTests {
         job.setCommands(List.of(command));
         job.setStatus(jobStatus);
 
-        jobService.runJob(job, 0);
+        jobService.runJob(job,"d1", 0);
         Job jobDb = jobService.skipCycle(job.getUid()).getBody();
         assertNotNull(jobDb);
         assertEquals(2, jobDb.getStatus().getCurrentCycle());
@@ -144,7 +144,7 @@ public class JobServiceTests {
         job.setNoOfReps(1);
         job.setStatus(jobStatus);
 
-        jobService.runJob(job, 0);
+        jobService.runJob(job,"d1", 0);
         Job jobDb = jobService.skipStep(job.getUid()).getBody();
         assertNotNull(jobDb);
         assertEquals(2, jobDb.getStatus().getCurrentStep());
@@ -178,8 +178,8 @@ public class JobServiceTests {
         job2.setNoOfReps(1);
         job2.setStatus(jobStatus2);
 
-        jobService.runJob(job, 0);
-        jobService.runJob(job2, 0);
+        jobService.runJob(job,"d1", 0);
+        jobService.runJob(job2,"d1", 0);
 
         Exception exception = assertThrows(NotFoundCustomException.class, () -> {
             jobService.getJobsByStatus("WRONG_STATUS");

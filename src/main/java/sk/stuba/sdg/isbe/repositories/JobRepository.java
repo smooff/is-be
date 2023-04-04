@@ -12,4 +12,6 @@ public interface JobRepository extends MongoRepository<Job, String> {
     List<Job> getJobsByStartedAtIsNotAndFinishedAtIs(Long startedAt, Long finishedAt);
     //get FINISHED JOBS
     List<Job> getJobsByFinishedAtIsNot(Long finishedAt);
+
+    Job getJobByUid(String jobUid);
 }

@@ -7,9 +7,9 @@ import java.util.List;
 
 public interface JobService {
 
-    Job runJobFromRecipe(String recipeId, int repetitions);
+    Job runJobFromRecipe(String recipeId, String deviceId, int repetitions);
 
-    Job runJob(Job job, int repetitions);
+    Job runJob(Job job,String deviceId, int repetitions);
 
     Job getJob(String jobId);
 

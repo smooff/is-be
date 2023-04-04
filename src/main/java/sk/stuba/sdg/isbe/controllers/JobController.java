@@ -16,15 +16,15 @@ public class JobController {
     private JobService jobService;
 
     @Operation(summary = "Run a job created from a recipe with repetitions")
-    @PostMapping("runFromRecipe/{recipeId}/{repetitions}")
-    public Job createJobFromRecipe(@PathVariable String recipeId, @PathVariable int repetitions) {
-        return jobService.runJobFromRecipe(recipeId, repetitions);
+    @PostMapping("runFromRecipe/{recipeId}/{deviceId}/{repetitions}")
+    public Job createJobFromRecipe(@PathVariable String recipeId,@PathVariable String deviceId, @PathVariable int repetitions) {
+        return jobService.runJobFromRecipe(recipeId,deviceId, repetitions);
     }
 
     @Operation(summary = "Run a job")
-    @PostMapping("runJob/{job}/{repetitions}")
-    public Job runJob(@PathVariable Job job, @PathVariable int repetitions) {
-        return jobService.runJob(job, repetitions);
+    @PostMapping("runJob/{job}/{deviceId}/{repetitions}")
+    public Job runJob(@PathVariable Job job, @PathVariable String deviceId, @PathVariable int repetitions) {
+        return jobService.runJob(job,deviceId, repetitions);
     }
 
     @Operation(summary = "Get job by its ID")

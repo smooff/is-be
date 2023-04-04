@@ -9,7 +9,9 @@ import sk.stuba.sdg.isbe.domain.model.Recipe;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidEntityException;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidOperationException;
 import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
+import sk.stuba.sdg.isbe.repositories.DeviceRepository;
 import sk.stuba.sdg.isbe.repositories.JobRepository;
+import sk.stuba.sdg.isbe.services.DeviceService;
 import sk.stuba.sdg.isbe.services.JobService;
 import sk.stuba.sdg.isbe.services.RecipeService;
 import sk.stuba.sdg.isbe.utilities.JobStatusUtils;
@@ -30,8 +32,11 @@ public class JobServiceImpl implements JobService {
     @Autowired
     private RecipeService recipeService;
 
+    @Autowired
+    private DeviceService deviceService;
+
     @Override
-    public Job runJobFromRecipe(String recipeId, int repetitions) {
+    public Job runJobFromRecipe(String recipeId, String deviceId, int repetitions) {
         Recipe recipe = recipeService.getRecipe(recipeId);
         if (recipe.isSubRecipe()) {
             throw new InvalidEntityException("Recipe is only a sub-recipe, can't create a job from it!");
@@ -43,12 +48,11 @@ public class JobServiceImpl implements JobService {
         Job job = new Job();
         job.setName("Job: " + recipe.getName());
         addCommandsFromRecipes(job, recipe);
-
-        return runJob(job, repetitions);
+        return runJob(job, deviceId, repetitions);
     }
 
     @Override
-    public Job runJob(Job job, int repetitions) {
+    public Job runJob(Job job, String deviceId, int repetitions) {
         if (repetitions < 0) {
             throw new IllegalArgumentException("Repetitions must be equal to or greater than 0!");
         }
@@ -59,6 +63,7 @@ public class JobServiceImpl implements JobService {
         }
 
         job.setCreatedAt(Instant.now().toEpochMilli());
+        deviceService.addJobToDevice(deviceId, job.getUid());
         return jobRepository.save(job);
     }
 
@@ -96,7 +101,6 @@ public class JobServiceImpl implements JobService {
         }
         job.getStatus().setCurrentCycle(currentCycle + 1);
         jobRepository.save(job);
-
         return ResponseEntity.ok(job);
     }
 

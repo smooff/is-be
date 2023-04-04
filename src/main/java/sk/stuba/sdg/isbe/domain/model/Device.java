@@ -16,7 +16,7 @@ public class Device {
     private String version;
     private String firmware;
     private Long addAt;
-    private List<Job> Jobs;
+    private List<String> Jobs;
     private List<JobStatus> JobsStatus;
     private boolean deactivated;
 
@@ -28,11 +28,11 @@ public class Device {
         JobsStatus = jobsStatus;
     }
 
-    public List<Job> getJobs() {
+    public List<String> getJobs() {
         return Jobs;
     }
 
-    public void setJobs(List<Job> jobs) {
+    public void setJobs(List<String> jobs) {
         Jobs = jobs;
     }
 
