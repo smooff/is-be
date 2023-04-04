@@ -18,7 +18,7 @@ public class Device {
     private String version;
     private String firmware;
     private Long addAt;
-    @DBRef(db = "Job")
+    @DBRef
     private List<Job> Jobs = new ArrayList<>();
     private List<JobStatus> JobsStatus;
     private boolean deactivated;
