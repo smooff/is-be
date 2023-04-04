@@ -79,7 +79,6 @@ public class JobServiceImpl implements JobService {
 
         job.setCreatedAt(Instant.now().toEpochMilli());
         jobRepository.save(job);
-        jobStatus.setJob(job);
 
         // add job as running on device by device uid
         deviceService.addJobToDevice(deviceId, job.getUid());
