@@ -17,10 +17,7 @@ import sk.stuba.sdg.isbe.services.RecipeService;
 import sk.stuba.sdg.isbe.utilities.JobStatusUtils;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -62,9 +59,15 @@ public class JobServiceImpl implements JobService {
             throw new InvalidEntityException("Job's body is invalid! Please fill all mandatory fields!");
         }
 
+        if (job.getUid() == null) {
+            job.setUid(UUID.randomUUID().toString());
+        }
+
         job.setCreatedAt(Instant.now().toEpochMilli());
+        jobRepository.save(job);
+        
         deviceService.addJobToDevice(deviceId, job.getUid());
-        return jobRepository.save(job);
+        return job;
     }
 
     private void addCommandsFromRecipes(Job job, Recipe recipe) {

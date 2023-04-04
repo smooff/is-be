@@ -4,6 +4,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import sk.stuba.sdg.isbe.domain.enums.DeviceTypeEnum;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Document
@@ -16,7 +17,7 @@ public class Device {
     private String version;
     private String firmware;
     private Long addAt;
-    private List<String> Jobs;
+    private List<String> Jobs = new ArrayList<>();
     private List<JobStatus> JobsStatus;
     private boolean deactivated;
 

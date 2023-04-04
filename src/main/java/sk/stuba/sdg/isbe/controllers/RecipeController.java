@@ -1,5 +1,6 @@
 package sk.stuba.sdg.isbe.controllers;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,8 +16,8 @@ public class RecipeController {
     @Autowired
     private RecipeService recipeService;
 
-    @PostMapping("create/{recipe}")
-    public Recipe createRecipe(@PathVariable Recipe recipe) {
+    @PostMapping("create/")
+    public Recipe createRecipe(@Valid @RequestBody Recipe recipe) {
          return recipeService.createRecipe(recipe);
     }
 
