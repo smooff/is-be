@@ -15,8 +15,6 @@ public class NotificationController {
 
     public NotificationController(NotificationService notificationService) {
         this.notificationService = notificationService;
-
-//        this.notificationService.createCustomer(new CustomerCreateRequestDto("Simon","0908123456","mail@mail.com"));
     }
 
     @GetMapping
