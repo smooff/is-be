@@ -11,7 +11,8 @@ import java.util.List;
 public class JobStatus {
     @Id
     private String uid;
-    private String jobUid;
+    @DBRef
+    private Job job;
     private JobStatusEnum retCode;
     private JobStatusEnum code;
     private Integer currentStep;
@@ -29,12 +30,12 @@ public class JobStatus {
         this.uid = uid;
     }
 
-    public String getJobUid() {
-        return jobUid;
+    public Job getJob() {
+        return job;
     }
 
-    public void setJobUid(String jobUid) {
-        this.jobUid = jobUid;
+    public void setJob(Job job) {
+        this.job = job;
     }
 
     public JobStatusEnum getRetCode() {

@@ -11,6 +11,7 @@ import sk.stuba.sdg.isbe.handlers.exceptions.InvalidEntityException;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidOperationException;
 import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
 import sk.stuba.sdg.isbe.repositories.JobRepository;
+import sk.stuba.sdg.isbe.repositories.JobStatusRepository;
 import sk.stuba.sdg.isbe.services.DeviceService;
 import sk.stuba.sdg.isbe.services.JobService;
 import sk.stuba.sdg.isbe.services.JobStatusService;
@@ -38,6 +39,9 @@ public class JobServiceImpl implements JobService {
 
     @Autowired
     private JobStatusService jobStatusService;
+
+    @Autowired
+    private JobStatusRepository jobStatusRepository;
 
     @Override
     public Job runJobFromRecipe(String recipeId, String deviceId, int repetitions) {
@@ -75,7 +79,7 @@ public class JobServiceImpl implements JobService {
 
         job.setCreatedAt(Instant.now().toEpochMilli());
         jobRepository.save(job);
-        jobStatus.setJobUid(job.getUid());
+        jobStatus.setJob(job);
 
         // add job as running on device by device uid
         deviceService.addJobToDevice(deviceId, job.getUid());
@@ -115,7 +119,8 @@ public class JobServiceImpl implements JobService {
             throw new InvalidOperationException("Last cycle is under process, can't skip current one!");
         }
         job.getStatus().setCurrentCycle(currentCycle + 1);
-        jobRepository.save(job);
+        jobStatusRepository.save(job.getStatus());
+
         return ResponseEntity.ok(job);
     }
 
@@ -129,7 +134,7 @@ public class JobServiceImpl implements JobService {
             throw new InvalidOperationException("Last step is under process, can't skip current one!");
         }
         job.getStatus().setCurrentStep(currentStep + 1);
-        jobRepository.save(job);
+        jobStatusRepository.save(job.getStatus());
 
         return ResponseEntity.ok(job);
     }
