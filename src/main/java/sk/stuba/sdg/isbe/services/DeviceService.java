@@ -17,4 +17,6 @@ public interface DeviceService {
     ResponseEntity<Device> deleteDevice(String deviceId);
 
     ResponseEntity<Job> addJobToDevice(String deviceId, String jodId);
+
+    ResponseEntity<List<Job>> getAllDeviceJobs(String deviceId);
 }

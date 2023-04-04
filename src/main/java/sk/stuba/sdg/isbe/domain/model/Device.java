@@ -1,6 +1,7 @@
 package sk.stuba.sdg.isbe.domain.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import sk.stuba.sdg.isbe.domain.enums.DeviceTypeEnum;
 
@@ -17,7 +18,8 @@ public class Device {
     private String version;
     private String firmware;
     private Long addAt;
-    private List<String> Jobs = new ArrayList<>();
+    @DBRef(db = "Job")
+    private List<Job> Jobs = new ArrayList<>();
     private List<JobStatus> JobsStatus;
     private boolean deactivated;
 
@@ -29,11 +31,11 @@ public class Device {
         JobsStatus = jobsStatus;
     }
 
-    public List<String> getJobs() {
+    public List<Job> getJobs() {
         return Jobs;
     }
 
-    public void setJobs(List<String> jobs) {
+    public void setJobs(List<Job> jobs) {
         Jobs = jobs;
     }
 

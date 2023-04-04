@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import sk.stuba.sdg.isbe.domain.model.Device;
 import sk.stuba.sdg.isbe.domain.model.Job;
+import sk.stuba.sdg.isbe.handlers.exceptions.EntityExistsException;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidEntityException;
 import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
 import sk.stuba.sdg.isbe.repositories.DeviceRepository;
@@ -12,6 +13,7 @@ import sk.stuba.sdg.isbe.repositories.JobRepository;
 import sk.stuba.sdg.isbe.services.DeviceService;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -81,9 +83,25 @@ public class DeviceServiceImpl implements DeviceService {
             throw new NotFoundCustomException("Device with ID: '" + deviceId + "' was not found!");
         }
         Device device = optionalDevice.get();
-        device.getJobs().add(jobId);
+        device.getJobs().add(job);
 
         deviceRepository.save(device);
         return ResponseEntity.ok(job);
+    }
+
+    @Override
+    public ResponseEntity<List<Job>> getAllDeviceJobs(String deviceId){
+
+        Optional<Device> optionalDevice = deviceRepository.findById(deviceId);
+        if (optionalDevice.isEmpty()) {
+            throw new NotFoundCustomException("Device with ID: '" + deviceId + "' was not found!");
+        }
+        Device device = optionalDevice.get();
+
+        if (device.getJobs().isEmpty()){
+            throw new EntityExistsException("No jobs for device already exists!");
+        }
+        
+        return  ResponseEntity.ok(device.getJobs());
     }
 }

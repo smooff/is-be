@@ -41,8 +41,15 @@ public class DeviceController {
         return this.deviceService.getDeviceById(deviceId);
     }
 
+    @Operation(summary = "Add job to device base on id inset into list of jobs")
     @PutMapping("addJobToDevice/{deviceId}/{jobId}")
     public ResponseEntity<Job> addJobToDevice(@PathVariable String deviceId, @PathVariable String jobId) {
         return this.deviceService.addJobToDevice(deviceId, jobId);
+    }
+
+    @Operation(summary = "Json of all jobs assigned to device")
+    @PostMapping(value = "/getAllDeviceJobs/{deviceId}")
+    public ResponseEntity<List<Job>> getAllDeviceJobs(@PathVariable String deviceId) {
+        return this.deviceService.getAllDeviceJobs(deviceId);
     }
 }
