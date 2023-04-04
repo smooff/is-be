@@ -18,6 +18,7 @@ public class Device {
     private Long addAt;
     private List<Job> Jobs;
     private List<JobStatus> JobsStatus;
+    private boolean deactivated;
 
     public List<JobStatus> getJobsStatus() {
         return JobsStatus;
@@ -89,5 +90,13 @@ public class Device {
 
     public void setAddAt(Long addAt) {
         this.addAt = addAt;
+    }
+
+    public boolean isDeactivated() {
+        return deactivated;
+    }
+
+    public void setDeactivated(boolean deactivated) {
+        this.deactivated = deactivated;
     }
 }

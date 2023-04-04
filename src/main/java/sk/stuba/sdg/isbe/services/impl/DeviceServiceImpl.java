@@ -1,9 +1,9 @@
 package sk.stuba.sdg.isbe.services.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import sk.stuba.sdg.isbe.domain.model.Device;
-import sk.stuba.sdg.isbe.domain.model.Recipe;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidEntityException;
 import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
 import sk.stuba.sdg.isbe.repositories.DeviceRepository;
@@ -25,6 +25,13 @@ public class DeviceServiceImpl implements DeviceService {
             throw new InvalidEntityException("Device has no name set!");
         }
 
+        if (device.getMac() == null || device.getMac().equals(EMPTY_STRING)) {
+            throw new InvalidEntityException("Device has no mac address set!");
+        }
+
+        if (device.getType() == null) {
+            throw new InvalidEntityException("Device has no type set!");
+        }
 
         deviceRepository.save(device);
         return device;
@@ -37,5 +44,13 @@ public class DeviceServiceImpl implements DeviceService {
             throw new NotFoundCustomException("Recipe with ID: '" + deviceId + "' was not found!");
         }
         return optionalDevice.get();
+    }
+
+    @Override
+    public ResponseEntity<Device> deleteDevice(String deviceId) {
+        Device deviceToDelete = getDevice(deviceId);
+        deviceToDelete.setDeactivated(true);
+        deviceRepository.save(deviceToDelete);
+        return ResponseEntity.ok(deviceToDelete);
     }
 }
