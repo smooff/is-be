@@ -9,14 +9,12 @@ import sk.stuba.sdg.isbe.handlers.exceptions.EntityExistsException;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidEntityException;
 import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
 import sk.stuba.sdg.isbe.repositories.DeviceRepository;
-import sk.stuba.sdg.isbe.repositories.JobRepository;
 import sk.stuba.sdg.isbe.services.DeviceService;
+import sk.stuba.sdg.isbe.services.JobService;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class DeviceServiceImpl implements DeviceService {
@@ -27,7 +25,7 @@ public class DeviceServiceImpl implements DeviceService {
     private DeviceRepository deviceRepository;
 
     @Autowired
-    private JobRepository jobRepository;
+    private JobService jobService;
 
     @Override
     public Device createDevice(Device device) {
@@ -41,7 +39,6 @@ public class DeviceServiceImpl implements DeviceService {
             throw new InvalidEntityException("Device has no type set!");
         }
 
-        device.setUid(UUID.randomUUID().toString());
         device.setAddAt(Instant.now().toEpochMilli());
         deviceRepository.save(device);
 
@@ -73,10 +70,7 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Override
     public ResponseEntity<Job> addJobToDevice(String deviceId, String jobId){
-        Job job = jobRepository.getJobByUid(jobId);
-        if (job.getUid().isEmpty()) {
-            throw new NotFoundCustomException("Job with ID: '" + jobId + "' was not found! Can't be add.");
-        }
+        Job job = jobService.getJob(jobId);
 
         Optional<Device> optionalDevice = deviceRepository.findById(deviceId);
         if (optionalDevice.isEmpty()) {

@@ -37,8 +37,7 @@ public class CommandServiceImpl implements CommandService {
             throw new InvalidEntityException("Command does not contain any parameters!");
         }
 
-        commandRepository.save(command);
-        return command;
+        return commandRepository.save(command);
     }
 
     @Override
@@ -69,9 +68,9 @@ public class CommandServiceImpl implements CommandService {
         if (!recipeNames.isEmpty()) {
             throw new InvalidOperationException("Command is used in Recipes: \n" + String.join("\n", recipeNames) + "\nRemove commands from recipes to be able to delete them!");
         }
+
         command.setDeactivated(true);
-        commandRepository.save(command);
-        return command;
+        return commandRepository.save(command);
     }
 
     @Override
@@ -89,8 +88,7 @@ public class CommandServiceImpl implements CommandService {
             command.setParams(updateCommand.getParams());
         }
 
-        commandRepository.save(command);
-        return command;
+        return commandRepository.save(command);
     }
 
     private boolean commandWithNameExists(String name) {

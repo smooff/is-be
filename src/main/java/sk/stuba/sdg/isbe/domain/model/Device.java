@@ -19,15 +19,15 @@ public class Device {
     private String firmware;
     private Long addAt;
     @DBRef
-    private List<Job> Jobs = new ArrayList<>();
+    private List<Job> jobs = new ArrayList<>();
     private boolean deactivated;
 
     public List<Job> getJobs() {
-        return Jobs;
+        return jobs;
     }
 
     public void setJobs(List<Job> jobs) {
-        Jobs = jobs;
+        this.jobs = jobs;
     }
 
     public String getUid() {

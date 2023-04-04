@@ -9,7 +9,7 @@ public interface JobService {
 
     Job runJobFromRecipe(String recipeId, String deviceId, int repetitions);
 
-    Job runJob(Job job,String deviceId, int repetitions);
+    Job runJob(Job job, String deviceId, int repetitions);
 
     Job getJob(String jobId);
 

@@ -45,8 +45,7 @@ public class RecipeServiceImpl implements RecipeService {
             throw new InvalidEntityException("Recipe's sub-recipe status not defined!");
         }
 
-        recipeRepository.save(recipe);
-        return recipe;
+        return recipeRepository.save(recipe);
     }
 
     @Override
@@ -110,7 +109,6 @@ public class RecipeServiceImpl implements RecipeService {
 
         recipe.getSubRecipes().add(subRecipe);
         recipeRepository.save(recipe);
-
         return ResponseEntity.ok(recipe);
     }
 
@@ -210,8 +208,8 @@ public class RecipeServiceImpl implements RecipeService {
         } else {
             recipe.getCommands().add(command);
         }
-        recipeRepository.save(recipe);
-        return recipe;
+
+        return recipeRepository.save(recipe);
     }
 
     @Override
@@ -227,8 +225,7 @@ public class RecipeServiceImpl implements RecipeService {
 
         if (recipe.getCommands().get(index).getId().equals(commandId)) {
             recipe.getCommands().remove(index);
-            recipeRepository.save(recipe);
-            return recipe;
+            return recipeRepository.save(recipe);
         }
 
         List<String> commandIndexes = new ArrayList<>();
