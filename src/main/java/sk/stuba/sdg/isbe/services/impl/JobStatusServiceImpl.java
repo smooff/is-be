@@ -23,15 +23,16 @@ public class JobStatusServiceImpl implements JobStatusService {
     }
 
     @Override
-    public void validateJobStatus(JobStatus jobStatus) {
-
-    }
-
     public JobStatus getJobStatus(String jobStatusId) {
         Optional<JobStatus> optionalStatus = jobStatusRepository.findById(jobStatusId);
         if (optionalStatus.isEmpty()) {
             throw new NotFoundCustomException("Job-status with ID: '" + jobStatusId + "' was not found!");
         }
         return optionalStatus.get();
+    }
+
+    @Override
+    public void validateJobStatus(JobStatus jobStatus) {
+
     }
 }
