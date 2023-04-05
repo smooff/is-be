@@ -71,6 +71,6 @@ public class DeviceController {
     public JobStatus updateJobStatus(@PathVariable String deviceId, @PathVariable String jobStatusId, @Valid @RequestBody JobStatus changeJobStatus) {
         deviceService.getDeviceById(deviceId);
 
-        return jobStatusService.updateJobStatus(jobStatusId, changeJobStatus);
+        return jobStatusService.updateJobStatus(jobStatusId, changeJobStatus, deviceId);
     }
 }

@@ -29,7 +29,7 @@ public class JobStatusController {
     @Operation(summary = "Update JobStatus")
     @PostMapping("/updateJobStatus/{jobStatusId}")
     public JobStatus updateJobStatus(@PathVariable String jobStatusId, @Valid @RequestBody JobStatus changeJobStatus) {
-        return jobStatusService.updateJobStatus(jobStatusId, changeJobStatus);
+        return jobStatusService.updateJobStatus(jobStatusId, changeJobStatus, null);
     }
 
 }
