@@ -51,11 +51,11 @@ public class CommandServiceImpl implements CommandService {
 
     @Override
     public Command getCommandByName(String name) {
-        Command command = commandRepository.getCommandByNameAndDeactivated(name, false);
-        if (command == null) {
+        Optional<Command> optionalCommand = commandRepository.getCommandByNameAndDeactivated(name, false);
+        if (optionalCommand.isEmpty()) {
             throw new NotFoundCustomException("Command with name: '" + name + "' not found!");
         }
-        return command;
+        return optionalCommand.get();
     }
 
     @Override
@@ -92,6 +92,6 @@ public class CommandServiceImpl implements CommandService {
     }
 
     private boolean commandWithNameExists(String name) {
-        return commandRepository.getCommandByNameAndDeactivated(name, false) != null;
+        return commandRepository.getCommandByNameAndDeactivated(name, false).isPresent();
     }
 }
