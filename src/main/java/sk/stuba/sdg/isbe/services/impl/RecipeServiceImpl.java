@@ -56,11 +56,11 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public Recipe getRecipeByName(String name) {
-        Recipe recipe = recipeRepository.getRecipeByNameAndDeactivated(name, false);
-        if (recipe == null) {
+        Optional<Recipe> recipe = recipeRepository.getRecipeByNameAndDeactivated(name, false);
+        if (recipe.isEmpty()) {
             throw new NotFoundCustomException("Recipe with name: '" + name + "' does not exist!");
         }
-        return recipe;
+        return recipe.get();
     }
 
     @Override
@@ -181,7 +181,7 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public Recipe getRecipe(String recipeId) {
-        Optional<Recipe> optionalRecipe = recipeRepository.findById(recipeId);
+        Optional<Recipe> optionalRecipe = recipeRepository.getRecipeByIdAndDeactivated(recipeId, false);
         if (optionalRecipe.isEmpty()) {
             throw new NotFoundCustomException("Recipe with ID: '" + recipeId + "' was not found!");
         }
@@ -245,6 +245,6 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     private boolean recipeWithNameExists(String name) {
-        return recipeRepository.getRecipeByNameAndDeactivated(name, false) != null;
+        return recipeRepository.getRecipeByNameAndDeactivated(name, false).isPresent();
     }
 }

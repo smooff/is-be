@@ -14,4 +14,6 @@ public interface DataPointTagService {
     DataPointTag getDataPointTagById(String dataPointTagId);
 
     DataPointTag updateDataPointTag(String dataPointTagId, DataPointTag changeDataPointTag);
+
+    DataPointTag deleteDataPointTag(String dataPointTagId);
 }

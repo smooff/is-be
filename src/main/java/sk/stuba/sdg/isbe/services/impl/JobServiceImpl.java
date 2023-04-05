@@ -70,6 +70,11 @@ public class JobServiceImpl implements JobService {
             throw new InvalidEntityException("Job's body is invalid! Please fill all mandatory fields!");
         }
 
+        // try if jobs stack is full
+        if (deviceService.getDeviceById(deviceId).getJobs().size() >= 10 ) {
+            throw new InvalidEntityException("Job can't be add! Full device jobs stack.");
+        }
+
         // create jobStatus for this new created job
         JobStatus jobStatus = new JobStatus();
         jobStatus.setRetCode(JobStatusEnum.JOB_PENDING);
