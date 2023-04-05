@@ -7,13 +7,16 @@ import sk.stuba.sdg.isbe.domain.model.Command;
 import sk.stuba.sdg.isbe.domain.model.Recipe;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface RecipeRepository extends MongoRepository<Recipe, String> {
 
     List<Recipe> getRecipesByTypeOfDeviceAndDeactivated(DeviceTypeEnum typeOfDevice, boolean deactivated);
 
-    Recipe getRecipeByNameAndDeactivated(String name, boolean deactivated);
+    Optional<Recipe> getRecipeByNameAndDeactivated(String name, boolean deactivated);
+
+    Optional<Recipe> getRecipeByIdAndDeactivated(String recipeId, boolean deactivated);
 
     List<Recipe> getRecipesByIsSubRecipeAndTypeOfDeviceAndDeactivated(Boolean isSubRecipe, DeviceTypeEnum typeOfDevice, boolean deactivated);
 

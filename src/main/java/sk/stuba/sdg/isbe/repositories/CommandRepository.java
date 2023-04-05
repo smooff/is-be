@@ -8,7 +8,7 @@ import java.util.Optional;
 
 @Repository
 public interface CommandRepository extends MongoRepository<Command, String> {
-    Command getCommandByNameAndDeactivated(String name, boolean deactivated);
+    Optional<Command> getCommandByNameAndDeactivated(String name, boolean deactivated);
 
     Optional<Command> getCommandByIdAndDeactivated(String id, boolean deactivated);
 }

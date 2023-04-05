@@ -105,8 +105,11 @@ public class RecipeServiceTests {
         recipe.setTypeOfDevice(DeviceTypeEnum.ESP32);
         recipeService.createRecipe(recipe);
         recipeService.deleteRecipe(recipe.getId());
-        Recipe recipeFromDb = recipeService.getRecipe(recipe.getId());
-        assertTrue(recipeFromDb.isDeactivated());
+        Exception exception = assertThrows(NotFoundCustomException.class, () -> {
+            recipeService.getRecipe(recipe.getId());
+        });
+        String expected = "Recipe with ID: '" + recipe.getId() + "' was not found!";
+        assertEquals(expected, exception.getMessage());
         recipeRepository.delete(recipe);
     }
 
