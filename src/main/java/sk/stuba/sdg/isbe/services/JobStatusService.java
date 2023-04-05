@@ -7,5 +7,7 @@ public interface JobStatusService {
 
     JobStatus getJobStatus(String jobStatusId);
 
+    JobStatus updateJobStatus(String jobStatusId, JobStatus changeJobStatus);
+
     void validateJobStatus(JobStatus jobStatus);
 }

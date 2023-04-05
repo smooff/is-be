@@ -7,8 +7,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sk.stuba.sdg.isbe.domain.model.Device;
 import sk.stuba.sdg.isbe.domain.model.Job;
+import sk.stuba.sdg.isbe.domain.model.JobStatus;
 import sk.stuba.sdg.isbe.domain.model.Recipe;
+import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
 import sk.stuba.sdg.isbe.services.DeviceService;
+import sk.stuba.sdg.isbe.services.JobStatusService;
 
 import java.util.List;
 
@@ -18,6 +21,9 @@ public class DeviceController {
 
     @Autowired
     private DeviceService deviceService;
+
+    @Autowired
+    private JobStatusService jobStatusService;
 
     @GetMapping
     public List<Device> getDevices() {
@@ -54,5 +60,13 @@ public class DeviceController {
             return this.deviceService.getPendingDeviceJobs(deviceId);
         }
         return this.deviceService.getAllDeviceJobs(deviceId);
+    }
+
+    @Operation(summary = "Update JobStatus by device uid")
+    @PostMapping("/updateJobStatus/{deviceId}/{jobStatusId}")
+    public JobStatus updateJobStatus(@PathVariable String deviceId, @PathVariable String jobStatusId, @Valid @RequestBody JobStatus changeJobStatus) {
+        deviceService.getDeviceById(deviceId);
+
+        return jobStatusService.updateJobStatus(jobStatusId, changeJobStatus);
     }
 }
