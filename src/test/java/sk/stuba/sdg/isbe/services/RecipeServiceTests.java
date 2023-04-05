@@ -3,7 +3,7 @@ package sk.stuba.sdg.isbe.services;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.context.annotation.Profile;
 import sk.stuba.sdg.isbe.domain.enums.DeviceTypeEnum;
 import sk.stuba.sdg.isbe.domain.model.Command;
 import sk.stuba.sdg.isbe.domain.model.Recipe;
@@ -19,7 +19,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@ActiveProfiles(profiles = {"test"})
+@Profile("!deployment")
 public class RecipeServiceTests {
 
     @Autowired
