@@ -58,4 +58,12 @@ public class DataPointTagServiceImpl implements DataPointTagService {
 
         return dataPointTagRepository.save(dataPointTag);
     }
+
+    @Override
+    public DataPointTag deleteDataPointTag(String dataPointTagId) {
+        DataPointTag dataPointTag = getDataPointTagById(dataPointTagId);
+        dataPointTag.setDeactivated(true);
+        dataPointTagRepository.save(dataPointTag);
+        return dataPointTag;
+    }
 }

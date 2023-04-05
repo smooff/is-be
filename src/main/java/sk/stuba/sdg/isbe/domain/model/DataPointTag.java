@@ -5,6 +5,7 @@ public class DataPointTag {
     private String name;
     private String unit;
     private Long decimal;
+    private boolean deactivated;
 
     public String getUid() {
         return uid;
@@ -36,6 +37,14 @@ public class DataPointTag {
 
     public void setDecimal(Long decimal) {
         this.decimal = decimal;
+    }
+
+    public boolean isDeactivated() {
+        return deactivated;
+    }
+
+    public void setDeactivated(boolean deactivated) {
+        this.deactivated = deactivated;
     }
 
     public boolean isValid() {
