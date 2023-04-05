@@ -1,7 +1,6 @@
 package sk.stuba.sdg.isbe.services.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import sk.stuba.sdg.isbe.domain.enums.JobStatusEnum;
 import sk.stuba.sdg.isbe.domain.model.Job;
@@ -113,7 +112,7 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public ResponseEntity<Job> skipCycle(String jobId) {
+    public Job skipCycle(String jobId) {
         Job job = getJob(jobId);
         Integer currentCycle = job.getStatus().getCurrentCycle();
         Integer maxCycles = job.getNoOfReps();
@@ -124,11 +123,11 @@ public class JobServiceImpl implements JobService {
         job.getStatus().setCurrentCycle(currentCycle + 1);
         jobStatusRepository.save(job.getStatus());
 
-        return ResponseEntity.ok(job);
+        return job;
     }
 
     @Override
-    public ResponseEntity<Job> skipStep(String jobId) {
+    public Job skipStep(String jobId) {
         Job job = getJob(jobId);
         Integer currentStep = job.getStatus().getCurrentStep();
         Integer maxSteps = job.getStatus().getTotalSteps();
@@ -139,31 +138,28 @@ public class JobServiceImpl implements JobService {
         job.getStatus().setCurrentStep(currentStep + 1);
         jobStatusRepository.save(job.getStatus());
 
-        return ResponseEntity.ok(job);
+        return job;
     }
 
     @Override
-    public ResponseEntity<Job> cancelJob(String jobId) {
+    public Job cancelJob(String jobId) {
         Job job = getJob(jobId);
         job.setToCancel(true);
-        jobRepository.save(job);
-        return ResponseEntity.ok(job);
+        return jobRepository.save(job);
     }
 
     @Override
-    public ResponseEntity<Job> pauseJob(String jobId) {
+    public Job pauseJob(String jobId) {
         Job job = getJob(jobId);
         job.setPaused(true);
-        jobRepository.save(job);
-        return ResponseEntity.ok(job);
+        return jobRepository.save(job);
     }
 
     @Override
-    public ResponseEntity<Job> continueJob(String jobId) {
+    public Job continueJob(String jobId) {
         Job job = getJob(jobId);
         job.setPaused(false);
-        jobRepository.save(job);
-        return ResponseEntity.ok(job);
+        return jobRepository.save(job);
     }
 
     @Override
@@ -199,6 +195,6 @@ public class JobServiceImpl implements JobService {
     public List<Job> getJobsByStatus(String status) {
         JobStatusEnum jobStatus = JobStatusUtils.getJobStatusEnum(status);
         List<Job> allJobs = jobRepository.findAll();
-        return allJobs.stream().filter(job -> job.getStatus().getRetCode() == jobStatus).collect(Collectors.toList());
+        return allJobs.stream().filter(job -> job.getStatus().getCode() == jobStatus).collect(Collectors.toList());
     }
 }

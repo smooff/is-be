@@ -138,7 +138,7 @@ public class JobServiceTests {
         jobService.runJob(job, device.getUid(), 0);
         job.getStatus().setCurrentCycle(1);
         jobStatusRepository.save(job.getStatus());
-        Job jobDb = jobService.skipCycle(job.getUid()).getBody();
+        Job jobDb = jobService.skipCycle(job.getUid());
         assertNotNull(jobDb);
         assertEquals(2, jobDb.getStatus().getCurrentCycle());
 
@@ -168,7 +168,7 @@ public class JobServiceTests {
         job.getStatus().setTotalSteps(3);
         job.getStatus().setCurrentStep(1);
         jobStatusRepository.save(job.getStatus());
-        Job jobDb = jobService.skipStep(job.getUid()).getBody();
+        Job jobDb = jobService.skipStep(job.getUid());
         assertNotNull(jobDb);
         assertEquals(2, jobDb.getStatus().getCurrentStep());
 

@@ -3,7 +3,6 @@ package sk.stuba.sdg.isbe.controllers;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sk.stuba.sdg.isbe.domain.model.Recipe;
 import sk.stuba.sdg.isbe.services.RecipeService;
@@ -25,7 +24,7 @@ public class RecipeController {
 
     @Operation(summary = "Delete recipe by ID")
     @DeleteMapping("delete/{recipeId}")
-    public ResponseEntity<Recipe> deleteRecipe(@PathVariable String recipeId) {
+    public Recipe deleteRecipe(@PathVariable String recipeId) {
         return recipeService.deleteRecipe(recipeId);
     }
 

@@ -1,7 +1,6 @@
 package sk.stuba.sdg.isbe.services.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import sk.stuba.sdg.isbe.domain.enums.DeviceTypeEnum;
 import sk.stuba.sdg.isbe.domain.model.Command;
@@ -64,7 +63,7 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public ResponseEntity<Recipe> updateRecipe(String recipeId, Recipe changeRecipe) {
+    public Recipe updateRecipe(String recipeId, Recipe changeRecipe) {
         Recipe recipe = getRecipe(recipeId);
 
         if (changeRecipe == null) {
@@ -91,12 +90,11 @@ public class RecipeServiceImpl implements RecipeService {
             recipe.setSubRecipes(changeRecipe.getSubRecipes());
         }
 
-        recipeRepository.save(recipe);
-        return ResponseEntity.ok(recipe);
+        return recipeRepository.save(recipe);
     }
 
     @Override
-    public ResponseEntity<Recipe> addSubRecipeToRecipe(String recipeId, String subRecipeId) {
+    public Recipe addSubRecipeToRecipe(String recipeId, String subRecipeId) {
         Recipe recipe = getRecipe(recipeId);
         Recipe subRecipe = getRecipe(subRecipeId);
 
@@ -108,12 +106,11 @@ public class RecipeServiceImpl implements RecipeService {
         }
 
         recipe.getSubRecipes().add(subRecipe);
-        recipeRepository.save(recipe);
-        return ResponseEntity.ok(recipe);
+        return recipeRepository.save(recipe);
     }
 
     @Override
-    public ResponseEntity<Recipe> removeSubRecipeFromRecipe(String recipeId, String subRecipeId, int index) {
+    public Recipe removeSubRecipeFromRecipe(String recipeId, String subRecipeId, int index) {
         Recipe recipe = getRecipe(recipeId);
         if (subRecipeId == null) {
             throw new NullPointerException("ID of sub-recipe must not be null!");
@@ -129,8 +126,7 @@ public class RecipeServiceImpl implements RecipeService {
 
         if (recipe.getSubRecipes().get(index).getId().equals(subRecipeId)) {
             recipe.getSubRecipes().remove(index);
-            recipeRepository.save(recipe);
-            return ResponseEntity.ok(recipe);
+            return recipeRepository.save(recipe);
         }
 
         List<String> subRecipeIndexes = new ArrayList<>();
@@ -150,11 +146,10 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public ResponseEntity<Recipe> deleteRecipe(String recipeId) {
+    public Recipe deleteRecipe(String recipeId) {
         Recipe recipeToDelete = getRecipe(recipeId);
         recipeToDelete.setDeactivated(true);
-        recipeRepository.save(recipeToDelete);
-        return ResponseEntity.ok(recipeToDelete);
+        return recipeRepository.save(recipeToDelete);
     }
 
     @Override

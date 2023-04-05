@@ -1,6 +1,5 @@
 package sk.stuba.sdg.isbe.services;
 
-import org.springframework.http.ResponseEntity;
 import sk.stuba.sdg.isbe.domain.model.Job;
 
 import java.util.List;
@@ -13,15 +12,15 @@ public interface JobService {
 
     Job getJob(String jobId);
 
-    ResponseEntity<Job> skipCycle(String jobId);
+    Job skipCycle(String jobId);
 
-    ResponseEntity<Job> skipStep(String jobId);
+    Job skipStep(String jobId);
 
-    ResponseEntity<Job> cancelJob(String jobId);
+    Job cancelJob(String jobId);
 
-    ResponseEntity<Job> pauseJob(String jobId);
+    Job pauseJob(String jobId);
 
-    ResponseEntity<Job> continueJob(String jobId);
+    Job continueJob(String jobId);
 
     List<Job> getFinishedJobsByStatus();
 

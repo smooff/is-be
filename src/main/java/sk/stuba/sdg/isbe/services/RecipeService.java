@@ -1,6 +1,5 @@
 package sk.stuba.sdg.isbe.services;
 
-import org.springframework.http.ResponseEntity;
 import sk.stuba.sdg.isbe.domain.model.Command;
 import sk.stuba.sdg.isbe.domain.model.Recipe;
 
@@ -20,13 +19,13 @@ public interface RecipeService {
 
     Recipe getRecipeByName(String name);
 
-    ResponseEntity<Recipe> updateRecipe(String recipeId, Recipe changeRecipe);
+    Recipe updateRecipe(String recipeId, Recipe changeRecipe);
 
-    ResponseEntity<Recipe> addSubRecipeToRecipe(String recipeId, String subRecipeId);
+    Recipe addSubRecipeToRecipe(String recipeId, String subRecipeId);
 
-    ResponseEntity<Recipe> removeSubRecipeFromRecipe(String recipeId, String subRecipeId, int index);
+    Recipe removeSubRecipeFromRecipe(String recipeId, String subRecipeId, int index);
 
-    ResponseEntity<Recipe> deleteRecipe(String recipeId);
+    Recipe deleteRecipe(String recipeId);
 
     List<Recipe> getAllRecipes();
 
