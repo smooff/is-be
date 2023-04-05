@@ -4,8 +4,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import sk.stuba.sdg.isbe.domain.model.DataPointTag;
-import sk.stuba.sdg.isbe.services.DataPointTagService;
+import sk.stuba.sdg.isbe.domain.model.DataPointSave;
+import sk.stuba.sdg.isbe.services.DataPointSaveService;
 
 import java.util.List;
 
@@ -14,32 +14,32 @@ import java.util.List;
 public class DataPointTagController {
 
     @Autowired
-    private DataPointTagService dataPointTagService;
+    private DataPointSaveService dataPointSaveService;
 
     @GetMapping
-    public List<DataPointTag> getDataPointTags() {return dataPointTagService.getDataPointTags();}
+    public List<DataPointSave> getDataPointSaves() {return dataPointSaveService.getDataPointSaves();}
 
-    @Operation(summary = "Add new Data point tag into the system")
+    @Operation(summary = "Add new Data point Save into the system")
     @PostMapping("/create")
-    public DataPointTag createDataPointTag(@Valid @RequestBody DataPointTag dataPointTag) {
-        return dataPointTagService.createDataPointTag(dataPointTag);
+    public DataPointSave createDataPointSave(@Valid @RequestBody DataPointSave dataPointSave) {
+        return dataPointSaveService.createDataPointSave(dataPointSave);
     }
 
-    @Operation(summary = "Get Data point tag by uid")
-    @GetMapping("/getDataPointTagById/{dataPointTagId}")
-    public DataPointTag getDataPointTagById(@PathVariable String dataPointTagId) {
-        return dataPointTagService.getDataPointTagById(dataPointTagId);
+    @Operation(summary = "Get Data point Save by uid")
+    @GetMapping("/getDataPointSaveById/{dataPointSaveId}")
+    public DataPointSave getDataPointSaveById(@PathVariable String dataPointSaveId) {
+        return dataPointSaveService.getDataPointSaveById(dataPointSaveId);
     }
 
-    @Operation(summary = "Update Data point tag")
-    @PostMapping("/updateDataPointTag/{dataPointTagId}")
-    public DataPointTag updateDataPointTag(@PathVariable String dataPointTagId, @Valid @RequestBody DataPointTag changeDataPointTag) {
-        return dataPointTagService.updateDataPointTag(dataPointTagId, changeDataPointTag);
+    @Operation(summary = "Update Data point Save")
+    @PostMapping("/updateDataPointSave/{dataPointSaveId}")
+    public DataPointSave updateDataPointSave(@PathVariable String dataPointSaveId, @Valid @RequestBody DataPointSave changeDataPointSave) {
+        return dataPointSaveService.updateDataPointSave(dataPointSaveId, changeDataPointSave);
     }
 
-    @Operation(summary = "Delete Data point tag")
-    @DeleteMapping("deleteDataPointTag/{dataPointTagId}")
-    public DataPointTag deleteDataPointTag(@PathVariable String dataPointTagId) {
-        return dataPointTagService.deleteDataPointTag(dataPointTagId);
+    @Operation(summary = "Delete Data point Save")
+    @DeleteMapping("deleteDataPointSave/{dataPointSaveId}")
+    public DataPointSave deleteDataPointSave(@PathVariable String dataPointSaveId) {
+        return dataPointSaveService.deleteDataPointSave(dataPointSaveId);
     }
 }

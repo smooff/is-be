@@ -3,9 +3,7 @@ package sk.stuba.sdg.isbe.services.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sk.stuba.sdg.isbe.domain.enums.JobStatusEnum;
-import sk.stuba.sdg.isbe.domain.model.Job;
-import sk.stuba.sdg.isbe.domain.model.JobStatus;
-import sk.stuba.sdg.isbe.domain.model.Recipe;
+import sk.stuba.sdg.isbe.domain.model.*;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidEntityException;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidOperationException;
 import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
@@ -69,14 +67,24 @@ public class JobServiceImpl implements JobService {
             throw new InvalidEntityException("Job's body is invalid! Please fill all mandatory fields!");
         }
 
+        Device device = deviceService.getDeviceById(deviceId);
+
         // try if jobs stack is full
-        if (deviceService.getDeviceById(deviceId).getJobs().size() >= 10 ) {
+        if (device.getJobs().size() >= 10 ) {
             throw new InvalidEntityException("Job can't be add! Full device jobs stack.");
         }
 
         // create jobStatus for this new created job
         JobStatus jobStatus = new JobStatus();
         jobStatus.setCode(JobStatusEnum.JOB_PENDING);
+        // add dataPoints
+        List<DataPoint> dataPoints = new ArrayList<>();
+        for (DataPointTag tag: device.getDataPointTags()) {
+            DataPoint dataPoint = new DataPoint();
+            dataPoint.setTag(tag.getTag());
+            dataPoints.add(dataPoint);
+        }
+        jobStatus.setData(dataPoints);
         job.setStatus(jobStatus);
         jobStatusService.createJobStatus(jobStatus);
 

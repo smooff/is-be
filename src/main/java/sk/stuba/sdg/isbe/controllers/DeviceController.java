@@ -8,8 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import sk.stuba.sdg.isbe.domain.model.Device;
 import sk.stuba.sdg.isbe.domain.model.Job;
 import sk.stuba.sdg.isbe.domain.model.JobStatus;
-import sk.stuba.sdg.isbe.domain.model.Recipe;
-import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
 import sk.stuba.sdg.isbe.services.DeviceService;
 import sk.stuba.sdg.isbe.services.JobStatusService;
 
@@ -51,6 +49,12 @@ public class DeviceController {
     @PutMapping("addJobToDevice/{deviceId}/{jobId}")
     public ResponseEntity<Job> addJobToDevice(@PathVariable String deviceId, @PathVariable String jobId) {
         return this.deviceService.addJobToDevice(deviceId, jobId);
+    }
+
+    @Operation(summary = "Add data point tag to device base on id inset into list of dataPointTags")
+    @PutMapping("addDataPointTagToDevice/{deviceId}/{dataPointTagId}")
+    public Device addDataPointTagToDevice(@PathVariable String deviceId, @PathVariable String dataPointTagId) {
+        return this.deviceService.addDataPointTagToDevice(deviceId, dataPointTagId);
     }
 
     @Operation(summary = "Json of all jobs assigned to device, if second parameter set to true only pending get")

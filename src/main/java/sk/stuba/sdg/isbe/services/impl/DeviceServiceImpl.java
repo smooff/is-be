@@ -4,18 +4,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import sk.stuba.sdg.isbe.domain.enums.JobStatusEnum;
+import sk.stuba.sdg.isbe.domain.model.DataPointTag;
 import sk.stuba.sdg.isbe.domain.model.Device;
 import sk.stuba.sdg.isbe.domain.model.Job;
 import sk.stuba.sdg.isbe.handlers.exceptions.EntityExistsException;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidEntityException;
 import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
 import sk.stuba.sdg.isbe.repositories.DeviceRepository;
+import sk.stuba.sdg.isbe.services.DataPointTagService;
 import sk.stuba.sdg.isbe.services.DeviceService;
 import sk.stuba.sdg.isbe.services.JobService;
-import sk.stuba.sdg.isbe.utilities.JobStatusUtils;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -30,6 +30,9 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Autowired
     private JobService jobService;
+
+    @Autowired
+    private DataPointTagService dataPointTagService;
 
     @Override
     public Device createDevice(Device device) {
@@ -76,15 +79,21 @@ public class DeviceServiceImpl implements DeviceService {
     public ResponseEntity<Job> addJobToDevice(String deviceId, String jobId){
         Job job = jobService.getJob(jobId);
 
-        Optional<Device> optionalDevice = deviceRepository.findById(deviceId);
-        if (optionalDevice.isEmpty()) {
-            throw new NotFoundCustomException("Device with ID: '" + deviceId + "' was not found!");
-        }
-        Device device = optionalDevice.get();
+        Device device = getDeviceById(deviceId);
         device.getJobs().add(job);
 
         deviceRepository.save(device);
         return ResponseEntity.ok(job);
+    }
+
+    @Override
+    public Device addDataPointTagToDevice(String deviceId, String dataPointTagId) {
+        DataPointTag dataPointTag = dataPointTagService.getDataPointTagById(dataPointTagId);
+        
+        Device device = getDeviceById(deviceId);
+        device.getDataPointTags().add(dataPointTag);
+
+        return deviceRepository.save(device);
     }
 
     @Override

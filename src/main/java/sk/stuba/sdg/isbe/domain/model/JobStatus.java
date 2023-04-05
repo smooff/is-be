@@ -16,7 +16,6 @@ public class JobStatus {
     private Integer currentStep;
     private Integer totalSteps;
     private Integer currentCycle;
-    @DBRef
     private List<DataPoint> data;
     private Long createdAt;
 

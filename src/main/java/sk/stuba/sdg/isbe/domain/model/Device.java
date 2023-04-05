@@ -17,9 +17,11 @@ public class Device {
     private DeviceTypeEnum type;
     private String version;
     private String firmware;
-    private Long addAt;
     @DBRef
     private List<Job> jobs = new ArrayList<>();
+    @DBRef
+    private List<DataPointTag> dataPointTags = new ArrayList<>();
+    private Long addAt;
     private boolean deactivated;
 
     public List<Job> getJobs() {
@@ -76,6 +78,14 @@ public class Device {
 
     public void setFirmware(String firmware) {
         this.firmware = firmware;
+    }
+
+    public List<DataPointTag> getDataPointTags() {
+        return dataPointTags;
+    }
+
+    public void setDataPointTags(List<DataPointTag> dataPointTags) {
+        this.dataPointTags = dataPointTags;
     }
 
     public Long getAddAt() {

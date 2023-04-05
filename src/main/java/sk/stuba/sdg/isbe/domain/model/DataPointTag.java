@@ -5,6 +5,7 @@ import org.springframework.data.annotation.Id;
 public class DataPointTag {
     @Id
     private String uid;
+    private String tag;
     private String name;
     private String unit;
     private Long decimal;
@@ -17,6 +18,14 @@ public class DataPointTag {
 
     public void setUid(String uid) {
         this.uid = uid;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 
     public String getName() {

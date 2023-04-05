@@ -57,6 +57,9 @@ public class DataPointTagServiceImpl implements DataPointTagService {
         if (changeDataPointTag.getDecimal() != null){
             dataPointTag.setDecimal(changeDataPointTag.getDecimal());
         }
+        if (changeDataPointTag.getTag() != null){
+            dataPointTag.setTag(changeDataPointTag.getTag());
+        }
 
         return dataPointTagRepository.save(dataPointTag);
     }
