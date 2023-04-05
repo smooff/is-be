@@ -1,13 +1,15 @@
 package sk.stuba.sdg.isbe.domain.model;
 
 import org.springframework.data.annotation.Id;
+import sk.stuba.sdg.isbe.domain.enums.UserPermissionEnum;
 
-public class DataPointTag {
+public class User {
     @Id
     private String uid;
     private String name;
-    private String unit;
-    private Long decimal;
+    private String mail;
+    private String password;
+    private UserPermissionEnum permissions;
     private Long createdAt;
     private boolean deactivated;
 
@@ -27,20 +29,28 @@ public class DataPointTag {
         this.name = name;
     }
 
-    public String getUnit() {
-        return unit;
+    public String getMail() {
+        return mail;
     }
 
-    public void setUnit(String unit) {
-        this.unit = unit;
+    public void setMail(String mail) {
+        this.mail = mail;
     }
 
-    public Long getDecimal() {
-        return decimal;
+    public String getPassword() {
+        return password;
     }
 
-    public void setDecimal(Long decimal) {
-        this.decimal = decimal;
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public UserPermissionEnum getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(UserPermissionEnum permissions) {
+        this.permissions = permissions;
     }
 
     public Long getCreatedAt() {
@@ -57,10 +67,5 @@ public class DataPointTag {
 
     public void setDeactivated(boolean deactivated) {
         this.deactivated = deactivated;
-    }
-
-    public boolean isValid() {
-        return this.getName() != null &&
-                this.getUnit() != null;
     }
 }

@@ -26,13 +26,13 @@ public class DataPointTagController {
     }
 
     @Operation(summary = "Get Data point tag by uid")
-    @PostMapping("/getDataPointTagById/{dataPointTagId}")
+    @GetMapping("/getDataPointTagById/{dataPointTagId}")
     public DataPointTag getDataPointTagById(@PathVariable String dataPointTagId) {
         return dataPointTagService.getDataPointTagById(dataPointTagId);
     }
 
     @Operation(summary = "Update Data point tag")
-    @PutMapping("/updateDataPointTag/{dataPointTagId}")
+    @PostMapping("/updateDataPointTag/{dataPointTagId}")
     public DataPointTag updateDataPointTag(@PathVariable String dataPointTagId, @Valid @RequestBody DataPointTag changeDataPointTag) {
         return dataPointTagService.updateDataPointTag(dataPointTagId, changeDataPointTag);
     }

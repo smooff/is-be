@@ -7,6 +7,7 @@ import sk.stuba.sdg.isbe.handlers.exceptions.InvalidEntityException;
 import sk.stuba.sdg.isbe.repositories.DataPointTagRepository;
 import sk.stuba.sdg.isbe.services.DataPointTagService;
 
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -21,6 +22,7 @@ public class DataPointTagServiceImpl implements DataPointTagService {
             throw new InvalidEntityException("Data Point Tag has no name or unit set!");
         }
 
+        dataPointTag.setCreatedAt(Instant.now().toEpochMilli());
         return dataPointTagRepository.save(dataPointTag);
     }
 
