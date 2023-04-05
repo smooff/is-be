@@ -77,8 +77,7 @@ public class JobServiceImpl implements JobService {
 
         // create jobStatus for this new created job
         JobStatus jobStatus = new JobStatus();
-        jobStatus.setRetCode(JobStatusEnum.JOB_PENDING);
-        jobStatus.setCode(JobStatusEnum.JOB_FREE);
+        jobStatus.setCode(JobStatusEnum.JOB_PENDING);
         job.setStatus(jobStatus);
         jobStatusService.createJobStatus(jobStatus);
 
