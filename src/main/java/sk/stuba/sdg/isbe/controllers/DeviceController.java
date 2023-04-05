@@ -47,9 +47,12 @@ public class DeviceController {
         return this.deviceService.addJobToDevice(deviceId, jobId);
     }
 
-    @Operation(summary = "Json of all jobs assigned to device")
-    @PostMapping(value = "/getAllDeviceJobs/{deviceId}")
-    public ResponseEntity<List<Job>> getAllDeviceJobs(@PathVariable String deviceId) {
+    @Operation(summary = "Json of all jobs assigned to device, if second parameter set to true only pending get")
+    @PostMapping(value = "/getAllDeviceJobs/{deviceId}/{pending}")
+    public List<Job> getAllDeviceJobs(@PathVariable String deviceId, @PathVariable Boolean pending) {
+        if (pending) {
+            return this.deviceService.getPendingDeviceJobs(deviceId);
+        }
         return this.deviceService.getAllDeviceJobs(deviceId);
     }
 }

@@ -3,6 +3,7 @@ package sk.stuba.sdg.isbe.services.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import sk.stuba.sdg.isbe.domain.enums.JobStatusEnum;
 import sk.stuba.sdg.isbe.domain.model.Device;
 import sk.stuba.sdg.isbe.domain.model.Job;
 import sk.stuba.sdg.isbe.handlers.exceptions.EntityExistsException;
@@ -11,10 +12,13 @@ import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
 import sk.stuba.sdg.isbe.repositories.DeviceRepository;
 import sk.stuba.sdg.isbe.services.DeviceService;
 import sk.stuba.sdg.isbe.services.JobService;
+import sk.stuba.sdg.isbe.utilities.JobStatusUtils;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class DeviceServiceImpl implements DeviceService {
@@ -84,7 +88,7 @@ public class DeviceServiceImpl implements DeviceService {
     }
 
     @Override
-    public ResponseEntity<List<Job>> getAllDeviceJobs(String deviceId){
+    public List<Job> getAllDeviceJobs(String deviceId){
 
         Optional<Device> optionalDevice = deviceRepository.findById(deviceId);
         if (optionalDevice.isEmpty()) {
@@ -96,6 +100,13 @@ public class DeviceServiceImpl implements DeviceService {
             throw new EntityExistsException("No jobs for device already exists!");
         }
         
-        return  ResponseEntity.ok(device.getJobs());
+        return  device.getJobs();
+    }
+
+    @Override
+    public List<Job> getPendingDeviceJobs(String deviceId) {
+        List<Job> jobs = getAllDeviceJobs(deviceId);
+
+        return jobs.stream().filter(job -> job.getStatus().getCode() == JobStatusEnum.JOB_PENDING).collect(Collectors.toList());
     }
 }
