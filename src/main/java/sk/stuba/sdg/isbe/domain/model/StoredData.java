@@ -2,9 +2,8 @@ package sk.stuba.sdg.isbe.domain.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
-import sk.stuba.sdg.isbe.handlers.exceptions.InvalidEntityException;
 
-public class DataPointSave {
+public class StoredData {
     @Id
     private String uid;
     @DBRef
