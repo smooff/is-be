@@ -3,6 +3,7 @@ package sk.stuba.sdg.isbe.services;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Profile;
 import sk.stuba.sdg.isbe.domain.enums.DeviceTypeEnum;
 import sk.stuba.sdg.isbe.domain.model.Command;
 import sk.stuba.sdg.isbe.domain.model.Device;
@@ -18,6 +19,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@Profile("!deployment")
 public class JobServiceTests {
 
     @Autowired
@@ -138,7 +140,7 @@ public class JobServiceTests {
         jobService.runJob(job, device.getUid(), 0);
         job.getStatus().setCurrentCycle(1);
         jobStatusRepository.save(job.getStatus());
-        Job jobDb = jobService.skipCycle(job.getUid()).getBody();
+        Job jobDb = jobService.skipCycle(job.getUid());
         assertNotNull(jobDb);
         assertEquals(2, jobDb.getStatus().getCurrentCycle());
 
@@ -168,7 +170,7 @@ public class JobServiceTests {
         job.getStatus().setTotalSteps(3);
         job.getStatus().setCurrentStep(1);
         jobStatusRepository.save(job.getStatus());
-        Job jobDb = jobService.skipStep(job.getUid()).getBody();
+        Job jobDb = jobService.skipStep(job.getUid());
         assertNotNull(jobDb);
         assertEquals(2, jobDb.getStatus().getCurrentStep());
 
