@@ -90,6 +90,6 @@ public class JobController {
     @Operation(summary = "Get all jobs by a given status")
     @GetMapping("getJobByStatus/{status}")
     public List<Job> getJobsByStatus(@PathVariable String status) {
-        return jobService.getJobsByStatus(status);
+        return jobService.getAllJobsByStatus(status);
     }
 }

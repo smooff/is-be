@@ -255,7 +255,7 @@ public class RecipeServiceTests {
 
         recipeService.addSubRecipeToRecipe(recipe.getId(), recipe2.getId());
         recipeService.addSubRecipeToRecipe(recipe.getId(), recipe2.getId());
-        expected = "Sub-recipe not found on index: " + 0 + "!\nSub-recipes with this ID can be found on indexes: " + String.join(", ", List.of("1","2"));
+        expected = "Sub-recipe not found on index: " + 0 + "!\nSub-recipes with this ID can be found on indexes: " + String.join(", ", String.join(", ", List.of("1","2")) + ".");
         exception = assertThrows(NotFoundCustomException.class, () -> {
             recipeService.removeSubRecipeFromRecipe(recipe.getId(), recipe2.getId(), 0);
         });

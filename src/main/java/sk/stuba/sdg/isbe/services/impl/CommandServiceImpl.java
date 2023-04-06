@@ -14,7 +14,6 @@ import sk.stuba.sdg.isbe.services.CommandService;
 import sk.stuba.sdg.isbe.services.RecipeService;
 import sk.stuba.sdg.isbe.utilities.DeviceTypeUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -75,15 +74,18 @@ public class CommandServiceImpl implements CommandService {
     @Override
     public List<Command> getCommandsByDeviceType(String deviceType) {
         DeviceTypeEnum deviceTypeEnum = DeviceTypeUtils.getDeviceTypeEnum(deviceType);
-        return commandRepository.getCommandsByTypeOfDeviceAndDeactivated(deviceTypeEnum, false);
+        List<Command> commands = commandRepository.getCommandsByTypeOfDeviceAndDeactivated(deviceTypeEnum, false);
+        if (commands.isEmpty()) {
+            throw new NotFoundCustomException("There are not any commands with this type of device in the database!");
+        }
+        return commands;
     }
 
     @Override
     public Command deleteCommand(String commandId) {
         Command command = getCommandById(commandId);
         List<Recipe> recipesUsingCommand = recipeService.getRecipesContainingCommand(command);
-        List<String> recipeNames = new ArrayList<>();
-        recipesUsingCommand.forEach(recipe -> recipeNames.add(recipe.getName()));
+        List<String> recipeNames = recipesUsingCommand.stream().map(Recipe::getName).toList();
 
         if (!recipeNames.isEmpty()) {
             throw new InvalidOperationException("Command is used in Recipes: \n" + String.join("\n", recipeNames) + "\nRemove commands from recipes to be able to delete them!");

@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class JobServiceImpl implements JobService {
@@ -43,11 +42,11 @@ public class JobServiceImpl implements JobService {
     @Override
     public Job runJobFromRecipe(String recipeId, String deviceId, int repetitions) {
         Recipe recipe = recipeService.getRecipe(recipeId);
-        if (recipe.isSubRecipe()) {
-            throw new InvalidEntityException("Recipe is only a sub-recipe, can't create a job from it!");
-        }
         if (recipe.isDeactivated()) {
             throw new InvalidEntityException("Recipe is deactivated, can't create a job from it!");
+        }
+        if (recipe.isSubRecipe()) {
+            throw new InvalidEntityException("Recipe is only a sub-recipe, can't create a job from it!");
         }
 
         Job job = new Job();
@@ -93,7 +92,7 @@ public class JobServiceImpl implements JobService {
 
     private List<DataPoint> getDataPointsFromDevice(Device device) {
         List<DataPoint> dataPoints = new ArrayList<>();
-        for (DataPointTag tag: device.getDataPointTags()) {
+        for (DataPointTag tag : device.getDataPointTags()) {
             DataPoint dataPoint = new DataPoint();
             dataPoint.setTag(tag.getTag());
             dataPoints.add(dataPoint);
@@ -177,22 +176,30 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public List<Job> getFinishedJobsByStatus() {
-        return getJobsByStatus("JOB_DONE");
+        return getAllJobsByStatus("JOB_DONE");
     }
 
     @Override
     public List<Job> getRunningJobsByStatus() {
-        return getJobsByStatus("JOB_PROCESSING");
+        return getAllJobsByStatus("JOB_PROCESSING");
     }
 
     @Override
     public List<Job> getFinishedJobs() {
-        return jobRepository.getJobsByFinishedAtIsNot(null);
+        List<Job> finishedJobs = jobRepository.getJobsByFinishedAtIsNot(null);
+        if (finishedJobs.isEmpty()) {
+            throw new NotFoundCustomException("There are not any finished jobs in the database!");
+        }
+        return finishedJobs;
     }
 
     @Override
     public List<Job> getRunningJobs() {
-        return jobRepository.getJobsByStartedAtIsNotAndFinishedAtIs(null, null);
+        List<Job> runningJobs = jobRepository.getJobsByStartedAtIsNotAndFinishedAtIs(null, null);
+        if (runningJobs.isEmpty()) {
+            throw new NotFoundCustomException("There are not any running jobs in the database!");
+        }
+        return runningJobs;
     }
 
     @Override
@@ -205,9 +212,16 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public List<Job> getJobsByStatus(String status) {
+    public List<Job> getAllJobsByStatus(String status) {
         JobStatusEnum jobStatus = JobStatusUtils.getJobStatusEnum(status);
-        List<Job> allJobs = jobRepository.findAll();
-        return allJobs.stream().filter(job -> job.getStatus().getCode() == jobStatus).collect(Collectors.toList());
+        List<Job> jobsByStatus = getJobsByStatus(jobRepository.findAll(), jobStatus);
+        if (jobsByStatus.isEmpty()) {
+            throw new NotFoundCustomException("There are no jobs with status: '" + status + "' in the database!");
+        }
+        return jobsByStatus;
+    }
+
+    public List<Job> getJobsByStatus(List<Job> jobs, JobStatusEnum status) {
+        return jobs.stream().filter(job -> job.getStatus().getCode() == status).toList();
     }
 }

@@ -19,7 +19,6 @@ import sk.stuba.sdg.isbe.services.JobService;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class DeviceServiceImpl implements DeviceService {
@@ -55,7 +54,7 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Override
     public Device initializeDevice(String macAddress) {
-        if (macAddress != null || macAddress.isEmpty()) {
+        if (macAddress == null || macAddress.isEmpty()) {
             throw new InvalidOperationException("Mac address is not set!");
         }
 
@@ -130,7 +129,6 @@ public class DeviceServiceImpl implements DeviceService {
     @Override
     public List<Job> getPendingDeviceJobs(String deviceId) {
         List<Job> jobs = getAllDeviceJobs(deviceId);
-
-        return jobs.stream().filter(job -> job.getStatus().getCode() == JobStatusEnum.JOB_PENDING).collect(Collectors.toList());
+        return jobService.getJobsByStatus(jobs, JobStatusEnum.JOB_PENDING);
     }
 }

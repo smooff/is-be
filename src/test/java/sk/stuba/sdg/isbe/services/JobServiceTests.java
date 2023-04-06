@@ -80,6 +80,7 @@ public class JobServiceTests {
         Command command = new Command();
         command.setName("Command" + Instant.now().toEpochMilli());
         command.setParams(List.of(1,2,3));
+        command.setTypeOfDevice(DeviceTypeEnum.ESP32);
         commandService.createCommand(command);
 
         recipe.setCommands(List.of(command));
@@ -126,6 +127,7 @@ public class JobServiceTests {
         Command command = new Command();
         command.setName("Command" + Instant.now().toEpochMilli());
         command.setParams(List.of(1,2,3));
+        command.setTypeOfDevice(DeviceTypeEnum.ESP32);
 
         Device device = new Device();
         device.setName("device1" + Instant.now().toEpochMilli());
@@ -154,6 +156,7 @@ public class JobServiceTests {
         Command command = new Command();
         command.setName("Command" + Instant.now().toEpochMilli());
         command.setParams(List.of(1,2,3));
+        command.setTypeOfDevice(DeviceTypeEnum.ESP32);
 
         Device device = new Device();
         device.setName("device1" + Instant.now().toEpochMilli());
@@ -184,6 +187,7 @@ public class JobServiceTests {
         Command command = new Command();
         command.setName("Command" + Instant.now().toEpochMilli());
         command.setParams(List.of(1,2,3));
+        command.setTypeOfDevice(DeviceTypeEnum.ESP32);
 
         Device device = new Device();
         device.setName("device1" + Instant.now().toEpochMilli());
@@ -205,12 +209,12 @@ public class JobServiceTests {
         jobService.runJob(job2, device.getUid(), 0);
 
         Exception exception = assertThrows(NotFoundCustomException.class, () -> {
-            jobService.getJobsByStatus("WRONG_STATUS");
+            jobService.getAllJobsByStatus("WRONG_STATUS");
         });
         String expected = "Job status: '" + "WRONG_STATUS" + "' does not exist!";
         assertEquals(expected, exception.getMessage());
 
-        List<Job> pendingJobs = jobService.getJobsByStatus("JOB_PENDING");
+        List<Job> pendingJobs = jobService.getAllJobsByStatus("JOB_PENDING");
         assertFalse(pendingJobs.isEmpty());
 
         jobRepository.delete(job);

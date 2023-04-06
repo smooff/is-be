@@ -16,6 +16,7 @@ import sk.stuba.sdg.isbe.utilities.DeviceTypeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -50,7 +51,11 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     public List<Recipe> getRecipesByTypeOfDevice(String typeOfDevice) {
         DeviceTypeEnum deviceType = DeviceTypeUtils.getDeviceTypeEnum(typeOfDevice);
-        return recipeRepository.getRecipesByTypeOfDeviceAndDeactivated(deviceType, false);
+        List<Recipe> recipes = recipeRepository.getRecipesByTypeOfDeviceAndDeactivated(deviceType, false);
+        if (recipes.isEmpty()) {
+            throw new NotFoundCustomException("There are not any recipes with type of Device: " + typeOfDevice + " in the database!");
+        }
+        return recipes;
     }
 
     @Override
@@ -95,6 +100,10 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public Recipe addSubRecipeToRecipe(String recipeId, String subRecipeId) {
+        if (Objects.equals(recipeId, subRecipeId)) {
+            throw new InvalidOperationException("Recipe can't be added as its own sub-recipe!");
+        }
+
         Recipe recipe = getRecipe(recipeId);
         Recipe subRecipe = getRecipe(subRecipeId);
 
@@ -103,6 +112,15 @@ public class RecipeServiceImpl implements RecipeService {
             + "\nRecipes device type: " + recipe.getTypeOfDevice()
             + "\nSubRecipe device type: " + subRecipe.getTypeOfDevice());
         }
+
+        if (subRecipe.getSubRecipes() != null) {
+            List<String> subRecipeIds = subRecipe.getSubRecipes().stream().map(Recipe::getId).toList();
+            if (subRecipeIds.contains(recipeId)) {
+                throw new InvalidOperationException("The list of sub-recipes of the given sub-recipe contains the recipe," +
+                        " therefore it can't be used as sub-recipe of the recipe to prevent infinite loop.");
+            }
+        }
+
         if (recipe.getSubRecipes() == null) {
             recipe.setSubRecipes(new ArrayList<>());
         }
@@ -144,7 +162,7 @@ public class RecipeServiceImpl implements RecipeService {
         }
 
         throw new NotFoundCustomException("Sub-recipe not found on index: " + index + "!"
-                                          + "\nSub-recipes with this ID can be found on indexes: " + String.join(", ", subRecipeIndexes));
+                                          + "\nSub-recipes with this ID can be found on indexes: " + String.join(", ", subRecipeIndexes) + ".");
     }
 
     @Override
@@ -158,7 +176,7 @@ public class RecipeServiceImpl implements RecipeService {
     public List<Recipe> getAllRecipes() {
         List<Recipe> recipes = recipeRepository.findAll();
         if (recipes.isEmpty()) {
-            throw new NotFoundCustomException("There are not any recipes in the database!");
+            throw new NotFoundCustomException("There are not any recipes in the database yet!");
         }
         return recipes;
     }
@@ -166,13 +184,21 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     public List<Recipe> getFullRecipes(String typeOfDevice) {
         DeviceTypeEnum deviceType = DeviceTypeUtils.getDeviceTypeEnum(typeOfDevice);
-        return recipeRepository.getRecipesByIsSubRecipeAndTypeOfDeviceAndDeactivated(false, deviceType, false);
+        List<Recipe> recipes = recipeRepository.getRecipesByIsSubRecipeAndTypeOfDeviceAndDeactivated(false, deviceType, false);
+        if (recipes.isEmpty()) {
+            throw new NotFoundCustomException("There are not any full recipes in the database yet!");
+        }
+        return recipes;
     }
 
     @Override
     public List<Recipe> getSubRecipes(String typeOfDevice) {
         DeviceTypeEnum deviceType = DeviceTypeUtils.getDeviceTypeEnum(typeOfDevice);
-        return recipeRepository.getRecipesByIsSubRecipeAndTypeOfDeviceAndDeactivated(true, deviceType, false);
+        List<Recipe> subRecipes = recipeRepository.getRecipesByIsSubRecipeAndTypeOfDeviceAndDeactivated(true, deviceType, false);
+        if (subRecipes.isEmpty()) {
+            throw new NotFoundCustomException("There are not any sub-recipes in the database yet!");
+        }
+        return subRecipes;
     }
 
     @Override
