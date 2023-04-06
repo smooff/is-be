@@ -70,21 +70,16 @@ public class JobServiceImpl implements JobService {
         Device device = deviceService.getDeviceById(deviceId);
 
         // try if jobs stack is full
-        if (device.getJobs().size() >= 10 ) {
-            throw new InvalidEntityException("Job can't be add! Full device jobs stack.");
+        if (device.getJobs().size() >= 10) {
+            throw new InvalidEntityException("Job can't be added! Job stack of device is full.");
         }
 
         // create jobStatus for this new created job
         JobStatus jobStatus = new JobStatus();
         jobStatus.setCode(JobStatusEnum.JOB_PENDING);
+
         // add dataPoints
-        List<DataPoint> dataPoints = new ArrayList<>();
-        for (DataPointTag tag: device.getDataPointTags()) {
-            DataPoint dataPoint = new DataPoint();
-            dataPoint.setTag(tag.getTag());
-            dataPoints.add(dataPoint);
-        }
-        jobStatus.setData(dataPoints);
+        jobStatus.setData(getDataPointsFromDevice(device));
         job.setStatus(jobStatus);
         jobStatusService.createJobStatus(jobStatus);
 
@@ -94,6 +89,16 @@ public class JobServiceImpl implements JobService {
         // add job as running on device by device uid
         deviceService.addJobToDevice(deviceId, job.getUid());
         return job;
+    }
+
+    private List<DataPoint> getDataPointsFromDevice(Device device) {
+        List<DataPoint> dataPoints = new ArrayList<>();
+        for (DataPointTag tag: device.getDataPointTags()) {
+            DataPoint dataPoint = new DataPoint();
+            dataPoint.setTag(tag.getTag());
+            dataPoints.add(dataPoint);
+        }
+        return dataPoints;
     }
 
     private void addCommandsFromRecipes(Job job, Recipe recipe) {
