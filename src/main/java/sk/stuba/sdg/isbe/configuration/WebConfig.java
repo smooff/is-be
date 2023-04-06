@@ -1,8 +1,10 @@
 package sk.stuba.sdg.isbe.configuration;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -21,6 +23,8 @@ public class WebConfig{
     @Value("${sdg.http.auth-token}")
     private String principalRequestValue;
 
+    @Autowired
+    Environment environment;
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         APIKeyAuthFilter filter = new APIKeyAuthFilter(principalRequestHeader);
@@ -38,6 +42,12 @@ public class WebConfig{
 
         // use the API key like authenticate method, comment all below for see swagger and connect ot endpoints
         // without authentication
+
+        if(environment.getActiveProfiles().equals("deployment")){
+            System.out.println("profil je deployment");
+        }else {
+            System.out.println("profil nie je deployment");
+        }
 //        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).
 //                and().addFilter(filter).authorizeHttpRequests().
 //                requestMatchers("/api/device").permitAll().
