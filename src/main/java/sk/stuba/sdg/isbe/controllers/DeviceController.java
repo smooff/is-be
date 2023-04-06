@@ -40,7 +40,7 @@ public class DeviceController {
         return this.deviceService.deleteDevice(deviceId);
     }
 
-    @PostMapping(value = "/getDeviceById/{deviceId}")
+    @GetMapping("/getDeviceById/{deviceId}")
     public Device getDeviceById(@PathVariable String deviceId) {
         return this.deviceService.getDeviceById(deviceId);
     }
