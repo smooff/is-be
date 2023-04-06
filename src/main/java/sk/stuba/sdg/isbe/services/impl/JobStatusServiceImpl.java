@@ -5,8 +5,8 @@ import org.springframework.stereotype.Service;
 import sk.stuba.sdg.isbe.domain.model.*;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidEntityException;
 import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
-import sk.stuba.sdg.isbe.repositories.DataPointSaveRepository;
 import sk.stuba.sdg.isbe.repositories.JobStatusRepository;
+import sk.stuba.sdg.isbe.repositories.StoredDataRepository;
 import sk.stuba.sdg.isbe.services.DeviceService;
 import sk.stuba.sdg.isbe.services.JobStatusService;
 
@@ -14,7 +14,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class JobStatusServiceImpl implements JobStatusService {
@@ -26,7 +25,7 @@ public class JobStatusServiceImpl implements JobStatusService {
     DeviceService deviceService;
 
     @Autowired
-    DataPointSaveRepository dataPointSaveRepository;
+    StoredDataRepository storedDataRepository;
 
     @Override
     public JobStatus createJobStatus(JobStatus jobStatus){
@@ -74,11 +73,11 @@ public class JobStatusServiceImpl implements JobStatusService {
                 for(DataPoint dataPoint :jobStatus.getData()) {
                     DataPointTag dataPointTag = dataPointTags.stream().filter(data -> Objects.equals(data.getTag(), dataPoint.getTag())).findAny()
                             .orElse(null);
-                    DataPointSave dataPointSave = new DataPointSave();
-                    dataPointSave.setDataPointTag(dataPointTag);
-                    dataPointSave.setValue(dataPoint.getValue());
-                    dataPointSave.setMeasureAdd(Instant.now().toEpochMilli());
-                    dataPointSaveRepository.save(dataPointSave);
+                    StoredData storedData = new StoredData();
+                    storedData.setDataPointTag(dataPointTag);
+                    storedData.setValue(dataPoint.getValue());
+                    storedData.setMeasureAdd(Instant.now().toEpochMilli());
+                    storedDataRepository.save(storedData);
                 }
             }
         }
