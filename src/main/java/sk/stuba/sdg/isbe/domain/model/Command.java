@@ -2,6 +2,7 @@ package sk.stuba.sdg.isbe.domain.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import sk.stuba.sdg.isbe.domain.enums.DeviceTypeEnum;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ public class Command {
     private String id;
     private String name;
     private List<Integer> params;
+    private DeviceTypeEnum typeOfDevice;
     private boolean deactivated;
 
     public String getId() {
@@ -35,6 +37,14 @@ public class Command {
 
     public void setParams(List<Integer> params) {
         this.params = params;
+    }
+
+    public DeviceTypeEnum getTypeOfDevice() {
+        return typeOfDevice;
+    }
+
+    public void setTypeOfDevice(DeviceTypeEnum typeOfDevice) {
+        this.typeOfDevice = typeOfDevice;
     }
 
     public boolean isDeactivated() {

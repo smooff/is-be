@@ -99,7 +99,9 @@ public class RecipeServiceImpl implements RecipeService {
         Recipe subRecipe = getRecipe(subRecipeId);
 
         if (recipe.getTypeOfDevice() != subRecipe.getTypeOfDevice()) {
-            throw new InvalidEntityException("Device types of the recipes do not match!");
+            throw new InvalidEntityException("Device types of the recipes do not match!"
+            + "\nRecipes device type: " + recipe.getTypeOfDevice()
+            + "\nSubRecipe device type: " + subRecipe.getTypeOfDevice());
         }
         if (recipe.getSubRecipes() == null) {
             recipe.setSubRecipes(new ArrayList<>());
@@ -138,11 +140,11 @@ public class RecipeServiceImpl implements RecipeService {
             currentIndex++;
         }
         if (subRecipeIndexes.isEmpty()) {
-            throw new NotFoundCustomException("Provided recipe does not contain any sub-recipe with ID '" + subRecipeId + "' !");
+            throw new NotFoundCustomException("Provided recipe does not contain any sub-recipe with ID '" + subRecipeId + "'!");
         }
 
         throw new NotFoundCustomException("Sub-recipe not found on index: " + index + "!"
-                                          + " Sub-recipes with this ID can be found on indexes: " + String.join(", ", subRecipeIndexes));
+                                          + "\nSub-recipes with this ID can be found on indexes: " + String.join(", ", subRecipeIndexes));
     }
 
     @Override
@@ -154,7 +156,11 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public List<Recipe> getAllRecipes() {
-        return recipeRepository.findAll();
+        List<Recipe> recipes = recipeRepository.findAll();
+        if (recipes.isEmpty()) {
+            throw new NotFoundCustomException("There are not any recipes in the database!");
+        }
+        return recipes;
     }
 
     @Override
@@ -189,7 +195,12 @@ public class RecipeServiceImpl implements RecipeService {
         Command command = commandService.getCommandById(commandId);
 
         if (command.isDeactivated()) {
-            throw new InvalidOperationException("Command is not active!");
+            throw new InvalidOperationException("Command can't be found!");
+        }
+        if (command.getTypeOfDevice() != recipe.getTypeOfDevice()) {
+            throw new InvalidOperationException("Types of devices of the command and recipe do not match!"
+            + "\nRecipes device type: " + recipe.getTypeOfDevice()
+            + "\nCommands device type: " + command.getTypeOfDevice());
         }
         if (command.getName() == null || command.getName().isEmpty()) {
             throw new InvalidOperationException("Command does not have any name set!");
@@ -199,11 +210,10 @@ public class RecipeServiceImpl implements RecipeService {
         }
 
         if (recipe.getCommands() == null) {
-            recipe.setCommands(List.of(command));
-        } else {
-            recipe.getCommands().add(command);
+            recipe.setCommands(new ArrayList<>());
         }
 
+        recipe.getCommands().add(command);
         return recipeRepository.save(recipe);
     }
 
@@ -211,10 +221,10 @@ public class RecipeServiceImpl implements RecipeService {
     public Recipe removeCommandFromRecipe(String recipeId, String commandId, int index) {
         Recipe recipe = getRecipe(recipeId);
 
-        if (recipe.getCommands() == null && recipe.getCommands().isEmpty()) {
+        if (recipe.getCommands() == null || recipe.getCommands().isEmpty()) {
             throw new NotFoundCustomException("Recipe does not contain any commands!");
         }
-        if (index > 0 || index > recipe.getCommands().size() - 1) {
+        if (index < 0 || index > recipe.getCommands().size() - 1) {
             throw new IndexOutOfBoundsException("Index of command is out of bounds!");
         }
 
@@ -233,10 +243,10 @@ public class RecipeServiceImpl implements RecipeService {
         }
 
         if (commandIndexes.isEmpty()) {
-            throw new NotFoundCustomException("Provided recipe does not contain any sub-recipe with ID '" + commandId + "' !");
+            throw new NotFoundCustomException("Provided recipe does not contain any command with ID '" + commandId + "'!");
         }
         throw new NotFoundCustomException("Command not found on index: " + index + "!"
-                + " Commands with this ID can be found on indexes: " + String.join(", ", commandIndexes));
+                + "\nCommands with this ID can be found on indexes: " + String.join(", ", commandIndexes));
     }
 
     private boolean recipeWithNameExists(String name) {

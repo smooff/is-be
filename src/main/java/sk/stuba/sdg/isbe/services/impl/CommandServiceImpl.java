@@ -2,6 +2,7 @@ package sk.stuba.sdg.isbe.services.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import sk.stuba.sdg.isbe.domain.enums.DeviceTypeEnum;
 import sk.stuba.sdg.isbe.domain.model.Command;
 import sk.stuba.sdg.isbe.domain.model.Recipe;
 import sk.stuba.sdg.isbe.handlers.exceptions.EntityExistsException;
@@ -11,6 +12,7 @@ import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
 import sk.stuba.sdg.isbe.repositories.CommandRepository;
 import sk.stuba.sdg.isbe.services.CommandService;
 import sk.stuba.sdg.isbe.services.RecipeService;
+import sk.stuba.sdg.isbe.utilities.DeviceTypeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +38,9 @@ public class CommandServiceImpl implements CommandService {
         if (command.getParams() == null || command.getParams().isEmpty()) {
             throw new InvalidEntityException("Command does not contain any parameters!");
         }
+        if (command.getTypeOfDevice() == null) {
+            throw new InvalidEntityException("Type of device for command must be set!");
+        }
 
         return commandRepository.save(command);
     }
@@ -50,12 +55,27 @@ public class CommandServiceImpl implements CommandService {
     }
 
     @Override
+    public List<Command> getAllCommands() {
+        List<Command> commands = commandRepository.findAll();
+        if (commands.isEmpty()) {
+            throw new NotFoundCustomException("There are not any commands in the database!");
+        }
+        return commands;
+    }
+
+    @Override
     public Command getCommandByName(String name) {
         Optional<Command> optionalCommand = commandRepository.getCommandByNameAndDeactivated(name, false);
         if (optionalCommand.isEmpty()) {
             throw new NotFoundCustomException("Command with name: '" + name + "' not found!");
         }
         return optionalCommand.get();
+    }
+
+    @Override
+    public List<Command> getCommandsByDeviceType(String deviceType) {
+        DeviceTypeEnum deviceTypeEnum = DeviceTypeUtils.getDeviceTypeEnum(deviceType);
+        return commandRepository.getCommandsByTypeOfDeviceAndDeactivated(deviceTypeEnum, false);
     }
 
     @Override

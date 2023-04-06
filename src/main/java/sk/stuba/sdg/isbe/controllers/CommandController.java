@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.*;
 import sk.stuba.sdg.isbe.domain.model.Command;
 import sk.stuba.sdg.isbe.services.CommandService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("api/jobs/command")
 public class CommandController {
@@ -30,6 +32,18 @@ public class CommandController {
     @GetMapping("getCommandByName/{commandName}")
     public Command getCommandByName(@PathVariable String commandName) {
         return commandService.getCommandByName(commandName);
+    }
+
+    @Operation(summary = "Get all commands")
+    @GetMapping("getAllCommands/")
+    public List<Command> getAllCommands() {
+        return commandService.getAllCommands();
+    }
+
+    @Operation(summary = "Get command by device-type")
+    @GetMapping("getCommandByDeviceType/{deviceType}")
+    public List<Command> getCommandsByDeviceType(@PathVariable String deviceType) {
+        return commandService.getCommandsByDeviceType(deviceType);
     }
 
     @Operation(summary = "Delete command by ID")
