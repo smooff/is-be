@@ -6,4 +6,6 @@ import sk.stuba.sdg.isbe.domain.model.Device;
 
 @Repository
 public interface DeviceRepository extends MongoRepository<Device, String> {
+
+    Device findDeviceByMac(String macAddress);
 }

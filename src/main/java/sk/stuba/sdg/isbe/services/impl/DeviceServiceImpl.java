@@ -9,6 +9,7 @@ import sk.stuba.sdg.isbe.domain.model.Device;
 import sk.stuba.sdg.isbe.domain.model.Job;
 import sk.stuba.sdg.isbe.handlers.exceptions.EntityExistsException;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidEntityException;
+import sk.stuba.sdg.isbe.handlers.exceptions.InvalidOperationException;
 import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
 import sk.stuba.sdg.isbe.repositories.DeviceRepository;
 import sk.stuba.sdg.isbe.services.DataPointTagService;
@@ -49,6 +50,20 @@ public class DeviceServiceImpl implements DeviceService {
         device.setAddAt(Instant.now().toEpochMilli());
         deviceRepository.save(device);
 
+        return device;
+    }
+
+    @Override
+    public Device initializeDevice(String macAddress) {
+        if (macAddress != null || macAddress.isEmpty()) {
+            throw new InvalidOperationException("Mac address is not set!");
+        }
+
+        Device device = deviceRepository.findDeviceByMac(macAddress);
+        if (device == null) {
+            throw new EntityExistsException("Device with MAC: '" + macAddress + "' was not found!");
+        }
+        
         return device;
     }
 

@@ -9,6 +9,8 @@ import java.util.List;
 public interface DeviceService {
     Device createDevice(Device device);
 
+    Device initializeDevice(String macAddress);
+
     List<Device> getDevices();
 
     Device getDeviceById(String deviceId);
