@@ -40,20 +40,16 @@ public class WebConfig{
         // resolves 403 forbidden - when POST curl (DB insert) triggers
         http.csrf().disable();
 
-        // use the API key like authenticate method, comment all below for see swagger and connect ot endpoints
-        // without authentication
-
         if(environment.getActiveProfiles().equals("deployment")){
-            System.out.println("profil je deployment");
-        }else {
-            System.out.println("profil nie je deployment");
+            // use the API key like authenticate method, comment all below for see swagger and connect ot endpoints
+            // without authentication
+            http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).
+                and().addFilter(filter).authorizeHttpRequests().
+                requestMatchers("/api/device").permitAll().
+                anyRequest().authenticated();
         }
-//        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).
-//                and().addFilter(filter).authorizeHttpRequests().
-//                requestMatchers("/api/device").permitAll().
-//                anyRequest().authenticated();
 
-    // http.cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues());
+        // http.cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues());
         return http.build();
     }
 }

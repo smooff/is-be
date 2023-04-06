@@ -11,15 +11,15 @@ import org.springframework.context.annotation.Bean;
 @SpringBootApplication
 public class IsBeApplication {
 
-	// HTTP port
-	//	@Value("${http.port}")
-	//	private int httpPort;
 
 	public static void main(String[] args) {
 		SpringApplication.run(IsBeApplication.class, args);
 	}
 
-	// Let's configure additional connector to enable support for both HTTP and HTTPS
+	// 	Let's configure additional connector to enable support for both HTTP and HTTPS
+	// 	HTTP port
+	//	@Value("${http.port}")
+	//	private int httpPort;
 	//	@Bean
 	//	public ServletWebServerFactory servletContainer() {
 	//		TomcatServletWebServerFactory tomcat = new TomcatServletWebServerFactory();
