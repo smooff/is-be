@@ -17,8 +17,7 @@ import sk.stuba.sdg.isbe.repositories.RecipeRepository;
 import java.time.Instant;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Profile("!deployment")
@@ -43,6 +42,7 @@ public class CommandServiceTests {
 
         command.setName("command" + Instant.now().toEpochMilli());
         command.setParams(List.of(1,2,3));
+        command.setTypeOfDevice(DeviceTypeEnum.ESP32);
         commandService.createCommand(command);
         exception = assertThrows(EntityExistsException.class, () -> {
             commandService.createCommand(command);
@@ -66,6 +66,7 @@ public class CommandServiceTests {
         Command command = new Command();
         command.setName("command " + Instant.now().toEpochMilli());
         command.setParams(List.of(1,2,3));
+        command.setTypeOfDevice(DeviceTypeEnum.ESP32);
         commandService.createCommand(command);
         commandService.deleteCommand(command.getId());
         Exception exception = assertThrows(NotFoundCustomException.class, () -> {
@@ -105,6 +106,7 @@ public class CommandServiceTests {
         command.setName("command " + Instant.now().toEpochMilli());
         command.setParams(List.of(1,2,3));
         command.setDeactivated(true);
+        command.setTypeOfDevice(DeviceTypeEnum.ESP32);
         commandService.createCommand(command);
         Exception exception = assertThrows(NotFoundCustomException.class, () -> {
             commandService.getCommandById(command.getId());
@@ -115,6 +117,39 @@ public class CommandServiceTests {
         command.setDeactivated(false);
         commandService.createCommand(command);
         commandService.getCommandById(command.getId());
+        commandRepository.delete(command);
+    }
+
+    @Test
+    void testGetCommandByName() {
+        Command command = new Command();
+        command.setName("command " + Instant.now().toEpochMilli());
+        command.setParams(List.of(1,2,3));
+        command.setTypeOfDevice(DeviceTypeEnum.ESP32);
+        commandService.createCommand(command);
+
+        String fakeName = command.getName() + " fake";
+        Exception exception = assertThrows(NotFoundCustomException.class, () -> {
+            commandService.getCommandByName(fakeName);
+        });
+        String expected = "Command with name: '" + fakeName + "' not found!";
+        assertEquals(expected, exception.getMessage());
+
+        commandService.getCommandByName(command.getName());
+        commandRepository.delete(command);
+    }
+
+    @Test
+    void testGetCommandsByDeviceType() {
+        Command command = new Command();
+        command.setName("command " + Instant.now().toEpochMilli());
+        command.setParams(List.of(1,2,3));
+        command.setTypeOfDevice(DeviceTypeEnum.ESP32);
+        commandService.createCommand(command);
+
+        List<Command> commandsDb = commandService.getCommandsByDeviceType("ESP32");
+        assertFalse(commandsDb.isEmpty());
+
         commandRepository.delete(command);
     }
 

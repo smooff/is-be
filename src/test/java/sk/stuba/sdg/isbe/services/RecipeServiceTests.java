@@ -126,6 +126,7 @@ public class RecipeServiceTests {
         Command command = new Command();
         command.setName("command" + Instant.now().toEpochMilli());
         command.setParams(List.of(1,2,3));
+        command.setTypeOfDevice(DeviceTypeEnum.ESP32);
         commandService.createCommand(command);
         commandService.deleteCommand(command.getId());
 
@@ -196,7 +197,9 @@ public class RecipeServiceTests {
         recipeService.createRecipe(recipe);
         recipeService.createRecipe(recipe2);
 
-        String expected = "Device types of the recipes do not match!";
+        String expected = "Device types of the recipes do not match!"
+                + "\nRecipes device type: " + recipe.getTypeOfDevice()
+                + "\nSubRecipe device type: " + recipe2.getTypeOfDevice();
         Exception exception = assertThrows(InvalidEntityException.class, () -> {
             recipeService.addSubRecipeToRecipe(recipe.getId(), recipe2.getId());
         });
@@ -244,7 +247,7 @@ public class RecipeServiceTests {
         recipeService.createRecipe(subRecipe);
         recipeService.addSubRecipeToRecipe(recipe.getId(), subRecipe.getId());
 
-        expected = "Provided recipe does not contain any sub-recipe with ID '" + recipe2.getId() + "' !";
+        expected = "Provided recipe does not contain any sub-recipe with ID '" + recipe2.getId() + "'!";
         exception = assertThrows(NotFoundCustomException.class, () -> {
             recipeService.removeSubRecipeFromRecipe(recipe.getId(), recipe2.getId(), 0);
         });
@@ -252,7 +255,7 @@ public class RecipeServiceTests {
 
         recipeService.addSubRecipeToRecipe(recipe.getId(), recipe2.getId());
         recipeService.addSubRecipeToRecipe(recipe.getId(), recipe2.getId());
-        expected = "Sub-recipe not found on index: " + 0 + "! Sub-recipes with this ID can be found on indexes: " + String.join(", ", List.of("1","2"));
+        expected = "Sub-recipe not found on index: " + 0 + "!\nSub-recipes with this ID can be found on indexes: " + String.join(", ", List.of("1","2"));
         exception = assertThrows(NotFoundCustomException.class, () -> {
             recipeService.removeSubRecipeFromRecipe(recipe.getId(), recipe2.getId(), 0);
         });
@@ -264,5 +267,46 @@ public class RecipeServiceTests {
 
         recipeRepository.delete(recipe);
         recipeRepository.delete(recipe2);
+    }
+
+    @Test
+    void removeCommandFromRecipeTest() {
+        Recipe recipe = new Recipe();
+        recipe.setName("recipe " + Instant.now().toEpochMilli());
+        recipe.setSubRecipe(false);
+        recipe.setTypeOfDevice(DeviceTypeEnum.ESP32);
+        recipeService.createRecipe(recipe);
+
+        Command command = new Command();
+        command.setName("command" + Instant.now().toEpochMilli());
+        command.setParams(List.of(1,2,3));
+        command.setTypeOfDevice(DeviceTypeEnum.ESP32);
+        commandService.createCommand(command);
+
+        Command command1 = new Command();
+        command1.setName("command" + Instant.now().toEpochMilli());
+        command1.setParams(List.of(1,2,3));
+        command1.setTypeOfDevice(DeviceTypeEnum.ESP32);
+        commandService.createCommand(command1);
+
+        recipeService.addCommandToRecipe(recipe.getId(), command.getId());
+        recipeService.addCommandToRecipe(recipe.getId(), command.getId());
+        recipeService.addCommandToRecipe(recipe.getId(), command1.getId());
+
+        String expected = "Command not found on index: 2!\nCommands with this ID can be found on indexes: 0, 1";
+        Exception exception = assertThrows(NotFoundCustomException.class, () -> {
+            recipeService.removeCommandFromRecipe(recipe.getId(), command.getId(), 2);
+        });
+        assertEquals(expected, exception.getMessage());
+
+        expected = "Provided recipe does not contain any command with ID 'fakeId'!";
+        exception = assertThrows(NotFoundCustomException.class, () -> {
+            recipeService.removeCommandFromRecipe(recipe.getId(), "fakeId", 2);
+        });
+        assertEquals(expected, exception.getMessage());
+
+        recipeRepository.delete(recipe);
+        commandRepository.delete(command);
+        commandRepository.delete(command1);
     }
 }
