@@ -34,6 +34,18 @@ public class DeviceController {
         return this.deviceService.createDevice(device);
     }
 
+    @Operation(summary = "Initialize device by mac address in 1 min time window")
+    @GetMapping(value = "/initializeDevice/{macAddress}")
+    public Device initializeDevice(@PathVariable String macAddress) {
+        return deviceService.initializeDevice(macAddress);
+    }
+
+    @Operation(summary = "Initialize time of device set to 1 min window")
+    @GetMapping(value = "/initExpireTime/{deviceId}")
+    public Long initExpireTime(@PathVariable String deviceId) {
+        return deviceService.initExpireTime(deviceId);
+    }
+
     @Operation(summary = "Delete device by uid")
     @DeleteMapping("delete/{deviceId}")
     public ResponseEntity<Device> deleteDevice(@PathVariable String deviceId) {
@@ -58,7 +70,7 @@ public class DeviceController {
     }
 
     @Operation(summary = "Json of all jobs assigned to device, if second parameter set to true only pending get")
-    @PostMapping(value = "/getAllDeviceJobs/{deviceId}/{pending}")
+    @GetMapping(value = "/getAllDeviceJobs/{deviceId}/{pending}")
     public List<Job> getAllDeviceJobs(@PathVariable String deviceId, @PathVariable Boolean pending) {
         if (pending) {
             return this.deviceService.getPendingDeviceJobs(deviceId);

@@ -11,6 +11,8 @@ public interface DeviceService {
 
     Device initializeDevice(String macAddress);
 
+    Long initExpireTime(String deviceId);
+
     List<Device> getDevices();
 
     Device getDeviceById(String deviceId);

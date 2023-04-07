@@ -16,6 +16,7 @@ import sk.stuba.sdg.isbe.services.DataPointTagService;
 import sk.stuba.sdg.isbe.services.DeviceService;
 import sk.stuba.sdg.isbe.services.JobService;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -46,7 +47,7 @@ public class DeviceServiceImpl implements DeviceService {
             throw new InvalidEntityException("Device has no type set!");
         }
 
-        device.setAddAt(Instant.now().toEpochMilli());
+        device.setAddTime(Instant.now().toEpochMilli());
         deviceRepository.save(device);
 
         return device;
@@ -62,8 +63,28 @@ public class DeviceServiceImpl implements DeviceService {
         if (device == null) {
             throw new EntityExistsException("Device with MAC: '" + macAddress + "' was not found!");
         }
+        if (device.getInitExpireTime() < Instant.now().toEpochMilli() || device.getInitExpireTime() == -1) {
+            throw new InvalidEntityException("Device initial time is out of time!");
+        }
+
+        device.setInitExpireTime((long) -1);
+        deviceRepository.save(device);
         
         return device;
+    }
+
+    @Override
+    public Long initExpireTime(String deviceId) {
+        Device device = deviceRepository.findDeviceByUid(deviceId);
+        if (device == null) {
+            throw new EntityExistsException("Device with id: '" + deviceId + "' was not found!");
+        }
+
+        Long time = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
+        device.setInitExpireTime(time);
+
+        deviceRepository.save(device);
+        return time;
     }
 
     @Override

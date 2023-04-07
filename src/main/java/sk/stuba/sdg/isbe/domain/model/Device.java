@@ -21,7 +21,8 @@ public class Device {
     private List<Job> jobs = new ArrayList<>();
     @DBRef
     private List<DataPointTag> dataPointTags = new ArrayList<>();
-    private Long addAt;
+    private Long addTime;
+    private Long initExpireTime;
     private boolean deactivated;
 
     public List<Job> getJobs() {
@@ -88,12 +89,20 @@ public class Device {
         this.dataPointTags = dataPointTags;
     }
 
-    public Long getAddAt() {
-        return addAt;
+    public Long getAddTime() {
+        return addTime;
     }
 
-    public void setAddAt(Long addAt) {
-        this.addAt = addAt;
+    public void setAddTime(Long addTime) {
+        this.addTime = addTime;
+    }
+
+    public Long getInitExpireTime() {
+        return initExpireTime;
+    }
+
+    public void setInitExpireTime(Long initExpireTime) {
+        this.initExpireTime = initExpireTime;
     }
 
     public boolean isDeactivated() {
