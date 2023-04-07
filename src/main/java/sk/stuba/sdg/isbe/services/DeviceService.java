@@ -26,4 +26,6 @@ public interface DeviceService {
     List<Job> getAllDeviceJobs(String deviceId);
 
     List<Job> getPendingDeviceJobs(String deviceId);
+
+    String getDeviceStatus(String deviceId);
 }

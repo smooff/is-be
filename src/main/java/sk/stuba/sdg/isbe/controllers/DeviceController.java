@@ -85,4 +85,10 @@ public class DeviceController {
 
         return jobStatusService.updateJobStatus(jobStatusId, changeJobStatus, deviceId);
     }
+
+    @Operation(summary = "Get status of the device")
+    @GetMapping("getDeviceStatus/{deviceId}")
+    public String getDeviceStatus(@PathVariable String deviceId) {
+        return this.deviceService.getDeviceStatus(deviceId);
+    }
 }

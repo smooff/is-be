@@ -69,7 +69,7 @@ public class JobController {
         return jobService.getFinishedJobs();
     }
 
-    @Operation(summary = "Get all running jobs")
+    @Operation(summary = "Get all running jobs using db query")
     @GetMapping("getRunningJobs")
     public List<Job> getRunningJobs() {
         return jobService.getRunningJobs();
@@ -88,7 +88,7 @@ public class JobController {
     }
 
     @Operation(summary = "Get all jobs by a given status")
-    @GetMapping("getJobByStatus/{status}")
+    @GetMapping("getJobsByStatus/{status}")
     public List<Job> getJobsByStatus(@PathVariable String status) {
         return jobService.getAllJobsByStatus(status);
     }

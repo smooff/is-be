@@ -11,6 +11,7 @@ import sk.stuba.sdg.isbe.services.DeviceService;
 import sk.stuba.sdg.isbe.services.JobStatusService;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -30,6 +31,7 @@ public class JobStatusServiceImpl implements JobStatusService {
     @Override
     public JobStatus createJobStatus(JobStatus jobStatus){
         jobStatus.setCreatedAt(Instant.now().toEpochMilli());
+        jobStatus.setLastUpdated(LocalDateTime.now());
         return jobStatusRepository.save(jobStatus);
     }
 
@@ -81,7 +83,8 @@ public class JobStatusServiceImpl implements JobStatusService {
                 }
             }
         }
-        
+
+        jobStatus.setLastUpdated(LocalDateTime.now());
         return jobStatusRepository.save(jobStatus);
     }
 

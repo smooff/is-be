@@ -8,10 +8,7 @@ import sk.stuba.sdg.isbe.domain.enums.JobStatusEnum;
 import sk.stuba.sdg.isbe.domain.model.DataPointTag;
 import sk.stuba.sdg.isbe.domain.model.Device;
 import sk.stuba.sdg.isbe.domain.model.Job;
-import sk.stuba.sdg.isbe.handlers.exceptions.EntityExistsException;
-import sk.stuba.sdg.isbe.handlers.exceptions.InvalidEntityException;
-import sk.stuba.sdg.isbe.handlers.exceptions.InvalidOperationException;
-import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
+import sk.stuba.sdg.isbe.handlers.exceptions.*;
 import sk.stuba.sdg.isbe.repositories.DeviceRepository;
 import sk.stuba.sdg.isbe.services.DataPointTagService;
 import sk.stuba.sdg.isbe.services.DeviceService;
@@ -19,6 +16,7 @@ import sk.stuba.sdg.isbe.services.JobService;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -152,12 +150,31 @@ public class DeviceServiceImpl implements DeviceService {
             throw new EntityExistsException("No jobs for device already exists!");
         }
         
-        return  device.getJobs();
+        return device.getJobs();
     }
 
     @Override
     public List<Job> getPendingDeviceJobs(String deviceId) {
         List<Job> jobs = getAllDeviceJobs(deviceId);
         return jobService.getJobsByStatus(jobs, JobStatusEnum.JOB_PENDING);
+    }
+
+    @Override
+    public String getDeviceStatus(String deviceId) {
+        Device device = getDeviceById(deviceId);
+        List<Job> runningJobs;
+
+        try {
+            runningJobs = jobService.getJobsByStatus(device.getJobs(), JobStatusEnum.JOB_PROCESSING);
+        } catch (InvalidEntityException e) {
+            throw new NotFoundCustomException("Device status can't be identified, since there are no running jobs on the device!");
+        }
+
+        LocalDateTime lastUpdated = runningJobs.get(0).getStatus().getLastUpdated();
+        if (LocalDateTime.now().minusSeconds(10).isAfter(lastUpdated)) {
+            throw new DeviceErrorException("Device job last updated at: " + lastUpdated.toString().replace("T", " - ") + "."
+                    + "\nDevice may be disconnected!");
+        }
+        return lastUpdated.toString().replace("T", " - ");
     }
 }
