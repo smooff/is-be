@@ -94,17 +94,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void validateUser(User user) {
-        if (user.getName() != null || user.getName().isEmpty()) {
+        if (user.getName() == null || user.getName().isEmpty()) {
             throw new InvalidEntityException("User name is not set!");
         }
-        if (user.getMail() != null || user.getMail().isEmpty()) {
+        if (user.getMail() == null || user.getMail().isEmpty()) {
             throw new InvalidEntityException("User mail is not set!");
         }
-        if (user.getPassword() != null || user.getPassword().isEmpty()) {
+        if (user.getPassword() == null || user.getPassword().isEmpty()) {
             throw new InvalidEntityException("User password is not set!");
         }
-        if (user.getPermissions() != null) {
-            throw new InvalidEntityException("User permissions is not set!");
-        }
+//        if (user.getPermissions() == null) {
+//            throw new InvalidEntityException("User permissions is not set!");
+//        }
     }
 }

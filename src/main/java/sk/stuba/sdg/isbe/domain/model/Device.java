@@ -23,6 +23,7 @@ public class Device {
     private List<DataPointTag> dataPointTags = new ArrayList<>();
     private Long addTime;
     private Long initExpireTime;
+    private String initApiKey;
     private boolean deactivated;
 
     public List<Job> getJobs() {
@@ -103,6 +104,14 @@ public class Device {
 
     public void setInitExpireTime(Long initExpireTime) {
         this.initExpireTime = initExpireTime;
+    }
+
+    public String getInitApiKey() {
+        return initApiKey;
+    }
+
+    public void setInitApiKey(String initApiKey) {
+        this.initApiKey = initApiKey;
     }
 
     public boolean isDeactivated() {

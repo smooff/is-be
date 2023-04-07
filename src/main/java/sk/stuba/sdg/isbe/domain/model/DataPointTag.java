@@ -2,6 +2,8 @@ package sk.stuba.sdg.isbe.domain.model;
 
 import org.springframework.data.annotation.Id;
 
+import java.util.List;
+
 public class DataPointTag {
     @Id
     private String uid;
@@ -9,6 +11,7 @@ public class DataPointTag {
     private String name;
     private String unit;
     private Long decimal;
+    private List<StoredData> storedData;
     private Long createdAt;
     private boolean deactivated;
 
@@ -50,6 +53,14 @@ public class DataPointTag {
 
     public void setDecimal(Long decimal) {
         this.decimal = decimal;
+    }
+
+    public List<StoredData> getStoredData() {
+        return storedData;
+    }
+
+    public void setStoredData(List<StoredData> storedData) {
+        this.storedData = storedData;
     }
 
     public Long getCreatedAt() {

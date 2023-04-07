@@ -1,6 +1,7 @@
 package sk.stuba.sdg.isbe.services.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import sk.stuba.sdg.isbe.domain.enums.JobStatusEnum;
@@ -25,6 +26,9 @@ import java.util.Optional;
 public class DeviceServiceImpl implements DeviceService {
 
     private static final String EMPTY_STRING = "";
+
+    @Value("${spring.security.user.password}")
+    private String apiKey;
 
     @Autowired
     private DeviceRepository deviceRepository;
@@ -65,12 +69,15 @@ public class DeviceServiceImpl implements DeviceService {
             throw new EntityExistsException("Device with MAC: '" + macAddress + "' was not found!");
         }
         if (device.getInitExpireTime() < Instant.now().toEpochMilli() || device.getInitExpireTime() == -1) {
-            throw new InvalidEntityException("Device initial time is out of time!");
+            throw new InvalidEntityException("Device initial time is out of!");
         }
 
         device.setInitExpireTime((long) -1);
         deviceRepository.save(device);
-        
+
+        device.setDataPointTags(null);
+        device.setInitApiKey(apiKey);
+
         return device;
     }
 

@@ -3,6 +3,7 @@ package sk.stuba.sdg.isbe.services.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sk.stuba.sdg.isbe.domain.model.DataPointTag;
+import sk.stuba.sdg.isbe.domain.model.StoredData;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidEntityException;
 import sk.stuba.sdg.isbe.repositories.DataPointTagRepository;
 import sk.stuba.sdg.isbe.services.DataPointTagService;
@@ -38,6 +39,15 @@ public class DataPointTagServiceImpl implements DataPointTagService {
         }
 
         return dataPointTagRepository.getDataPointTagByUid(dataPointTagId);
+    }
+
+    @Override
+    public List<StoredData> getStoredData(String dataPointTagId) {
+        if (dataPointTagId == null || dataPointTagId.isEmpty()) {
+            throw new InvalidEntityException("Data Point Tag id is not set!");
+        }
+
+        return getDataPointTagById(dataPointTagId).getStoredData();
     }
 
     @Override

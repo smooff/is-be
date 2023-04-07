@@ -20,7 +20,7 @@ public class WebConfig{
     @Value("${sdg.http.auth-token-header-name}")
     private String principalRequestHeader;
 
-    @Value("${sdg.http.auth-token}")
+    @Value("${spring.security.user.password}")
     private String principalRequestValue;
 
     @Autowired
