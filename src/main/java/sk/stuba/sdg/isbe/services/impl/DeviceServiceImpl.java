@@ -47,6 +47,7 @@ public class DeviceServiceImpl implements DeviceService {
             throw new InvalidEntityException("Device has no type set!");
         }
 
+        device.setInitExpireTime((long) -1);
         device.setAddTime(Instant.now().toEpochMilli());
         deviceRepository.save(device);
 
