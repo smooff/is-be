@@ -211,7 +211,7 @@ public class JobServiceTests {
         Exception exception = assertThrows(NotFoundCustomException.class, () -> {
             jobService.getAllJobsByStatus("WRONG_STATUS");
         });
-        String expected = "Job status: '" + "WRONG_STATUS" + "' does not exist!";
+        String expected = "Job status type: '" + "WRONG_STATUS" + "' does not exist!";
         assertEquals(expected, exception.getMessage());
 
         List<Job> pendingJobs = jobService.getAllJobsByStatus("JOB_PENDING");

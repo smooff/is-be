@@ -92,6 +92,7 @@ public class JobServiceImpl implements JobService {
 
     private List<DataPoint> getDataPointsFromDevice(Device device) {
         List<DataPoint> dataPoints = new ArrayList<>();
+
         for (DataPointTag tag : device.getDataPointTags()) {
             DataPoint dataPoint = new DataPoint();
             dataPoint.setTag(tag.getTag());
@@ -162,15 +163,17 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public Job pauseJob(String jobId) {
-        Job job = getJob(jobId);
-        job.setPaused(true);
-        return jobRepository.save(job);
+        return setJobPaused(jobId, true);
     }
 
     @Override
     public Job continueJob(String jobId) {
+        return setJobPaused(jobId, false);
+    }
+
+    private Job setJobPaused(String jobId, boolean paused) {
         Job job = getJob(jobId);
-        job.setPaused(false);
+        job.setPaused(paused);
         return jobRepository.save(job);
     }
 
@@ -214,14 +217,18 @@ public class JobServiceImpl implements JobService {
     @Override
     public List<Job> getAllJobsByStatus(String status) {
         JobStatusEnum jobStatus = JobStatusUtils.getJobStatusEnum(status);
-        List<Job> jobsByStatus = getJobsByStatus(jobRepository.findAll(), jobStatus);
-        if (jobsByStatus.isEmpty()) {
-            throw new NotFoundCustomException("There are no jobs with status: '" + status + "' in the database!");
-        }
-        return jobsByStatus;
+        return getJobsByStatus(jobRepository.findAll(), jobStatus);
     }
 
     public List<Job> getJobsByStatus(List<Job> jobs, JobStatusEnum status) {
-        return jobs.stream().filter(job -> job.getStatus().getCode() == status).toList();
+        if (jobs == null || jobs.isEmpty()) {
+            throw new InvalidEntityException("There are not any jobs in the database!");
+        }
+
+        List<Job> foundJobs = jobs.stream().filter(job -> job.getStatus().getCode() == status).toList();
+        if (foundJobs.isEmpty()) {
+            throw new NotFoundCustomException("No jobs found with status: '" + status.name() + "'!");
+        }
+        return foundJobs;
     }
 }

@@ -1,10 +1,10 @@
 package sk.stuba.sdg.isbe.domain.model;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import sk.stuba.sdg.isbe.domain.enums.JobStatusEnum;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Document
@@ -18,6 +18,7 @@ public class JobStatus {
     private Integer currentCycle;
     private List<DataPoint> data;
     private Long createdAt;
+    private LocalDateTime lastUpdated;
 
     public String getUid() {
         return uid;
@@ -81,5 +82,13 @@ public class JobStatus {
 
     public void setCreatedAt(Long createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getLastUpdated() {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated(LocalDateTime lastUpdated) {
+        this.lastUpdated = lastUpdated;
     }
 }

@@ -9,7 +9,7 @@ public final class JobStatusUtils {
         try {
             return Enum.valueOf(JobStatusEnum.class, jobStatus.toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new NotFoundCustomException("Job status: '" + jobStatus + "' does not exist!");
+            throw new NotFoundCustomException("Job status type: '" + jobStatus + "' does not exist!");
         }
     }
 }

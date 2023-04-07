@@ -64,4 +64,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntityBuilder.build(err);
     }
 
+    @ExceptionHandler(DeviceErrorException.class)
+    public ResponseEntity<Object> handleDeviceErrorException(DeviceErrorException ex) {
+        List<String> details = new ArrayList<>();
+        String message = ex.getMessage();
+        details.add(message);
+
+        ApiError err = new ApiError(LocalDateTime.now(),HttpStatus.ACCEPTED, "Device is not working properly!", details);
+        logger.error(message, ex);
+
+        return ResponseEntityBuilder.build(err);
+    }
+
 }
