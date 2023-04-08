@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import sk.stuba.sdg.isbe.domain.model.*;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidEntityException;
 import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
+import sk.stuba.sdg.isbe.repositories.DataPointTagRepository;
 import sk.stuba.sdg.isbe.repositories.JobStatusRepository;
 import sk.stuba.sdg.isbe.repositories.StoredDataRepository;
 import sk.stuba.sdg.isbe.services.DeviceService;
@@ -24,6 +25,9 @@ public class JobStatusServiceImpl implements JobStatusService {
 
     @Autowired
     DeviceService deviceService;
+
+    @Autowired
+    DataPointTagRepository dataPointTagRepository;
 
     @Autowired
     StoredDataRepository storedDataRepository;
@@ -80,6 +84,9 @@ public class JobStatusServiceImpl implements JobStatusService {
                     storedData.setValue(dataPoint.getValue());
                     storedData.setMeasureAdd(Instant.now().toEpochMilli());
                     storedDataRepository.save(storedData);
+                    assert dataPointTag != null;
+                    dataPointTag.getStoredData().add(storedData);
+                    dataPointTagRepository.save(dataPointTag);
                 }
             }
         }

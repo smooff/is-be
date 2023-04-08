@@ -1,7 +1,9 @@
 package sk.stuba.sdg.isbe.domain.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DataPointTag {
@@ -11,7 +13,8 @@ public class DataPointTag {
     private String name;
     private String unit;
     private Long decimal;
-    private List<StoredData> storedData;
+    @DBRef
+    private List<StoredData> storedData = new ArrayList<>();
     private Long createdAt;
     private boolean deactivated;
 
