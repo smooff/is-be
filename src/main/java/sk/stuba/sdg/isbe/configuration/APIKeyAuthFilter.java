@@ -1,8 +1,10 @@
 package sk.stuba.sdg.isbe.configuration;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
+@Profile("deployment")
 public class APIKeyAuthFilter extends AbstractPreAuthenticatedProcessingFilter {
 
     private final String principalRequestHeader;

@@ -6,11 +6,12 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 public class StoredData {
     @Id
     private String uid;
-    @DBRef
     private DataPointTag dataPointTag;
     private Double value;
     private Long measureAdd;
     private boolean deactivated;
+
+    private String deviceId;
 
     public String getUid() {
         return uid;
@@ -54,5 +55,13 @@ public class StoredData {
 
     public boolean isValid() {
         return getDataPointTag() == null && getMeasureAdd() == null && getValue() == null;
+    }
+
+    public String getDeviceId() {
+        return deviceId;
+    }
+
+    public void setDeviceId(String deviceId) {
+        this.deviceId = deviceId;
     }
 }

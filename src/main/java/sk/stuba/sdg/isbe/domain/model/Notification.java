@@ -4,7 +4,9 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import sk.stuba.sdg.isbe.domain.enums.NotificationLevelEnum;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Document
 public class Notification {
@@ -54,6 +56,16 @@ public class Notification {
      * Time of creation.
      */
     private Long createdAt;
+
+    private Map<String,String> deviceAndTag = new HashMap<>();
+
+    public Map<String, String> getDeviceAndTag() {
+        return deviceAndTag;
+    }
+
+    public void setDeviceAndTag(Map<String, String> deviceAndTag) {
+        this.deviceAndTag = deviceAndTag;
+    }
 
     public boolean hasNonEmptyName() {
         return name != null && !name.isEmpty();

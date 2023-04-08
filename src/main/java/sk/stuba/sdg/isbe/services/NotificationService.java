@@ -18,5 +18,7 @@ public interface NotificationService {
 
     List<Notification> getNotificationById(String notificationId);
 
+    List<Notification> getNotificationByDeviceAndTag(String deviceId, String tag);
+
     Notification editNotification(Notification notification);
 }
