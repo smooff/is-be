@@ -1,8 +1,10 @@
 package sk.stuba.sdg.isbe.services.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import sk.stuba.sdg.isbe.domain.model.*;
+import sk.stuba.sdg.isbe.events.DataStoredEvent;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidEntityException;
 import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
 import sk.stuba.sdg.isbe.repositories.JobStatusRepository;
@@ -11,6 +13,7 @@ import sk.stuba.sdg.isbe.services.DeviceService;
 import sk.stuba.sdg.isbe.services.JobStatusService;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -27,6 +30,9 @@ public class JobStatusServiceImpl implements JobStatusService {
 
     @Autowired
     StoredDataRepository storedDataRepository;
+
+    @Autowired
+    ApplicationEventPublisher eventPublisher;
 
     @Override
     public JobStatus createJobStatus(JobStatus jobStatus){
@@ -72,6 +78,7 @@ public class JobStatusServiceImpl implements JobStatusService {
 
             if (deviceId != null) {
                 List<DataPointTag> dataPointTags = deviceService.getDeviceById(deviceId).getDataPointTags();
+                 List<StoredData> listStoredData = new ArrayList<>();
                 for(DataPoint dataPoint :jobStatus.getData()) {
                     DataPointTag dataPointTag = dataPointTags.stream().filter(data -> Objects.equals(data.getTag(), dataPoint.getTag())).findAny()
                             .orElse(null);
@@ -79,8 +86,12 @@ public class JobStatusServiceImpl implements JobStatusService {
                     storedData.setDataPointTag(dataPointTag);
                     storedData.setValue(dataPoint.getValue());
                     storedData.setMeasureAdd(Instant.now().toEpochMilli());
+                    storedData.setDeviceId(deviceId);
                     storedDataRepository.save(storedData);
+                    listStoredData.add(storedData);
                 }
+                DataStoredEvent dataStoredEvent = new DataStoredEvent(this, listStoredData, deviceId);
+                eventPublisher.publishEvent(dataStoredEvent);
             }
         }
 

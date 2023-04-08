@@ -71,6 +71,11 @@ public class DataPointTagServiceImpl implements DataPointTagService {
             dataPointTag.setTag(changeDataPointTag.getTag());
         }
 
+        /**
+         * TODO - update vsetkych StoredData, ktore maju v sebe tento DataPointTag
+         * dôvod: odstranil sa @DBRef na DataPointTag v triede StoredData
+         */
+
         return dataPointTagRepository.save(dataPointTag);
     }
 
@@ -78,6 +83,12 @@ public class DataPointTagServiceImpl implements DataPointTagService {
     public DataPointTag deleteDataPointTag(String dataPointTagId) {
         DataPointTag dataPointTag = getDataPointTagById(dataPointTagId);
         dataPointTag.setDeactivated(true);
+
+        /**
+         * TODO - update vsetkych StoredData, ktore maju v sebe tento DataPointTag
+         * dôvod: odstranil sa @DBRef na DataPointTag v triede StoredData
+         */
+
         dataPointTagRepository.save(dataPointTag);
         return dataPointTag;
     }

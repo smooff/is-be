@@ -68,6 +68,12 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    public List<Notification> getNotificationByDeviceAndTag(String deviceId, String tag) {
+
+        return notificationRepository.getNotificationByDeviceAndTag(deviceId, tag);
+    }
+
+    @Override
     public Notification editNotification(Notification notification) {
 
         validateNotificationId(notification.getId());
