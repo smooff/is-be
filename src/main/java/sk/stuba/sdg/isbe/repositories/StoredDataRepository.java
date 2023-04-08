@@ -6,5 +6,5 @@ import sk.stuba.sdg.isbe.domain.model.StoredData;
 public interface StoredDataRepository extends MongoRepository<StoredData, String> {
     StoredData getStoredDataByUid(String StoredDataId);
 
-    StoredData findFirstStoredDataByDeviceIdAndDataPointTag_TagOrderByMeasureAddDesc(String deviceId, String tag);
+    StoredData findFirstStoredDataByDeviceIdAndTagOrderByMeasureAddDesc(String deviceId, String tag);
 }

@@ -32,11 +32,11 @@ public class NotificationProcessor {
                 for (Notification notification : notifications) {
                     Map<String, String> mapDeviceAndTag = notification.getDeviceAndTag();
                     mapDeviceAndTag.remove(event.getDeviceId());
-                    dataForExpression.put(storedData.getDeviceId() + "." + storedData.getDataPointTag().getTag(), storedData.getValue());
+                    dataForExpression.put(storedData.getDeviceId() + "." + storedData.getTag(), storedData.getValue());
                     mapDeviceAndTag.forEach((k, v) -> {
-                        StoredData lastStoredData = storedDataRepository.findFirstStoredDataByDeviceIdAndDataPointTag_TagOrderByMeasureAddDesc(k, v);
+                        StoredData lastStoredData = storedDataRepository.findFirstStoredDataByDeviceIdAndTagOrderByMeasureAddDesc(k, v);
                         if (lastStoredData != null) {
-                            dataForExpression.put(lastStoredData.getDeviceId() + "." + lastStoredData.getDataPointTag().getTag(), lastStoredData.getValue());
+                            dataForExpression.put(lastStoredData.getDeviceId() + "." + lastStoredData.getTag(), lastStoredData.getValue());
                         }
                     });
                     /**

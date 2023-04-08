@@ -48,9 +48,14 @@ public class StoredDataServiceImpl implements StoredDataService {
             throw new InvalidEntityException("StoredData with changes is null!");
         }
 
-        if (changeStoredData.getDataPointTag() != null) {
-            storedData.setDataPointTag(changeStoredData.getDataPointTag());
+        if (changeStoredData.getDataPointTagId() != null) {
+            storedData.setDataPointTagId(changeStoredData.getDataPointTagId());
         }
+
+        if (changeStoredData.getTag() != null){
+            storedData.setTag(changeStoredData.getTag());
+        }
+
         if (changeStoredData.getValue() != null) {
             storedData.setValue(changeStoredData.getValue());
         }

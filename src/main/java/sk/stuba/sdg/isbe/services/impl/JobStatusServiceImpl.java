@@ -83,7 +83,8 @@ public class JobStatusServiceImpl implements JobStatusService {
                     DataPointTag dataPointTag = dataPointTags.stream().filter(data -> Objects.equals(data.getTag(), dataPoint.getTag())).findAny()
                             .orElse(null);
                     StoredData storedData = new StoredData();
-                    storedData.setDataPointTag(dataPointTag);
+                    storedData.setDataPointTagId(dataPointTag.getUid());
+                    storedData.setTag(dataPointTag.getTag());
                     storedData.setValue(dataPoint.getValue());
                     storedData.setMeasureAdd(Instant.now().toEpochMilli());
                     storedData.setDeviceId(deviceId);
