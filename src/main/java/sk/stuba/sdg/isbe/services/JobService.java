@@ -1,6 +1,5 @@
 package sk.stuba.sdg.isbe.services;
 
-import sk.stuba.sdg.isbe.domain.enums.JobStatusEnum;
 import sk.stuba.sdg.isbe.domain.model.Job;
 
 import java.util.List;
@@ -23,15 +22,12 @@ public interface JobService {
 
     Job continueJob(String jobId);
 
-    List<Job> getFinishedJobsByStatus();
+    List<Job> getAllJobsOnDevice(String deviceId);
 
-    List<Job> getRunningJobsByStatus();
+    List<Job> getFinishedJobsByStatus(String deviceId);
 
-    List<Job> getFinishedJobs();
+    List<Job> getRunningJobsByStatus(String deviceId);
 
-    List<Job> getRunningJobs();
+    List<Job> getAllJobsByStatus(String deviceId, String status);
 
-    List<Job> getAllJobsByStatus(String status);
-
-    List<Job> getJobsByStatus(List<Job> jobs, JobStatusEnum status);
 }

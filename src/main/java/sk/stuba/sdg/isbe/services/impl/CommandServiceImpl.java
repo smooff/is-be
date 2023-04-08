@@ -88,7 +88,8 @@ public class CommandServiceImpl implements CommandService {
         List<String> recipeNames = recipesUsingCommand.stream().map(Recipe::getName).toList();
 
         if (!recipeNames.isEmpty()) {
-            throw new InvalidOperationException("Command is used in Recipes: \n" + String.join("\n", recipeNames) + "\nRemove commands from recipes to be able to delete them!");
+            throw new InvalidOperationException("Command is used in Recipes: \n" + String.join("\n", recipeNames)
+                    + "\nRemove this command from recipes to be able to delete it!");
         }
 
         command.setDeactivated(true);
@@ -108,6 +109,9 @@ public class CommandServiceImpl implements CommandService {
         }
         if (updateCommand.getParams() != null) {
             command.setParams(updateCommand.getParams());
+        }
+        if (updateCommand.getTypeOfDevice() != null) {
+            command.setTypeOfDevice(updateCommand.getTypeOfDevice());
         }
 
         return commandRepository.save(command);

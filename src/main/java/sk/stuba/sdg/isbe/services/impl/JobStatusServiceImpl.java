@@ -10,6 +10,7 @@ import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
 import sk.stuba.sdg.isbe.repositories.JobStatusRepository;
 import sk.stuba.sdg.isbe.repositories.StoredDataRepository;
 import sk.stuba.sdg.isbe.services.DeviceService;
+import sk.stuba.sdg.isbe.services.JobService;
 import sk.stuba.sdg.isbe.services.JobStatusService;
 
 import java.time.Instant;
@@ -33,6 +34,9 @@ public class JobStatusServiceImpl implements JobStatusService {
 
     @Autowired
     ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    JobService jobService;
 
     @Override
     public JobStatus createJobStatus(JobStatus jobStatus){
@@ -63,6 +67,7 @@ public class JobStatusServiceImpl implements JobStatusService {
         }
         if (changeJobStatus.getCode() != null) {
             jobStatus.setCode(changeJobStatus.getCode());
+            jobService.getJob(jobStatus.getJobId()).setCurrentStatus(changeJobStatus.getCode());
         }
         if (changeJobStatus.getCurrentStep() != null) {
             jobStatus.setCurrentCycle(changeJobStatus.getCurrentStep());

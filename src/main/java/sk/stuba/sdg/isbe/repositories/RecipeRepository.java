@@ -18,7 +18,9 @@ public interface RecipeRepository extends MongoRepository<Recipe, String> {
 
     Optional<Recipe> getRecipeByIdAndDeactivated(String recipeId, boolean deactivated);
 
-    List<Recipe> getRecipesByIsSubRecipeAndTypeOfDeviceAndDeactivated(Boolean isSubRecipe, DeviceTypeEnum typeOfDevice, boolean deactivated);
+    List<Recipe> getRecipesByIsSubRecipeAndTypeOfDeviceAndDeactivated(boolean isSubRecipe, DeviceTypeEnum typeOfDevice, boolean deactivated);
 
     List<Recipe> getRecipesByCommandsContaining(Command command);
+
+    List<Recipe> getRecipesBySubRecipesContaining(Recipe recipe);
 }

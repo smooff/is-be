@@ -109,8 +109,8 @@ public class RecipeServiceImpl implements RecipeService {
 
         if (recipe.getTypeOfDevice() != subRecipe.getTypeOfDevice()) {
             throw new InvalidEntityException("Device types of the recipes do not match!"
-            + "\nRecipes device type: " + recipe.getTypeOfDevice()
-            + "\nSubRecipe device type: " + subRecipe.getTypeOfDevice());
+            + "\nRecipe's device type: " + recipe.getTypeOfDevice()
+            + "\nSub-recipe's device type: " + subRecipe.getTypeOfDevice());
         }
 
         if (subRecipe.getSubRecipes() != null) {
@@ -168,6 +168,14 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     public Recipe deleteRecipe(String recipeId) {
         Recipe recipeToDelete = getRecipe(recipeId);
+        List<Recipe> recipesUsingThis = recipeRepository.getRecipesBySubRecipesContaining(recipeToDelete);
+        List<String> recipeNames = recipesUsingThis.stream().map(Recipe::getName).toList();
+
+        if (!recipesUsingThis.isEmpty()) {
+            throw new InvalidOperationException("Recipe is used in Recipes as sub-recipe: \n" + String.join("\n", recipeNames)
+                    + "\nRemove recipe from all recipes to be able to delete it!");
+        }
+
         recipeToDelete.setDeactivated(true);
         return recipeRepository.save(recipeToDelete);
     }
@@ -228,7 +236,7 @@ public class RecipeServiceImpl implements RecipeService {
             + "\nRecipes device type: " + recipe.getTypeOfDevice()
             + "\nCommands device type: " + command.getTypeOfDevice());
         }
-        if (command.getName() == null || command.getName().isEmpty()) {
+        if (command.getName() == null || command.getName().equals(EMPTY_STRING)) {
             throw new InvalidOperationException("Command does not have any name set!");
         }
         if (command.getParams() == null || command.getParams().isEmpty()) {

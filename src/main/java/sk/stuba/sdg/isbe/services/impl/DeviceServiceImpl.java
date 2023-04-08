@@ -155,22 +155,14 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Override
     public List<Job> getPendingDeviceJobs(String deviceId) {
-        List<Job> jobs = getAllDeviceJobs(deviceId);
-        return jobService.getJobsByStatus(jobs, JobStatusEnum.JOB_PENDING);
+        return jobService.getAllJobsByStatus(deviceId, JobStatusEnum.JOB_PENDING.name());
     }
 
     @Override
     public String getDeviceStatus(String deviceId) {
-        Device device = getDeviceById(deviceId);
-        List<Job> runningJobs;
-
-        try {
-            runningJobs = jobService.getJobsByStatus(device.getJobs(), JobStatusEnum.JOB_PROCESSING);
-        } catch (InvalidEntityException e) {
-            throw new NotFoundCustomException("Device status can't be identified, since there are no running jobs on the device!");
-        }
-
+        List<Job> runningJobs = jobService.getAllJobsByStatus(deviceId, JobStatusEnum.JOB_PROCESSING.name());
         LocalDateTime lastUpdated = runningJobs.get(0).getStatus().getLastUpdated();
+
         if (LocalDateTime.now().minusSeconds(10).isAfter(lastUpdated)) {
             throw new DeviceErrorException("Device job last updated at: " + lastUpdated.toString().replace("T", " - ") + "."
                     + "\nDevice may be disconnected!");

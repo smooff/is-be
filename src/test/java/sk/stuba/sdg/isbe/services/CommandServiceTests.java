@@ -92,7 +92,7 @@ public class CommandServiceTests {
         exception = assertThrows(InvalidOperationException.class, () -> {
             commandService.deleteCommand(command.getId());
         });
-        expected = "Command is used in Recipes: \n" + String.join("\n", recipe.getName(), recipe2.getName()) + "\nRemove commands from recipes to be able to delete them!";
+        expected = "Command is used in Recipes: \n" + String.join("\n", recipe.getName(), recipe2.getName()) + "\nRemove this command from recipes to be able to delete it!";
         assertEquals(expected, exception.getMessage());
 
         commandRepository.delete(command);

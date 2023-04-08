@@ -3,6 +3,7 @@ package sk.stuba.sdg.isbe.domain.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+import sk.stuba.sdg.isbe.domain.enums.JobStatusEnum;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -13,11 +14,13 @@ import java.util.List;
 public class Job {
     @Id
     private String uid;
+    private String deviceId;
     private String name;
     private Integer noOfCmds;
     private Integer noOfReps;
     @DBRef
     private JobStatus status;
+    private JobStatusEnum currentStatus;
     private List<Command> commands;
     private boolean toCancel;
     private boolean paused;
@@ -31,6 +34,14 @@ public class Job {
 
     public void setUid(String uid) {
         this.uid = uid;
+    }
+
+    public String getDeviceId() {
+        return deviceId;
+    }
+
+    public void setDeviceId(String deviceId) {
+        this.deviceId = deviceId;
     }
 
     public String getName() {
@@ -63,6 +74,14 @@ public class Job {
 
     public void setStatus(JobStatus status) {
         this.status = status;
+    }
+
+    public JobStatusEnum getCurrentStatus() {
+        return currentStatus;
+    }
+
+    public void setCurrentStatus(JobStatusEnum currentStatus) {
+        this.currentStatus = currentStatus;
     }
 
     public List<Command> getCommands() {

@@ -79,9 +79,12 @@ public class JobServiceImpl implements JobService {
 
         // add dataPoints
         jobStatus.setData(getDataPointsFromDevice(device));
+        jobStatus.setJobId(job.getUid());
         job.setStatus(jobStatus);
         jobStatusService.createJobStatus(jobStatus);
 
+        job.setDeviceId(deviceId);
+        job.setCurrentStatus(JobStatusEnum.JOB_PENDING);
         job.setCreatedAt(Instant.now().toEpochMilli());
         jobRepository.save(job);
 
@@ -178,31 +181,22 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public List<Job> getFinishedJobsByStatus() {
-        return getAllJobsByStatus("JOB_DONE");
-    }
-
-    @Override
-    public List<Job> getRunningJobsByStatus() {
-        return getAllJobsByStatus("JOB_PROCESSING");
-    }
-
-    @Override
-    public List<Job> getFinishedJobs() {
-        List<Job> finishedJobs = jobRepository.getJobsByFinishedAtIsNot(null);
-        if (finishedJobs.isEmpty()) {
-            throw new NotFoundCustomException("There are not any finished jobs in the database!");
+    public List<Job> getAllJobsOnDevice(String deviceId) {
+        List<Job> jobs = jobRepository.getJobsByDeviceId(deviceId);
+        if (jobs.isEmpty()) {
+            throw new NotFoundCustomException("There are not any jobs on the device!");
         }
-        return finishedJobs;
+        return jobs;
     }
 
     @Override
-    public List<Job> getRunningJobs() {
-        List<Job> runningJobs = jobRepository.getJobsByStartedAtIsNotAndFinishedAtIs(null, null);
-        if (runningJobs.isEmpty()) {
-            throw new NotFoundCustomException("There are not any running jobs in the database!");
-        }
-        return runningJobs;
+    public List<Job> getFinishedJobsByStatus(String deviceId) {
+        return getAllJobsByStatus(deviceId, JobStatusEnum.JOB_DONE.name());
+    }
+
+    @Override
+    public List<Job> getRunningJobsByStatus(String deviceId) {
+        return getAllJobsByStatus(deviceId, JobStatusEnum.JOB_PROCESSING.name());
     }
 
     @Override
@@ -215,20 +209,14 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public List<Job> getAllJobsByStatus(String status) {
-        JobStatusEnum jobStatus = JobStatusUtils.getJobStatusEnum(status);
-        return getJobsByStatus(jobRepository.findAll(), jobStatus);
-    }
+    public List<Job> getAllJobsByStatus(String deviceId, String statusName) {
+        JobStatusEnum jobStatus = JobStatusUtils.getJobStatusEnum(statusName);
+        Device device = deviceService.getDeviceById(deviceId);
+        List<Job> jobs = jobRepository.getJobsByDeviceIdAndCurrentStatusIs(deviceId, jobStatus);
 
-    public List<Job> getJobsByStatus(List<Job> jobs, JobStatusEnum status) {
-        if (jobs == null || jobs.isEmpty()) {
-            throw new InvalidEntityException("There are not any jobs in the database!");
+        if (jobs.isEmpty()) {
+            throw new NotFoundCustomException("No jobs found with status: '" + statusName + " on device: " + device.getName() + "'!");
         }
-
-        List<Job> foundJobs = jobs.stream().filter(job -> job.getStatus().getCode() == status).toList();
-        if (foundJobs.isEmpty()) {
-            throw new NotFoundCustomException("No jobs found with status: '" + status.name() + "'!");
-        }
-        return foundJobs;
+        return jobs;
     }
 }

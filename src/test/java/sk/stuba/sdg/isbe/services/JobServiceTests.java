@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Profile;
 import sk.stuba.sdg.isbe.domain.enums.DeviceTypeEnum;
+import sk.stuba.sdg.isbe.domain.enums.JobStatusEnum;
 import sk.stuba.sdg.isbe.domain.model.Command;
 import sk.stuba.sdg.isbe.domain.model.Device;
 import sk.stuba.sdg.isbe.domain.model.Job;
@@ -209,12 +210,12 @@ public class JobServiceTests {
         jobService.runJob(job2, device.getUid(), 0);
 
         Exception exception = assertThrows(NotFoundCustomException.class, () -> {
-            jobService.getAllJobsByStatus("WRONG_STATUS");
+            jobService.getAllJobsByStatus(device.getUid(), "WRONG_STATUS");
         });
         String expected = "Job status type: '" + "WRONG_STATUS" + "' does not exist!";
         assertEquals(expected, exception.getMessage());
 
-        List<Job> pendingJobs = jobService.getAllJobsByStatus("JOB_PENDING");
+        List<Job> pendingJobs = jobService.getAllJobsByStatus(device.getUid(), JobStatusEnum.JOB_PENDING.name());
         assertFalse(pendingJobs.isEmpty());
 
         jobRepository.delete(job);

@@ -63,33 +63,27 @@ public class JobController {
         jobService.continueJob(jobId);
     }
 
-    @Operation(summary = "Get all finished jobs")
-    @GetMapping("getFinishedJobs")
-    public List<Job> getFinishedJobs() {
-        return jobService.getFinishedJobs();
-    }
-
-    @Operation(summary = "Get all running jobs using db query")
-    @GetMapping("getRunningJobs")
-    public List<Job> getRunningJobs() {
-        return jobService.getRunningJobs();
+    @Operation(summary = "Get all jobs by device")
+    @GetMapping("getAllJobs/{deviceId}")
+    public List<Job> getAllJobsOnDevice(@PathVariable String deviceId) {
+        return jobService.getAllJobsOnDevice(deviceId);
     }
 
     @Operation(summary = "Get finished jobs by a given status")
-    @GetMapping("getFinishedJobsByStatus")
-    public List<Job> getFinishedJobsByStatus() {
-        return jobService.getFinishedJobsByStatus();
+    @GetMapping("getFinishedJobsByStatus/{deviceId}")
+    public List<Job> getFinishedJobsByStatus(@PathVariable String deviceId) {
+        return jobService.getFinishedJobsByStatus(deviceId);
     }
 
     @Operation(summary = "Get running jobs by a given status")
-    @GetMapping("getRunningJobsByStatus")
-    public List<Job> getRunningJobsByStatus() {
-        return jobService.getRunningJobsByStatus();
+    @GetMapping("getRunningJobsByStatus/{deviceId}")
+    public List<Job> getRunningJobsByStatus(@PathVariable String deviceId) {
+        return jobService.getRunningJobsByStatus(deviceId);
     }
 
     @Operation(summary = "Get all jobs by a given status")
-    @GetMapping("getJobsByStatus/{status}")
-    public List<Job> getJobsByStatus(@PathVariable String status) {
-        return jobService.getAllJobsByStatus(status);
+    @GetMapping("getJobsByStatus/{deviceId}/{status}")
+    public List<Job> getJobsByStatus(@PathVariable String deviceId, @PathVariable String status) {
+        return jobService.getAllJobsByStatus(deviceId, status);
     }
 }

@@ -198,8 +198,8 @@ public class RecipeServiceTests {
         recipeService.createRecipe(recipe2);
 
         String expected = "Device types of the recipes do not match!"
-                + "\nRecipes device type: " + recipe.getTypeOfDevice()
-                + "\nSubRecipe device type: " + recipe2.getTypeOfDevice();
+                + "\nRecipe's device type: " + recipe.getTypeOfDevice()
+                + "\nSub-recipe's device type: " + recipe2.getTypeOfDevice();
         Exception exception = assertThrows(InvalidEntityException.class, () -> {
             recipeService.addSubRecipeToRecipe(recipe.getId(), recipe2.getId());
         });
