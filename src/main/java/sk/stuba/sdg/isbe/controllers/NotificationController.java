@@ -19,10 +19,16 @@ public class NotificationController {
         this.notificationService = notificationService;
     }
 
-    @GetMapping
+    @GetMapping("/all")
     @Operation(summary = "Get all Notifications")
     public List<Notification> getNotifications() {
         return this.notificationService.getNotifications();
+    }
+
+    @GetMapping("/active")
+    @Operation(summary = "Get only active Notifications")
+    public List<Notification> getActiveNotifications() {
+        return this.notificationService.getActiveNotifications();
     }
 
     @PostMapping(value = "/create")
@@ -37,13 +43,13 @@ public class NotificationController {
         return this.notificationService.getNotificationById(id);
     }
 
-    @PostMapping(value = "/getNotificationById/{deviceId}/{tag}")
+    @PostMapping(value = "/getNotificationByDeviceIdAndTag/{deviceId}/{tag}")
     @Operation(summary = "Get Notification by DeviceId and Tag (Tag in DataPointTag)")
     public List<Notification> getNotificationByDeviceAndTag(@PathVariable("deviceId") String deviceId, @PathVariable("tag") String tag) {
         return this.notificationService.getNotificationByDeviceAndTag(deviceId, tag);
     }
 
-    @PostMapping(value = "/getNotificationByDevice/{deviceId}")
+    @PostMapping(value = "/getNotificationByDeviceId/{deviceId}")
     @Operation(summary = "Get Notification by associated Device id")
     public List<Notification> getNotificationByDevice(@PathVariable("deviceId") String id) {
         return this.notificationService.getNotificationsAssociatedWithDevice(id);

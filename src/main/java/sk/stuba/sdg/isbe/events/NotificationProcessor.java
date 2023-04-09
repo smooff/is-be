@@ -35,7 +35,7 @@ public class NotificationProcessor {
     @Async
     @EventListener
     public void handleDataSavedEvent(DataStoredEvent event) throws JsonLogicException {
-        List<Notification> notifications = notificationRepository.getNotificationByDevicesContaining(event.getDeviceId());
+        List<Notification> notifications = notificationRepository.getNotificationByDevicesContainingAndDeactivated(event.getDeviceId(), false);
         if (notifications != null) {
             List<String> alreadyEvaluated = new ArrayList<>();
             for (StoredData storedData : event.getStoredData()) {  //z1.teplota, z1.vlhkost, z1.svetlo

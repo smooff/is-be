@@ -47,7 +47,7 @@ public class NotificationServiceImpl implements NotificationService {
             throw new InvalidOperationException("deviceID needs to be set for this operation.");
         }
 
-        List<Notification> notifications = notificationRepository.getNotificationByDevicesContaining(deviceID);
+        List<Notification> notifications = notificationRepository.getNotificationByDevicesContainingAndDeactivated(deviceID, false);
 
         if (notifications.isEmpty()) {
             throw new EntityExistsException("Notification associated with deviceID: "+ deviceID +" does not exists.");
@@ -59,6 +59,12 @@ public class NotificationServiceImpl implements NotificationService {
     public List<Notification> getNotifications() {
 
         return notificationRepository.findAll();
+    }
+
+    @Override
+    public List<Notification> getActiveNotifications() {
+
+        return notificationRepository.getNotificationByDeactivated(false);
     }
 
     @Override

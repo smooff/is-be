@@ -18,6 +18,8 @@ public interface NotificationService {
 
     List<Notification> getNotifications();
 
+    List<Notification> getActiveNotifications();
+
     Notification getNotificationById(String notificationId);
 
     List<Notification> getNotificationByDeviceAndTag(String deviceId, String tag);

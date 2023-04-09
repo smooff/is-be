@@ -11,7 +11,9 @@ public interface NotificationRepository extends MongoRepository<Notification, St
 
     Optional<Notification> getNotificationByName(String name);
 
-   List<Notification> getNotificationByDevicesContaining(String device);
+   List<Notification> getNotificationByDevicesContainingAndDeactivated(String device, boolean deactivated);
+
+    List<Notification> getNotificationByDeactivated(boolean deactivated);
 
    Notification getNotificationById(String id);
 
