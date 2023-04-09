@@ -13,10 +13,10 @@ public class Notification {
 
     public Notification(){}
 
-    public Notification(String name, List<String> devices, Boolean active, String rules){
+    public Notification(String name, List<String> devices, Boolean deactivated, String rules){
         this.name = name;
         this.devices = devices;
-        this.active = active;
+        this.deactivated = deactivated;
         this.rules = rules;
     }
     @Id
@@ -40,7 +40,7 @@ public class Notification {
     /**
      * Define if notification is active.
      */
-    private Boolean active;
+    private Boolean deactivated;
 
     /**
      * Define notification level - response from user to notfication.
@@ -131,12 +131,12 @@ public class Notification {
         this.devices = devices;
     }
 
-    public Boolean getActive() {
-        return active;
+    public Boolean getDeactivated() {
+        return deactivated;
     }
 
-    public void setActive(Boolean active) {
-        this.active = active;
+    public void setDeactivated(Boolean deactivated) {
+        this.deactivated = deactivated;
     }
 
     public NotificationLevelEnum getLevel() {
@@ -210,7 +210,7 @@ public class Notification {
                 ", rules='" + rules + '\'' +
                 ", name='" + name + '\'' +
                 ", devices=" + devices +
-                ", active=" + active +
+                ", active=" + deactivated +
                 ", level=" + level +
                 ", counter=" + multiplicityCounter +
                 ", createdAt=" + createdAt +

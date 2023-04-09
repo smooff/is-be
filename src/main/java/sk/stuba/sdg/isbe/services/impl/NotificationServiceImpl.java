@@ -62,7 +62,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public List<Notification> getNotificationById(String notificationId) {
+    public Notification getNotificationById(String notificationId) {
 
         validateNotificationId(notificationId);
 
@@ -87,7 +87,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         existingNotification.setName(notification.getName());
         existingNotification.setDevices(notification.getDevices());
-        existingNotification.setActive(notification.getActive());
+        existingNotification.setDeactivated(notification.getDeactivated());
         existingNotification.setRules(notification.getRules());
         existingNotification.setLevel(notification.getLevel());
         existingNotification.setNotificationMessage(notification.getNotificationMessage());
@@ -101,13 +101,23 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    public Notification deleteNotification(String notificationId) {
+
+        validateNotificationId(notificationId);
+
+        Notification notificationToDelete = getNotificationById(notificationId);
+        notificationToDelete.setDeactivated(true);
+        return notificationRepository.save(notificationToDelete);
+    }
+
+    @Override
     public void validateNotification(Notification notification) {
 
         if (!notification.hasNonEmptyName()) {
             throw new InvalidEntityException("Notification name needs to be set correctly.");
         } else if (!notification.hasNonEmptyDevices()) {
             throw new InvalidEntityException("Notification devices needs to be set correctly.");
-        } else if (notification.getActive() == null) {
+        } else if (notification.getDeactivated() == null) {
             throw new InvalidEntityException("Notification activity needs to be set correctly.");
         } else if (!notification.hasNonEmptyRules()) {
             throw new InvalidEntityException("Notification rules needs to be set correctly.");

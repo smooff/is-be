@@ -13,7 +13,7 @@ public interface NotificationRepository extends MongoRepository<Notification, St
 
    List<Notification> getNotificationByDevicesContaining(String device);
 
-   List<Notification> getNotificationById(String id);
+   Notification getNotificationById(String id);
 
    @Query("{'deviceAndTag.?0': ?1}")
    List<Notification> getNotificationByDeviceAndTag(String device, String tag);

@@ -1,5 +1,7 @@
 package sk.stuba.sdg.isbe.services;
 
+import org.springframework.http.ResponseEntity;
+import sk.stuba.sdg.isbe.domain.model.Device;
 import sk.stuba.sdg.isbe.domain.model.Notification;
 
 import java.util.List;
@@ -16,9 +18,11 @@ public interface NotificationService {
 
     List<Notification> getNotifications();
 
-    List<Notification> getNotificationById(String notificationId);
+    Notification getNotificationById(String notificationId);
 
     List<Notification> getNotificationByDeviceAndTag(String deviceId, String tag);
 
     Notification editNotification(Notification notification);
+
+    Notification deleteNotification(String notificationId);
 }

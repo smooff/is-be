@@ -2,6 +2,7 @@ package sk.stuba.sdg.isbe.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sk.stuba.sdg.isbe.domain.model.Notification;
 import sk.stuba.sdg.isbe.services.NotificationService;
@@ -32,7 +33,7 @@ public class NotificationController {
 
     @PostMapping(value = "/getNotificationById/{notificationId}")
     @Operation(summary = "Get Notification by id")
-    public List<Notification> getNotificationById(@PathVariable("notificationId") String id) {
+    public Notification getNotificationById(@PathVariable("notificationId") String id) {
         return this.notificationService.getNotificationById(id);
     }
 
@@ -52,5 +53,11 @@ public class NotificationController {
     @Operation(summary = "Edit existing Notification")
     public Notification editNotification(@Valid @RequestBody Notification notification){
         return this.notificationService.editNotification(notification);
+    }
+
+    @Operation(summary = "Delete Notification by uid")
+    @DeleteMapping("delete/{notificationId}")
+    public Notification deleteNotification(@PathVariable String notificationId) {
+        return this.notificationService.deleteNotification(notificationId);
     }
 }
