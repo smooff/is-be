@@ -57,13 +57,13 @@ public class Notification {
      */
     private Long createdAt;
 
-    private Map<String,String> deviceAndTag = new HashMap<>();
+    private Map<String,List<String>> deviceAndTag = new HashMap<>();
 
-    public Map<String, String> getDeviceAndTag() {
+    public Map<String, List<String>> getDeviceAndTag() {
         return deviceAndTag;
     }
 
-    public void setDeviceAndTag(Map<String, String> deviceAndTag) {
+    public void setDeviceAndTag(Map<String, List<String>> deviceAndTag) {
         this.deviceAndTag = deviceAndTag;
     }
 

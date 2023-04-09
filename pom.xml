@@ -21,6 +21,8 @@
 		<open-api.version>2.0.2</open-api.version>
 		<javax-servlet.version>3.1.0</javax-servlet.version>
 		<log4j.version>1.2.17</log4j.version>
+		<json.version>20190722</json.version>
+		<json-logic.version>1.0.7</json-logic.version>
 	</properties>
 
 	<packaging>jar</packaging>
@@ -72,6 +74,19 @@
 			<artifactId>log4j</artifactId>
 			<version>${log4j.version}</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>${json.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.github.jamsesso</groupId>
+			<artifactId>json-logic-java</artifactId>
+			<version>${json-logic.version}</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
