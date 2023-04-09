@@ -50,7 +50,32 @@ public class Notification {
     /**
      * Spam counter for already sent notification.
      */
-    private Integer counter;
+    private Integer multiplicityCounter;
+
+    /**
+     * Define if the notification was already triggered - sent to user. This reset if users interact with notification.
+     */
+    private Boolean isAlreadyTriggered;
+
+    /**
+     * Message for user after notification is triggered.
+     */
+    private String notificationMessage;
+
+    /**
+     * Define time when was notification first time triggered.
+     */
+    private Long firstTimeTriggeredAt;
+
+    /**
+     * Define time when was notification last time triggered.
+     */
+    private Long lastTimeTriggeredAt;
+
+    /**
+     * Define time until the notification is muted.
+     */
+    private Long mutedUntil;
 
     /**
      * Time of creation.
@@ -122,12 +147,12 @@ public class Notification {
         this.level = level;
     }
 
-    public Integer getCounter() {
-        return counter;
+    public Integer getMultiplicityCounter() {
+        return multiplicityCounter;
     }
 
-    public void setCounter(Integer counter) {
-        this.counter = counter;
+    public void setMultiplicityCounter(Integer multiplicityCounter) {
+        this.multiplicityCounter = multiplicityCounter;
     }
 
     public Long getCreatedAt() {
@@ -136,6 +161,46 @@ public class Notification {
 
     public void setCreatedAt(Long createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getNotificationMessage() {
+        return notificationMessage;
+    }
+
+    public void setNotificationMessage(String notificationMessage) {
+        this.notificationMessage = notificationMessage;
+    }
+
+    public Boolean getAlreadyTriggered() {
+        return isAlreadyTriggered;
+    }
+
+    public void setAlreadyTriggered(Boolean alreadyTriggered) {
+        isAlreadyTriggered = alreadyTriggered;
+    }
+
+    public Long getFirstTimeTriggeredAt() {
+        return firstTimeTriggeredAt;
+    }
+
+    public void setFirstTimeTriggeredAt(Long firstTimeTriggeredAt) {
+        this.firstTimeTriggeredAt = firstTimeTriggeredAt;
+    }
+
+    public Long getLastTimeTriggeredAt() {
+        return lastTimeTriggeredAt;
+    }
+
+    public void setLastTimeTriggeredAt(Long lastTimeTriggeredAt) {
+        this.lastTimeTriggeredAt = lastTimeTriggeredAt;
+    }
+
+    public Long getMutedUntil() {
+        return mutedUntil;
+    }
+
+    public void setMutedUntil(Long mutedUntil) {
+        this.mutedUntil = mutedUntil;
     }
 
     @Override
@@ -147,7 +212,7 @@ public class Notification {
                 ", devices=" + devices +
                 ", active=" + active +
                 ", level=" + level +
-                ", counter=" + counter +
+                ", counter=" + multiplicityCounter +
                 ", createdAt=" + createdAt +
                 '}';
     }

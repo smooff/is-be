@@ -4,6 +4,6 @@ public interface EventConstants {
 
     public static String NO_ACTION = "noAction";
 
-    public static String ACTION = "action";
+    public static String NOTIFICATION_MESSAGE = "notificationMessage";
 
 }

@@ -32,8 +32,10 @@ public class NotificationServiceImpl implements NotificationService {
         validateNotification(notification);
 
         notification.setCreatedAt(Instant.now().toEpochMilli());
-        notification.setCounter(0);
+        notification.setMultiplicityCounter(0);
         notification.setLevel(NotificationLevelEnum.NOT_SOLVED);
+        notification.setNotificationMessage("");
+        notification.setMutedUntil(null);
 
         return notificationRepository.save(notification);
     }
@@ -88,6 +90,12 @@ public class NotificationServiceImpl implements NotificationService {
         existingNotification.setActive(notification.getActive());
         existingNotification.setRules(notification.getRules());
         existingNotification.setLevel(notification.getLevel());
+        existingNotification.setNotificationMessage(notification.getNotificationMessage());
+        existingNotification.setAlreadyTriggered(notification.getAlreadyTriggered());
+        existingNotification.setMultiplicityCounter(notification.getMultiplicityCounter());
+        existingNotification.setFirstTimeTriggeredAt(notification.getFirstTimeTriggeredAt());
+        existingNotification.setLastTimeTriggeredAt(notification.getLastTimeTriggeredAt());
+        existingNotification.setMutedUntil(notification.getMutedUntil());
 
         return notificationRepository.save(existingNotification);
     }
@@ -103,6 +111,8 @@ public class NotificationServiceImpl implements NotificationService {
             throw new InvalidEntityException("Notification activity needs to be set correctly.");
         } else if (!notification.hasNonEmptyRules()) {
             throw new InvalidEntityException("Notification rules needs to be set correctly.");
+        } else if (notification.getNotificationMessage() == null){
+            throw new InvalidEntityException("Notification message needs to be set correctly.");
         }
     }
 
