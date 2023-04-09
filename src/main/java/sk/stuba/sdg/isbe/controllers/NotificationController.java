@@ -2,7 +2,6 @@ package sk.stuba.sdg.isbe.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sk.stuba.sdg.isbe.domain.model.Notification;
 import sk.stuba.sdg.isbe.services.NotificationService;
@@ -65,5 +64,11 @@ public class NotificationController {
     @DeleteMapping("delete/{notificationId}")
     public Notification deleteNotification(@PathVariable String notificationId) {
         return this.notificationService.deleteNotification(notificationId);
+    }
+
+    @PostMapping(value = "/mute/{notificationId}/{minutes}")
+    @Operation(summary = "Mute notification evaluation for certain time - minutes.")
+    public Notification muteNotification(@PathVariable("notificationId") String notificationId, @PathVariable("minutes") Integer minutes) {
+        return this.notificationService.muteNotification(notificationId, minutes);
     }
 }

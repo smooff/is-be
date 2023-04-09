@@ -24,6 +24,8 @@ public interface NotificationService {
 
     List<Notification> getNotificationByDeviceAndTag(String deviceId, String tag);
 
+    Notification muteNotification(String notificationId, Integer minutes);
+
     Notification editNotification(Notification notification);
 
     Notification deleteNotification(String notificationId);

@@ -7,6 +7,7 @@ import sk.stuba.sdg.isbe.domain.model.Notification;
 import sk.stuba.sdg.isbe.handlers.exceptions.EntityExistsException;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidEntityException;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidOperationException;
+import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
 import sk.stuba.sdg.isbe.repositories.NotificationRepository;
 import sk.stuba.sdg.isbe.services.NotificationService;
 
@@ -43,14 +44,14 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public List<Notification> getNotificationsAssociatedWithDevice(String deviceID) {
 
-        if(deviceID == null || deviceID.isEmpty()){
+        if (deviceID == null || deviceID.isEmpty()) {
             throw new InvalidOperationException("deviceID needs to be set for this operation.");
         }
 
         List<Notification> notifications = notificationRepository.getNotificationByDevicesContainingAndDeactivated(deviceID, false);
 
         if (notifications.isEmpty()) {
-            throw new EntityExistsException("Notification associated with deviceID: "+ deviceID +" does not exists.");
+            throw new EntityExistsException("Notification associated with deviceID: " + deviceID + " does not exists.");
         }
         return notifications;
     }
@@ -72,7 +73,13 @@ public class NotificationServiceImpl implements NotificationService {
 
         validateNotificationId(notificationId);
 
-        return notificationRepository.getNotificationById(notificationId);
+        Notification notification = notificationRepository.getNotificationById(notificationId);
+
+        if (notification == null) {
+            throw new NotFoundCustomException("Notification with ID: '" + notificationId + "' was not found!");
+        }
+
+        return notification;
     }
 
     @Override
@@ -117,6 +124,22 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    public Notification muteNotification(String notificationId, Integer minutes) {
+
+        validateNotificationId(notificationId);
+
+        if (minutes == null) {
+            throw new InvalidOperationException("Mute time for notification needs to be defined.");
+        }
+
+        Notification notificationToMute = getNotificationById(notificationId);
+        long muteTimeConverted = minutes * 60 * 1000;
+        notificationToMute.setMutedUntil(Instant.now().plusMillis(muteTimeConverted).toEpochMilli());
+
+        return notificationRepository.save(notificationToMute);
+    }
+
+    @Override
     public void validateNotification(Notification notification) {
 
         if (!notification.hasNonEmptyName()) {
@@ -127,7 +150,7 @@ public class NotificationServiceImpl implements NotificationService {
             throw new InvalidEntityException("Notification activity needs to be set correctly.");
         } else if (!notification.hasNonEmptyRules()) {
             throw new InvalidEntityException("Notification rules needs to be set correctly.");
-        } else if (notification.getNotificationMessage() == null){
+        } else if (notification.getNotificationMessage() == null) {
             throw new InvalidEntityException("Notification message needs to be set correctly.");
         }
     }
