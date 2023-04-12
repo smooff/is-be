@@ -46,6 +46,12 @@ public class RecipeController {
         return recipeService.getRecipesByTypeOfDevice(type);
     }
 
+    @Operation(summary = "Get recipes by device-type and pages with sorting")
+    @GetMapping("getByTypeOfDeviceAndPages/{type}/{page}/{pageSize}/{sortBy}/{sortDirection}")
+    public List<Recipe> getRecipesByTypeOfDevicePageable(@PathVariable String type, @PathVariable int page, @PathVariable int pageSize, @PathVariable String sortBy, @PathVariable String sortDirection) {
+        return recipeService.getRecipesByTypeOfDevicePageable(type, page, pageSize, sortBy, sortDirection);
+    }
+
     @Operation(summary = "Get recipe by name")
     @GetMapping("getByName/{name}")
     public Recipe getRecipeByName(@PathVariable String name) {
@@ -82,9 +88,21 @@ public class RecipeController {
         return recipeService.getFullRecipes(typeOfDevice);
     }
 
+    @Operation(summary = "Get non-sub-recipes by device-type and pages with sorting")
+    @GetMapping("getFullRecipesByDeviceTypeAndPages/{typeOfDevice}/{page}/{pageSize}/{sortBy}/{sortDirection}")
+    public List<Recipe> getFullRecipesPageable(@PathVariable String typeOfDevice, @PathVariable int page, @PathVariable int pageSize, @PathVariable String sortBy, @PathVariable String sortDirection) {
+        return recipeService.getFullRecipesPageable(typeOfDevice, page, pageSize, sortBy, sortDirection);
+    }
+
     @Operation(summary = "Get sub-recipes by device-type")
     @GetMapping("getSubRecipesByDeviceType/{typeOfDevice}")
     public List<Recipe> getSubRecipes(@PathVariable String typeOfDevice) {
         return recipeService.getSubRecipes(typeOfDevice);
+    }
+
+    @Operation(summary = "Get sub-recipes by device-type and pages with sorting")
+    @GetMapping("getSubRecipesByDeviceType/{typeOfDevice}/{page}/{pageSize}/{sortBy}/{sortDirection}")
+    public List<Recipe> getSubRecipesPageable(@PathVariable String typeOfDevice, @PathVariable int page, @PathVariable int pageSize, @PathVariable String sortBy, @PathVariable String sortDirection) {
+        return recipeService.getSubRecipesPageable(typeOfDevice, page, pageSize, sortBy, sortDirection);
     }
 }

@@ -17,7 +17,7 @@ public class JobController {
 
     @Operation(summary = "Run a job created from a recipe with n repetitions")
     @PostMapping("runFromRecipe/{recipeId}/{deviceId}/{repetitions}")
-    public Job createJobFromRecipe(@PathVariable String recipeId,@PathVariable String deviceId, @PathVariable int repetitions) {
+    public Job createJobFromRecipe(@PathVariable String recipeId, @PathVariable String deviceId, @PathVariable int repetitions) {
         return jobService.runJobFromRecipe(recipeId, deviceId, repetitions);
     }
 
@@ -63,20 +63,20 @@ public class JobController {
         jobService.continueJob(jobId);
     }
 
-    @Operation(summary = "Get all jobs by device")
+    @Operation(summary = "Get all jobs on a device")
     @GetMapping("getAllJobs/{deviceId}")
     public List<Job> getAllJobsOnDevice(@PathVariable String deviceId) {
         return jobService.getAllJobsOnDevice(deviceId);
     }
 
-    @Operation(summary = "Get finished jobs by a given status")
-    @GetMapping("getFinishedJobsByStatus/{deviceId}")
+    @Operation(summary = "Get finished jobs on a device")
+    @GetMapping("getFinishedJobs/{deviceId}")
     public List<Job> getFinishedJobsByStatus(@PathVariable String deviceId) {
         return jobService.getFinishedJobsByStatus(deviceId);
     }
 
-    @Operation(summary = "Get running jobs by a given status")
-    @GetMapping("getRunningJobsByStatus/{deviceId}")
+    @Operation(summary = "Get running jobs on a device")
+    @GetMapping("getRunningJobs/{deviceId}")
     public List<Job> getRunningJobsByStatus(@PathVariable String deviceId) {
         return jobService.getRunningJobsByStatus(deviceId);
     }

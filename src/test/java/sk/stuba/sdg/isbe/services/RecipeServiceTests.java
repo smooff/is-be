@@ -108,7 +108,7 @@ public class RecipeServiceTests {
         recipeService.createRecipe(recipe);
         recipeService.deleteRecipe(recipe.getId());
         Exception exception = assertThrows(NotFoundCustomException.class, () -> {
-            recipeService.getRecipe(recipe.getId());
+            recipeService.getRecipeById(recipe.getId());
         });
         String expected = "Recipe with ID: '" + recipe.getId() + "' was not found!";
         assertEquals(expected, exception.getMessage());
@@ -140,7 +140,7 @@ public class RecipeServiceTests {
         commandRepository.save(command);
 
         recipeService.addCommandToRecipe(recipe.getId(), command.getId());
-        Recipe recipeFromDb = recipeService.getRecipe(recipe.getId());
+        Recipe recipeFromDb = recipeService.getRecipeById(recipe.getId());
         assertNotNull(recipeFromDb.getCommands());
         assertFalse(recipeFromDb.getCommands().isEmpty());
 
@@ -175,7 +175,7 @@ public class RecipeServiceTests {
         updateRecipe.setSubRecipe(true);
         updateRecipe.setTypeOfDevice(DeviceTypeEnum.SDG_CUBE);
         recipeService.updateRecipe(recipe.getId(), updateRecipe);
-        Recipe recipeDb = recipeService.getRecipe(recipe.getId());
+        Recipe recipeDb = recipeService.getRecipeById(recipe.getId());
         assertNotNull(recipeDb);
         assertEquals(recipeDb.getName(), updateRecipe.getName());
         assertEquals(recipeDb.isSubRecipe(), updateRecipe.isSubRecipe());
@@ -208,7 +208,7 @@ public class RecipeServiceTests {
         recipeRepository.save(recipe2);
 
         recipeService.addSubRecipeToRecipe(recipe.getId(), recipe2.getId());
-        Recipe recipeDb = recipeService.getRecipe(recipe.getId());
+        Recipe recipeDb = recipeService.getRecipeById(recipe.getId());
         assertEquals(1, recipeDb.getSubRecipes().size());
 
         recipeRepository.delete(recipe);
@@ -262,7 +262,7 @@ public class RecipeServiceTests {
         assertEquals(expected, exception.getMessage());
 
         recipeService.removeSubRecipeFromRecipe(recipe.getId(), recipe2.getId(), 1);
-        Recipe recipeDb = recipeService.getRecipe(recipe.getId());
+        Recipe recipeDb = recipeService.getRecipeById(recipe.getId());
         assertEquals(2, recipeDb.getSubRecipes().size());
 
         recipeRepository.delete(recipe);

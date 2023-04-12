@@ -9,13 +9,15 @@ public interface RecipeService {
 
     Recipe createRecipe(Recipe recipe);
 
-    Recipe getRecipe(String recipeId);
+    Recipe getRecipeById(String recipeId);
 
     Recipe addCommandToRecipe(String recipeId, String commandId);
 
     Recipe removeCommandFromRecipe(String recipeId, String commandId, int index);
 
     List<Recipe> getRecipesByTypeOfDevice(String typeOfDevice);
+
+    List<Recipe> getRecipesByTypeOfDevicePageable(String typeOfDevice, int page, int pageSize, String sortBy, String sortDirection);
 
     Recipe getRecipeByName(String name);
 
@@ -32,6 +34,10 @@ public interface RecipeService {
     List<Recipe> getFullRecipes(String typeOfDevice);
 
     List<Recipe> getSubRecipes(String typeOfDevice);
+
+    List<Recipe> getFullRecipesPageable(String typeOfDevice, int page, int pageSize, String sortBy, String sortDirection);
+
+    List<Recipe> getSubRecipesPageable(String typeOfDevice, int page, int pageSize, String sortBy, String sortDirection);
 
     List<Recipe> getRecipesContainingCommand(Command command);
 }

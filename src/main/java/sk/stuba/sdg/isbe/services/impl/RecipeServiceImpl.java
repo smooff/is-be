@@ -1,8 +1,12 @@
 package sk.stuba.sdg.isbe.services.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import sk.stuba.sdg.isbe.domain.enums.DeviceTypeEnum;
+import sk.stuba.sdg.isbe.domain.enums.SortDirectionEnum;
 import sk.stuba.sdg.isbe.domain.model.Command;
 import sk.stuba.sdg.isbe.domain.model.Recipe;
 import sk.stuba.sdg.isbe.handlers.exceptions.EntityExistsException;
@@ -13,16 +17,13 @@ import sk.stuba.sdg.isbe.repositories.RecipeRepository;
 import sk.stuba.sdg.isbe.services.CommandService;
 import sk.stuba.sdg.isbe.services.RecipeService;
 import sk.stuba.sdg.isbe.utilities.DeviceTypeUtils;
+import sk.stuba.sdg.isbe.utilities.SortingUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.lang.reflect.Field;
+import java.util.*;
 
 @Service
 public class RecipeServiceImpl implements RecipeService {
-
-    private static final String EMPTY_STRING = "";
 
     @Autowired
     private RecipeRepository recipeRepository;
@@ -32,7 +33,7 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public Recipe createRecipe(Recipe recipe) {
-        if (recipe.getName() == null || recipe.getName().equals(EMPTY_STRING)) {
+        if (recipe.getName() == null || recipe.getName().isEmpty()) {
             throw new InvalidEntityException("Recipe has no name set!");
         }
         if (recipeWithNameExists(recipe.getName())) {
@@ -59,6 +60,25 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
+    public List<Recipe> getRecipesByTypeOfDevicePageable(String typeOfDevice, int page, int pageSize, String sortBy, String sortDirection) {
+        if (page <= 0) {
+            throw new InvalidOperationException("Page must be greater than 0!");
+        }
+        if (pageSize <= 0) {
+            throw new InvalidOperationException("Size of the page must be greater than 0!");
+        }
+
+        DeviceTypeEnum deviceType = DeviceTypeUtils.getDeviceTypeEnum(typeOfDevice);
+        Sort sorting = getDirectedSorting(Sort.by(getValidRecipeSortingField(sortBy)), sortDirection);
+        Pageable pageable = PageRequest.of(page - 1, pageSize, sorting);
+        List<Recipe> recipes = recipeRepository.getRecipesByTypeOfDeviceAndDeactivated(deviceType, false, pageable);
+        if (recipes.isEmpty()) {
+            throw new NotFoundCustomException("There are not any recipes with type of Device: " + typeOfDevice + " on this page!");
+        }
+        return recipes;
+    }
+
+    @Override
     public Recipe getRecipeByName(String name) {
         Optional<Recipe> recipe = recipeRepository.getRecipeByNameAndDeactivated(name, false);
         if (recipe.isEmpty()) {
@@ -69,7 +89,7 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public Recipe updateRecipe(String recipeId, Recipe changeRecipe) {
-        Recipe recipe = getRecipe(recipeId);
+        Recipe recipe = getRecipeById(recipeId);
 
         if (changeRecipe == null) {
             throw new InvalidEntityException("Recipe with changes is null!");
@@ -101,11 +121,11 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     public Recipe addSubRecipeToRecipe(String recipeId, String subRecipeId) {
         if (Objects.equals(recipeId, subRecipeId)) {
-            throw new InvalidOperationException("Recipe can't be added as its own sub-recipe!");
+            throw new InvalidOperationException("Recipe can't be added as its own sub-recipe to prevent infinite loop!");
         }
 
-        Recipe recipe = getRecipe(recipeId);
-        Recipe subRecipe = getRecipe(subRecipeId);
+        Recipe recipe = getRecipeById(recipeId);
+        Recipe subRecipe = getRecipeById(subRecipeId);
 
         if (recipe.getTypeOfDevice() != subRecipe.getTypeOfDevice()) {
             throw new InvalidEntityException("Device types of the recipes do not match!"
@@ -131,7 +151,7 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public Recipe removeSubRecipeFromRecipe(String recipeId, String subRecipeId, int index) {
-        Recipe recipe = getRecipe(recipeId);
+        Recipe recipe = getRecipeById(recipeId);
         if (subRecipeId == null) {
             throw new NullPointerException("ID of sub-recipe must not be null!");
         }
@@ -167,7 +187,7 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public Recipe deleteRecipe(String recipeId) {
-        Recipe recipeToDelete = getRecipe(recipeId);
+        Recipe recipeToDelete = getRecipeById(recipeId);
         List<Recipe> recipesUsingThis = recipeRepository.getRecipesBySubRecipesContaining(recipeToDelete);
         List<String> recipeNames = recipesUsingThis.stream().map(Recipe::getName).toList();
 
@@ -191,22 +211,44 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public List<Recipe> getFullRecipes(String typeOfDevice) {
-        DeviceTypeEnum deviceType = DeviceTypeUtils.getDeviceTypeEnum(typeOfDevice);
-        List<Recipe> recipes = recipeRepository.getRecipesByIsSubRecipeAndTypeOfDeviceAndDeactivated(false, deviceType, false);
+        return getFullOrSubRecipes(typeOfDevice, false);
+    }
+
+    @Override
+    public List<Recipe> getSubRecipes(String typeOfDevice) {
+        return getFullOrSubRecipes(typeOfDevice, true);
+    }
+
+    private List<Recipe> getFullOrSubRecipes(String deviceType, boolean isSubRecipe) {
+        DeviceTypeEnum deviceTypeEnum = DeviceTypeUtils.getDeviceTypeEnum(deviceType);
+        List<Recipe> recipes = recipeRepository.getRecipesByIsSubRecipeAndTypeOfDeviceAndDeactivated(isSubRecipe, deviceTypeEnum, false);
         if (recipes.isEmpty()) {
-            throw new NotFoundCustomException("There are not any full recipes in the database yet!");
+            String recipeType = isSubRecipe ? "sub-recipes" : "recipes";
+            throw new NotFoundCustomException("There are not any " + recipeType + " in the database yet!");
         }
         return recipes;
     }
 
     @Override
-    public List<Recipe> getSubRecipes(String typeOfDevice) {
-        DeviceTypeEnum deviceType = DeviceTypeUtils.getDeviceTypeEnum(typeOfDevice);
-        List<Recipe> subRecipes = recipeRepository.getRecipesByIsSubRecipeAndTypeOfDeviceAndDeactivated(true, deviceType, false);
-        if (subRecipes.isEmpty()) {
-            throw new NotFoundCustomException("There are not any sub-recipes in the database yet!");
+    public List<Recipe> getFullRecipesPageable(String deviceType, int page, int pageSize, String sortBy, String sortDirection) {
+        return getFullOrSubRecipesPageable(deviceType, false, page, pageSize, sortBy, sortDirection);
+    }
+
+    @Override
+    public List<Recipe> getSubRecipesPageable(String deviceType, int page, int pageSize, String sortBy, String sortDirection) {
+        return getFullOrSubRecipesPageable(deviceType, true, page, pageSize, sortBy, sortDirection);
+    }
+
+    private List<Recipe> getFullOrSubRecipesPageable(String deviceType, boolean isSubRecipe, int page, int pageSize, String sortBy, String sortDirection) {
+        DeviceTypeEnum deviceTypeEnum = DeviceTypeUtils.getDeviceTypeEnum(deviceType);
+        Sort sorting = getDirectedSorting(Sort.by(getValidRecipeSortingField(sortBy)), sortDirection);
+        Pageable pageable = PageRequest.of(page - 1, pageSize, sorting);
+        List<Recipe> recipes = recipeRepository.getRecipesByIsSubRecipeAndTypeOfDeviceAndDeactivated(isSubRecipe, deviceTypeEnum, false, pageable);
+        if (recipes.isEmpty()) {
+            String recipeType = isSubRecipe ? "sub-recipes" : "recipes";
+            throw new NotFoundCustomException("There are not any " + recipeType + " with type of Device: " + deviceType + " on this page!");
         }
-        return subRecipes;
+        return recipes;
     }
 
     @Override
@@ -215,7 +257,7 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public Recipe getRecipe(String recipeId) {
+    public Recipe getRecipeById(String recipeId) {
         Optional<Recipe> optionalRecipe = recipeRepository.getRecipeByIdAndDeactivated(recipeId, false);
         if (optionalRecipe.isEmpty()) {
             throw new NotFoundCustomException("Recipe with ID: '" + recipeId + "' was not found!");
@@ -225,7 +267,7 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public Recipe addCommandToRecipe(String recipeId, String commandId) {
-        Recipe recipe = getRecipe(recipeId);
+        Recipe recipe = getRecipeById(recipeId);
         Command command = commandService.getCommandById(commandId);
 
         if (command.isDeactivated()) {
@@ -236,7 +278,7 @@ public class RecipeServiceImpl implements RecipeService {
             + "\nRecipes device type: " + recipe.getTypeOfDevice()
             + "\nCommands device type: " + command.getTypeOfDevice());
         }
-        if (command.getName() == null || command.getName().equals(EMPTY_STRING)) {
+        if (command.getName() == null || command.getName().isEmpty()) {
             throw new InvalidOperationException("Command does not have any name set!");
         }
         if (command.getParams() == null || command.getParams().isEmpty()) {
@@ -253,7 +295,7 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public Recipe removeCommandFromRecipe(String recipeId, String commandId, int index) {
-        Recipe recipe = getRecipe(recipeId);
+        Recipe recipe = getRecipeById(recipeId);
 
         if (recipe.getCommands() == null || recipe.getCommands().isEmpty()) {
             throw new NotFoundCustomException("Recipe does not contain any commands!");
@@ -285,5 +327,24 @@ public class RecipeServiceImpl implements RecipeService {
 
     private boolean recipeWithNameExists(String name) {
         return recipeRepository.getRecipeByNameAndDeactivated(name, false).isPresent();
+    }
+
+    private Sort getDirectedSorting(Sort sorting, String sortDirection) {
+        SortDirectionEnum sortDirectionEnum = SortingUtils.getSortDirection(sortDirection);
+        if (SortDirectionEnum.NONE == sortDirectionEnum) {
+            return sorting;
+        }
+        return SortDirectionEnum.ASC == sortDirectionEnum ? sorting.ascending() : sorting.descending();
+    }
+
+    private String getValidRecipeSortingField(String sortBy) {
+        List<String> recipeSortingFields = Arrays.stream(Recipe.class.getDeclaredFields()).map(Field::getName).toList();
+        for (String field : recipeSortingFields) {
+            if (field.equalsIgnoreCase(sortBy)) {
+                return field;
+            }
+        }
+        throw new NotFoundCustomException("Sorting field: " + sortBy + " can't be found in Recipe class!" +
+                "Possible sorting fields: " + String.join(", ", recipeSortingFields));
     }
 }

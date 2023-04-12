@@ -41,7 +41,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public Job runJobFromRecipe(String recipeId, String deviceId, int repetitions) {
-        Recipe recipe = recipeService.getRecipe(recipeId);
+        Recipe recipe = recipeService.getRecipeById(recipeId);
         if (recipe.isDeactivated()) {
             throw new InvalidEntityException("Recipe is deactivated, can't create a job from it!");
         }
@@ -58,7 +58,7 @@ public class JobServiceImpl implements JobService {
     @Override
     public Job runJob(Job job, String deviceId, int repetitions) {
         if (repetitions < 0) {
-            throw new IllegalArgumentException("Repetitions must be equal to or greater than 0!");
+            throw new InvalidOperationException("Repetitions must be equal to or greater than 0!");
         }
 
         job.setNoOfReps(repetitions);
@@ -80,9 +80,9 @@ public class JobServiceImpl implements JobService {
         // add dataPoints
         jobStatus.setData(getDataPointsFromDevice(device));
         jobStatus.setJobId(job.getUid());
-        job.setStatus(jobStatus);
         jobStatusService.createJobStatus(jobStatus);
 
+        job.setStatus(jobStatus);
         job.setDeviceId(deviceId);
         job.setCurrentStatus(JobStatusEnum.JOB_PENDING);
         job.setCreatedAt(Instant.now().toEpochMilli());
