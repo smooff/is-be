@@ -3,10 +3,12 @@ package sk.stuba.sdg.isbe.services.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import sk.stuba.sdg.isbe.domain.enums.JobStatusEnum;
 import sk.stuba.sdg.isbe.domain.model.*;
 import sk.stuba.sdg.isbe.events.DataStoredEvent;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidEntityException;
 import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
+import sk.stuba.sdg.isbe.repositories.JobRepository;
 import sk.stuba.sdg.isbe.repositories.JobStatusRepository;
 import sk.stuba.sdg.isbe.repositories.StoredDataRepository;
 import sk.stuba.sdg.isbe.services.DeviceService;
@@ -24,19 +26,22 @@ import java.util.Optional;
 public class JobStatusServiceImpl implements JobStatusService {
 
     @Autowired
-    JobStatusRepository jobStatusRepository;
+    private JobStatusRepository jobStatusRepository;
 
     @Autowired
-    DeviceService deviceService;
+    private DeviceService deviceService;
 
     @Autowired
-    StoredDataRepository storedDataRepository;
+    private StoredDataRepository storedDataRepository;
 
     @Autowired
-    ApplicationEventPublisher eventPublisher;
+    private ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    JobService jobService;
+    private JobRepository jobRepository;
+
+    @Autowired
+    private JobService jobService;
 
     @Override
     public JobStatus createJobStatus(JobStatus jobStatus){
@@ -64,10 +69,11 @@ public class JobStatusServiceImpl implements JobStatusService {
 
         if (changeJobStatus.getRetCode() != null) {
             jobStatus.setRetCode(changeJobStatus.getRetCode());
+            changeJobsCurrentStatus(jobStatus.getJobId(), changeJobStatus.getRetCode());
         }
         if (changeJobStatus.getCode() != null) {
             jobStatus.setCode(changeJobStatus.getCode());
-            jobService.getJob(jobStatus.getJobId()).setCurrentStatus(changeJobStatus.getCode());
+            changeJobsCurrentStatus(jobStatus.getJobId(), changeJobStatus.getCode());
         }
         if (changeJobStatus.getCurrentStep() != null) {
             jobStatus.setCurrentCycle(changeJobStatus.getCurrentStep());
@@ -103,6 +109,12 @@ public class JobStatusServiceImpl implements JobStatusService {
 
         jobStatus.setLastUpdated(LocalDateTime.now());
         return jobStatusRepository.save(jobStatus);
+    }
+
+    private void changeJobsCurrentStatus(String jobId, JobStatusEnum jobStatus) {
+        Job job = jobService.getJob(jobId);
+        job.setCurrentStatus(jobStatus);
+        jobRepository.save(job);
     }
 
     @Override
