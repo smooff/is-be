@@ -198,8 +198,8 @@ public class RecipeServiceTests {
         recipeService.createRecipe(recipe2);
 
         String expected = "Device types of the recipes do not match!"
-                + "\nRecipe's device type: " + recipe.getTypeOfDevice()
-                + "\nSub-recipe's device type: " + recipe2.getTypeOfDevice();
+                + " Recipe's device type: " + recipe.getTypeOfDevice()
+                + " Sub-recipe's device type: " + recipe2.getTypeOfDevice();
         Exception exception = assertThrows(InvalidEntityException.class, () -> {
             recipeService.addSubRecipeToRecipe(recipe.getId(), recipe2.getId());
         });
@@ -255,7 +255,7 @@ public class RecipeServiceTests {
 
         recipeService.addSubRecipeToRecipe(recipe.getId(), recipe2.getId());
         recipeService.addSubRecipeToRecipe(recipe.getId(), recipe2.getId());
-        expected = "Sub-recipe not found on index: " + 0 + "!\nSub-recipes with this ID can be found on indexes: " + String.join(", ", String.join(", ", List.of("1","2")) + ".");
+        expected = "Sub-recipe not found on index: " + 0 + "! Sub-recipes with this ID can be found on indexes: " + String.join(", ", String.join(", ", List.of("1","2")) + ".");
         exception = assertThrows(NotFoundCustomException.class, () -> {
             recipeService.removeSubRecipeFromRecipe(recipe.getId(), recipe2.getId(), 0);
         });
@@ -293,7 +293,7 @@ public class RecipeServiceTests {
         recipeService.addCommandToRecipe(recipe.getId(), command.getId());
         recipeService.addCommandToRecipe(recipe.getId(), command1.getId());
 
-        String expected = "Command not found on index: 2!\nCommands with this ID can be found on indexes: 0, 1";
+        String expected = "Command not found on index: 2! Commands with this ID can be found on indexes: 0, 1";
         Exception exception = assertThrows(NotFoundCustomException.class, () -> {
             recipeService.removeCommandFromRecipe(recipe.getId(), command.getId(), 2);
         });

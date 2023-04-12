@@ -13,6 +13,10 @@ import java.util.Optional;
 @Repository
 public interface RecipeRepository extends MongoRepository<Recipe, String> {
 
+    List<Recipe> getRecipesByDeactivated(boolean deactivated);
+
+    List<Recipe> getRecipesByDeactivated(boolean deactivated, Pageable pageable);
+
     List<Recipe> getRecipesByTypeOfDeviceAndDeactivated(DeviceTypeEnum typeOfDevice, boolean deactivated);
 
     List<Recipe> getRecipesByTypeOfDeviceAndDeactivated(DeviceTypeEnum typeOfDevice, boolean deactivated, Pageable pageable);
@@ -25,7 +29,7 @@ public interface RecipeRepository extends MongoRepository<Recipe, String> {
 
     Optional<Recipe> getRecipeByIdAndDeactivated(String recipeId, boolean deactivated);
 
-    List<Recipe> getRecipesByCommandsContaining(Command command);
+    List<Recipe> getRecipesByCommandsContainingAndDeactivated(Command command, boolean deactivated);
 
-    List<Recipe> getRecipesBySubRecipesContaining(Recipe recipe);
+    List<Recipe> getRecipesBySubRecipesContainingAndDeactivated(Recipe recipe, boolean deactivated);
 }

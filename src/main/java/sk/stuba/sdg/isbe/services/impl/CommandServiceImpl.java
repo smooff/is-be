@@ -1,6 +1,7 @@
 package sk.stuba.sdg.isbe.services.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import sk.stuba.sdg.isbe.domain.enums.DeviceTypeEnum;
 import sk.stuba.sdg.isbe.domain.model.Command;
@@ -13,7 +14,9 @@ import sk.stuba.sdg.isbe.repositories.CommandRepository;
 import sk.stuba.sdg.isbe.services.CommandService;
 import sk.stuba.sdg.isbe.services.RecipeService;
 import sk.stuba.sdg.isbe.utilities.DeviceTypeUtils;
+import sk.stuba.sdg.isbe.utilities.SortingUtils;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,6 +44,8 @@ public class CommandServiceImpl implements CommandService {
             throw new InvalidEntityException("Type of device for command must be set!");
         }
 
+        command.setCreatedAt(Instant.now().toEpochMilli());
+
         return commandRepository.save(command);
     }
 
@@ -55,9 +60,19 @@ public class CommandServiceImpl implements CommandService {
 
     @Override
     public List<Command> getAllCommands() {
-        List<Command> commands = commandRepository.findAll();
+        List<Command> commands = commandRepository.getCommandsByDeactivated(false);
         if (commands.isEmpty()) {
             throw new NotFoundCustomException("There are not any commands in the database!");
+        }
+        return commands;
+    }
+
+    @Override
+    public List<Command> getAllCommandsPageable(int page, int pageSize, String sortBy, String sortDirection) {
+        Pageable pageable = SortingUtils.getPagination(Command.class, sortBy, sortDirection, page, pageSize);
+        List<Command> commands = commandRepository.getCommandsByDeactivated(false, pageable);
+        if (commands.isEmpty()) {
+            throw new NotFoundCustomException("There are not any commands on page " + page + "!");
         }
         return commands;
     }
@@ -77,6 +92,17 @@ public class CommandServiceImpl implements CommandService {
         List<Command> commands = commandRepository.getCommandsByTypeOfDeviceAndDeactivated(deviceTypeEnum, false);
         if (commands.isEmpty()) {
             throw new NotFoundCustomException("There are not any commands with this type of device in the database!");
+        }
+        return commands;
+    }
+
+    @Override
+    public List<Command> getCommandsByDeviceTypePageable(String deviceType, int page, int pageSize, String sortBy, String sortDirection) {
+        DeviceTypeEnum deviceTypeEnum = DeviceTypeUtils.getDeviceTypeEnum(deviceType);
+        Pageable pageable = SortingUtils.getPagination(Command.class, sortBy, sortDirection, page, pageSize);
+        List<Command> commands = commandRepository.getCommandsByTypeOfDeviceAndDeactivated(deviceTypeEnum, false, pageable);
+        if (commands.isEmpty()) {
+            throw new NotFoundCustomException("There are not any commands with type of device: '" + deviceType + "' on this page!");
         }
         return commands;
     }

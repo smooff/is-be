@@ -11,6 +11,7 @@ import sk.stuba.sdg.isbe.domain.model.Device;
 import sk.stuba.sdg.isbe.domain.model.Job;
 import sk.stuba.sdg.isbe.domain.model.Recipe;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidEntityException;
+import sk.stuba.sdg.isbe.handlers.exceptions.InvalidOperationException;
 import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
 import sk.stuba.sdg.isbe.repositories.*;
 
@@ -87,7 +88,7 @@ public class JobServiceTests {
         recipe.setCommands(List.of(command));
         recipeService.updateRecipe(recipe.getId(), recipe);
 
-        exception = assertThrows(IllegalArgumentException.class, () -> {
+        exception = assertThrows(InvalidOperationException.class, () -> {
             jobService.runJobFromRecipe(recipe.getId(), device.getUid(), -1);
         });
         expected = "Repetitions must be equal to or greater than 0!";

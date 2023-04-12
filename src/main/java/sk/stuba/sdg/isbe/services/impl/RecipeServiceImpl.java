@@ -1,12 +1,9 @@
 package sk.stuba.sdg.isbe.services.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import sk.stuba.sdg.isbe.domain.enums.DeviceTypeEnum;
-import sk.stuba.sdg.isbe.domain.enums.SortDirectionEnum;
 import sk.stuba.sdg.isbe.domain.model.Command;
 import sk.stuba.sdg.isbe.domain.model.Recipe;
 import sk.stuba.sdg.isbe.handlers.exceptions.EntityExistsException;
@@ -19,8 +16,11 @@ import sk.stuba.sdg.isbe.services.RecipeService;
 import sk.stuba.sdg.isbe.utilities.DeviceTypeUtils;
 import sk.stuba.sdg.isbe.utilities.SortingUtils;
 
-import java.lang.reflect.Field;
-import java.util.*;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class RecipeServiceImpl implements RecipeService {
@@ -46,6 +46,8 @@ public class RecipeServiceImpl implements RecipeService {
             throw new InvalidEntityException("Recipe's sub-recipe status not defined!");
         }
 
+        recipe.setCreatedAt(Instant.now().toEpochMilli());
+
         return recipeRepository.save(recipe);
     }
 
@@ -61,16 +63,8 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public List<Recipe> getRecipesByTypeOfDevicePageable(String typeOfDevice, int page, int pageSize, String sortBy, String sortDirection) {
-        if (page <= 0) {
-            throw new InvalidOperationException("Page must be greater than 0!");
-        }
-        if (pageSize <= 0) {
-            throw new InvalidOperationException("Size of the page must be greater than 0!");
-        }
-
         DeviceTypeEnum deviceType = DeviceTypeUtils.getDeviceTypeEnum(typeOfDevice);
-        Sort sorting = getDirectedSorting(Sort.by(getValidRecipeSortingField(sortBy)), sortDirection);
-        Pageable pageable = PageRequest.of(page - 1, pageSize, sorting);
+        Pageable pageable = SortingUtils.getPagination(Recipe.class, sortBy, sortDirection, page, pageSize);
         List<Recipe> recipes = recipeRepository.getRecipesByTypeOfDeviceAndDeactivated(deviceType, false, pageable);
         if (recipes.isEmpty()) {
             throw new NotFoundCustomException("There are not any recipes with type of Device: " + typeOfDevice + " on this page!");
@@ -129,8 +123,8 @@ public class RecipeServiceImpl implements RecipeService {
 
         if (recipe.getTypeOfDevice() != subRecipe.getTypeOfDevice()) {
             throw new InvalidEntityException("Device types of the recipes do not match!"
-            + "\nRecipe's device type: " + recipe.getTypeOfDevice()
-            + "\nSub-recipe's device type: " + subRecipe.getTypeOfDevice());
+            + " Recipe's device type: " + recipe.getTypeOfDevice()
+            + " Sub-recipe's device type: " + subRecipe.getTypeOfDevice());
         }
 
         if (subRecipe.getSubRecipes() != null) {
@@ -182,18 +176,18 @@ public class RecipeServiceImpl implements RecipeService {
         }
 
         throw new NotFoundCustomException("Sub-recipe not found on index: " + index + "!"
-                                          + "\nSub-recipes with this ID can be found on indexes: " + String.join(", ", subRecipeIndexes) + ".");
+                                          + " Sub-recipes with this ID can be found on indexes: " + String.join(", ", subRecipeIndexes) + ".");
     }
 
     @Override
     public Recipe deleteRecipe(String recipeId) {
         Recipe recipeToDelete = getRecipeById(recipeId);
-        List<Recipe> recipesUsingThis = recipeRepository.getRecipesBySubRecipesContaining(recipeToDelete);
+        List<Recipe> recipesUsingThis = recipeRepository.getRecipesBySubRecipesContainingAndDeactivated(recipeToDelete, false);
         List<String> recipeNames = recipesUsingThis.stream().map(Recipe::getName).toList();
 
         if (!recipesUsingThis.isEmpty()) {
-            throw new InvalidOperationException("Recipe is used in Recipes as sub-recipe: \n" + String.join("\n", recipeNames)
-                    + "\nRemove recipe from all recipes to be able to delete it!");
+            throw new InvalidOperationException("Recipe is used in Recipes as sub-recipe: " + String.join(", ", recipeNames)
+                    + ". Remove recipe from all recipes to be able to delete it!");
         }
 
         recipeToDelete.setDeactivated(true);
@@ -202,9 +196,19 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public List<Recipe> getAllRecipes() {
-        List<Recipe> recipes = recipeRepository.findAll();
+        List<Recipe> recipes = recipeRepository.getRecipesByDeactivated(false);
         if (recipes.isEmpty()) {
             throw new NotFoundCustomException("There are not any recipes in the database yet!");
+        }
+        return recipes;
+    }
+
+    @Override
+    public List<Recipe> getAllRecipesPageable(int page, int pageSize, String sortBy, String sortDirection) {
+        Pageable pageable = SortingUtils.getPagination(Command.class, sortBy, sortDirection, page, pageSize);
+        List<Recipe> recipes = recipeRepository.getRecipesByDeactivated(false, pageable);
+        if (recipes.isEmpty()) {
+            throw new NotFoundCustomException("There are not any recipes on page " + page + "!");
         }
         return recipes;
     }
@@ -241,19 +245,18 @@ public class RecipeServiceImpl implements RecipeService {
 
     private List<Recipe> getFullOrSubRecipesPageable(String deviceType, boolean isSubRecipe, int page, int pageSize, String sortBy, String sortDirection) {
         DeviceTypeEnum deviceTypeEnum = DeviceTypeUtils.getDeviceTypeEnum(deviceType);
-        Sort sorting = getDirectedSorting(Sort.by(getValidRecipeSortingField(sortBy)), sortDirection);
-        Pageable pageable = PageRequest.of(page - 1, pageSize, sorting);
+        Pageable pageable = SortingUtils.getPagination(Recipe.class, sortBy, sortDirection, page, pageSize);
         List<Recipe> recipes = recipeRepository.getRecipesByIsSubRecipeAndTypeOfDeviceAndDeactivated(isSubRecipe, deviceTypeEnum, false, pageable);
         if (recipes.isEmpty()) {
             String recipeType = isSubRecipe ? "sub-recipes" : "recipes";
-            throw new NotFoundCustomException("There are not any " + recipeType + " with type of Device: " + deviceType + " on this page!");
+            throw new NotFoundCustomException("There are not any " + recipeType + " with type of Device: " + deviceType + " on page " + page + "!");
         }
         return recipes;
     }
 
     @Override
     public List<Recipe> getRecipesContainingCommand(Command command) {
-        return recipeRepository.getRecipesByCommandsContaining(command);
+        return recipeRepository.getRecipesByCommandsContainingAndDeactivated(command, false);
     }
 
     @Override
@@ -275,8 +278,8 @@ public class RecipeServiceImpl implements RecipeService {
         }
         if (command.getTypeOfDevice() != recipe.getTypeOfDevice()) {
             throw new InvalidOperationException("Types of devices of the command and recipe do not match!"
-            + "\nRecipes device type: " + recipe.getTypeOfDevice()
-            + "\nCommands device type: " + command.getTypeOfDevice());
+            + " Recipes device type: " + recipe.getTypeOfDevice()
+            + " Commands device type: " + command.getTypeOfDevice());
         }
         if (command.getName() == null || command.getName().isEmpty()) {
             throw new InvalidOperationException("Command does not have any name set!");
@@ -322,29 +325,10 @@ public class RecipeServiceImpl implements RecipeService {
             throw new NotFoundCustomException("Provided recipe does not contain any command with ID '" + commandId + "'!");
         }
         throw new NotFoundCustomException("Command not found on index: " + index + "!"
-                + "\nCommands with this ID can be found on indexes: " + String.join(", ", commandIndexes));
+                + " Commands with this ID can be found on indexes: " + String.join(", ", commandIndexes));
     }
 
     private boolean recipeWithNameExists(String name) {
         return recipeRepository.getRecipeByNameAndDeactivated(name, false).isPresent();
-    }
-
-    private Sort getDirectedSorting(Sort sorting, String sortDirection) {
-        SortDirectionEnum sortDirectionEnum = SortingUtils.getSortDirection(sortDirection);
-        if (SortDirectionEnum.NONE == sortDirectionEnum) {
-            return sorting;
-        }
-        return SortDirectionEnum.ASC == sortDirectionEnum ? sorting.ascending() : sorting.descending();
-    }
-
-    private String getValidRecipeSortingField(String sortBy) {
-        List<String> recipeSortingFields = Arrays.stream(Recipe.class.getDeclaredFields()).map(Field::getName).toList();
-        for (String field : recipeSortingFields) {
-            if (field.equalsIgnoreCase(sortBy)) {
-                return field;
-            }
-        }
-        throw new NotFoundCustomException("Sorting field: " + sortBy + " can't be found in Recipe class!" +
-                "Possible sorting fields: " + String.join(", ", recipeSortingFields));
     }
 }

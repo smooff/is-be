@@ -31,6 +31,8 @@ public interface RecipeService {
 
     List<Recipe> getAllRecipes();
 
+    List<Recipe> getAllRecipesPageable(int page, int pageSize, String sortBy, String sortDirection);
+
     List<Recipe> getFullRecipes(String typeOfDevice);
 
     List<Recipe> getSubRecipes(String typeOfDevice);

@@ -9,6 +9,7 @@ import java.util.List;
 
 @Repository
 public interface JobRepository extends MongoRepository<Job, String> {
+
     List<Job> getJobsByDeviceIdAndCurrentStatusIs(String deviceId, JobStatusEnum currentStatus);
 
     List<Job> getJobsByDeviceId(String deviceId);

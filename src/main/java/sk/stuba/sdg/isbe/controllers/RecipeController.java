@@ -76,10 +76,16 @@ public class RecipeController {
         recipeService.removeSubRecipeFromRecipe(recipeId, subRecipeId, index);
     }
 
-    @Operation(summary = "Get all existing recipes")
+    @Operation(summary = "Get all recipes")
     @GetMapping("getAllRecipes")
     public List<Recipe> getAllRecipes() {
         return recipeService.getAllRecipes();
+    }
+
+    @Operation(summary = "Get all recipes with pagination and sorting")
+    @GetMapping("getAllRecipesPageable/{page}/{pageSize}/{sortBy}/{sortDirection}")
+    public List<Recipe> getAllRecipesPageable(@PathVariable int page, @PathVariable int pageSize, @PathVariable String sortBy, @PathVariable String sortDirection) {
+        return recipeService.getAllRecipesPageable(page, pageSize, sortBy, sortDirection);
     }
 
     @Operation(summary = "Get non-sub-recipes by device-type")

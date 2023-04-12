@@ -40,10 +40,22 @@ public class CommandController {
         return commandService.getAllCommands();
     }
 
+    @Operation(summary = "Get all commands with pagination and sorting")
+    @GetMapping("getAllCommandsWithPagination/{page}/{pageSize}/{sortBy}/{sortDirection}")
+    public List<Command> getAllCommandsPageable(@PathVariable int page, @PathVariable int pageSize, @PathVariable String sortBy, @PathVariable String sortDirection) {
+        return commandService.getAllCommandsPageable(page, pageSize, sortBy, sortDirection);
+    }
+
     @Operation(summary = "Get command by device-type")
     @GetMapping("getCommandByDeviceType/{deviceType}")
     public List<Command> getCommandsByDeviceType(@PathVariable String deviceType) {
         return commandService.getCommandsByDeviceType(deviceType);
+    }
+
+    @Operation(summary = "Get command by device-type and with pagination and sorting")
+    @GetMapping("getCommandByDeviceTypeAndPages/{deviceType}/{page}/{pageSize}/{sortBy}/{sortDirection}")
+    public List<Command> getCommandsByDeviceTypePageable(@PathVariable String deviceType, @PathVariable int page, @PathVariable int pageSize, @PathVariable String sortBy, @PathVariable String sortDirection) {
+        return commandService.getCommandsByDeviceTypePageable(deviceType, page, pageSize, sortBy, sortDirection);
     }
 
     @Operation(summary = "Delete command by ID")

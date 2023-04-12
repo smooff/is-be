@@ -18,6 +18,7 @@ public class Recipe {
     private List<Recipe> subRecipes;
     private DeviceTypeEnum typeOfDevice;
     private Boolean isSubRecipe;
+    private long createdAt;
     private boolean deactivated;
 
     public String getId() {
@@ -66,6 +67,14 @@ public class Recipe {
 
     public void setSubRecipes(List<Recipe> subRecipes) {
         this.subRecipes = subRecipes;
+    }
+
+    public long getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(long createdAt) {
+        this.createdAt = createdAt;
     }
 
     public boolean isDeactivated() {
