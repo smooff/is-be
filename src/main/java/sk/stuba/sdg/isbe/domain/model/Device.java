@@ -21,6 +21,7 @@ public class Device {
     private List<Job> jobs = new ArrayList<>();
     @DBRef
     private List<DataPointTag> dataPointTags = new ArrayList<>();
+    private Long responseTime;
     private Long addTime;
     private Long initExpireTime;
     private String initApiKey;
@@ -88,6 +89,14 @@ public class Device {
 
     public void setDataPointTags(List<DataPointTag> dataPointTags) {
         this.dataPointTags = dataPointTags;
+    }
+
+    public Long getResponseTime() {
+        return responseTime;
+    }
+
+    public void setResponseTime(Long responseTime) {
+        this.responseTime = responseTime;
     }
 
     public Long getAddTime() {

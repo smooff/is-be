@@ -25,7 +25,7 @@ public class DeviceServiceImpl implements DeviceService {
 
     private static final String EMPTY_STRING = "";
 
-    @Value("${spring.security.user.password}")
+    @Value("${sdg.http.auth-token-header-name}")
     private String apiKey;
 
     @Autowired
@@ -66,7 +66,10 @@ public class DeviceServiceImpl implements DeviceService {
         if (device == null) {
             throw new EntityExistsException("Device with MAC: '" + macAddress + "' was not found!");
         }
-        if (device.getInitExpireTime() < Instant.now().toEpochMilli() || device.getInitExpireTime() == -1) {
+        if (device.getInitExpireTime() == -1) {
+            throw new InvalidEntityException("Device is initialize!");
+        }
+        if (device.getInitExpireTime() < Instant.now().toEpochMilli()) {
             throw new InvalidEntityException("Device initial time is out of!");
         }
 
