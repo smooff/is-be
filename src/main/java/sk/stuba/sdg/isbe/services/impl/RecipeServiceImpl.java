@@ -124,7 +124,7 @@ public class RecipeServiceImpl implements RecipeService {
         if (recipe.getTypeOfDevice() != subRecipe.getTypeOfDevice()) {
             throw new InvalidEntityException("Device types of the recipes do not match!"
             + " Recipe's device type: " + recipe.getTypeOfDevice()
-            + " Sub-recipe's device type: " + subRecipe.getTypeOfDevice());
+            + ", Sub-recipe's device type: " + subRecipe.getTypeOfDevice());
         }
 
         if (subRecipe.getSubRecipes() != null) {
@@ -155,7 +155,7 @@ public class RecipeServiceImpl implements RecipeService {
         }
 
         if (index < 0 || index > recipe.getSubRecipes().size() - 1) {
-            throw new IndexOutOfBoundsException("Provided index of subRecipe is not valid!");
+            throw new NotFoundCustomException("Provided index of subRecipe is not valid!");
         }
 
         if (recipe.getSubRecipes().get(index).getId().equals(subRecipeId)) {
@@ -304,7 +304,7 @@ public class RecipeServiceImpl implements RecipeService {
             throw new NotFoundCustomException("Recipe does not contain any commands!");
         }
         if (index < 0 || index > recipe.getCommands().size() - 1) {
-            throw new IndexOutOfBoundsException("Index of command is out of bounds!");
+            throw new NotFoundCustomException("Index of command is out of bounds!");
         }
 
         if (recipe.getCommands().get(index).getId().equals(commandId)) {

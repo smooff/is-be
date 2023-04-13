@@ -10,6 +10,8 @@ public interface JobService {
 
     Job runJob(Job job, String deviceId, int repetitions);
 
+    Job resetJob(String jobId);
+
     Job getJob(String jobId);
 
     Job skipCycle(String jobId);

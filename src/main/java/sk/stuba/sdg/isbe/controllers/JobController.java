@@ -27,6 +27,12 @@ public class JobController {
         return jobService.runJob(job, deviceId, repetitions);
     }
 
+    @Operation(summary = "Reset a job's status")
+    @PostMapping("resetJob/{jobId}")
+    public Job resetJob(@PathVariable String jobId) {
+        return jobService.resetJob(jobId);
+    }
+
     @Operation(summary = "Get job by its ID")
     @GetMapping("getJobById/{jobId}")
     public Job getJob(@PathVariable String jobId) {

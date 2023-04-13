@@ -95,6 +95,26 @@ public class JobServiceImpl implements JobService {
         return job;
     }
 
+    @Override
+    public Job resetJob(String jobId) {
+        Job job = getJob(jobId);
+
+        jobStatusRepository.delete(job.getStatus());
+
+        JobStatus jobStatus = new JobStatus();
+        jobStatus.setCode(JobStatusEnum.JOB_PENDING);
+        jobStatus.setJobId(jobId);
+        jobStatusService.createJobStatus(jobStatus);
+
+        job.setCurrentStatus(JobStatusEnum.JOB_PENDING);
+        job.setStatus(jobStatus);
+
+        job.setCreatedAt(Instant.now().toEpochMilli());
+        jobRepository.save(job);
+
+        return job;
+    }
+
     private List<DataPoint> getDataPointsFromDevice(Device device) {
         List<DataPoint> dataPoints = new ArrayList<>();
 

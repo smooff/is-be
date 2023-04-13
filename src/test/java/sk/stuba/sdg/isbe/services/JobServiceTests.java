@@ -125,6 +125,35 @@ public class JobServiceTests {
     }
 
     @Test
+    void testResetJob() {
+        Device device = new Device();
+        device.setName("device1" + Instant.now().toEpochMilli());
+        device.setMac("ABCD");
+        device.setType(DeviceTypeEnum.ESP32);
+        deviceService.createDevice(device);
+
+        Job job = new Job();
+        job.setName("Job " + Instant.now().toEpochMilli());
+
+        Command command = new Command();
+        command.setName("Command" + Instant.now().toEpochMilli());
+        command.setParams(List.of(1,2,3));
+        command.setTypeOfDevice(DeviceTypeEnum.ESP32);
+        commandService.createCommand(command);
+
+        job.setCommands(List.of(command));
+        job.setNoOfCmds(job.getCommands().size());
+
+        jobService.runJob(job, device.getUid(), 1);
+        job = jobService.resetJob(job.getUid());
+
+        jobStatusRepository.delete(job.getStatus());
+        jobRepository.delete(job);
+        commandRepository.delete(command);
+        deviceRepository.delete(device);
+    }
+
+    @Test
     void testSkipCycle() {
         Command command = new Command();
         command.setName("Command" + Instant.now().toEpochMilli());

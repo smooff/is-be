@@ -164,8 +164,8 @@ public class DeviceServiceImpl implements DeviceService {
         LocalDateTime lastUpdated = runningJobs.get(0).getStatus().getLastUpdated();
 
         if (LocalDateTime.now().minusSeconds(10).isAfter(lastUpdated)) {
-            throw new DeviceErrorException("Device job last updated at: " + lastUpdated.toString().replace("T", " - ") + "."
-                    + "\nDevice may be disconnected!");
+            throw new DeviceErrorException("Device job last updated at: " + lastUpdated.toString().replace("T", " - ")
+                    + ". Device may be disconnected!");
         }
         return lastUpdated.toString().replace("T", " - ");
     }
