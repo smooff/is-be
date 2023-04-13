@@ -1,6 +1,7 @@
 package sk.stuba.sdg.isbe.services.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import sk.stuba.sdg.isbe.domain.enums.JobStatusEnum;
 import sk.stuba.sdg.isbe.domain.model.*;
@@ -14,6 +15,7 @@ import sk.stuba.sdg.isbe.services.JobService;
 import sk.stuba.sdg.isbe.services.JobStatusService;
 import sk.stuba.sdg.isbe.services.RecipeService;
 import sk.stuba.sdg.isbe.utilities.JobStatusUtils;
+import sk.stuba.sdg.isbe.utilities.SortingUtils;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -50,7 +52,7 @@ public class JobServiceImpl implements JobService {
         }
 
         Job job = new Job();
-        job.setName("Job: " + recipe.getName());
+        job.setName(recipe.getName());
         addCommandsFromRecipes(job, recipe);
         return runJob(job, deviceId, repetitions);
     }
@@ -182,9 +184,21 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public List<Job> getAllJobsOnDevice(String deviceId) {
+        Device device = deviceService.getDeviceById(deviceId);
         List<Job> jobs = jobRepository.getJobsByDeviceId(deviceId);
         if (jobs.isEmpty()) {
-            throw new NotFoundCustomException("There are not any jobs on the device!");
+            throw new NotFoundCustomException("There are not any jobs on the device with name: '" + device.getName() + "'!");
+        }
+        return jobs;
+    }
+
+    @Override
+    public List<Job> getAllJobsOnDevicePageable(String deviceId, int page, int pageSize, String sortBy, String sortDirection) {
+        Device device = deviceService.getDeviceById(deviceId);
+        Pageable pageable = SortingUtils.getPagination(Job.class, sortBy, sortDirection, page, pageSize);
+        List<Job> jobs = jobRepository.getJobsByDeviceId(deviceId, pageable);
+        if (jobs.isEmpty()) {
+            throw new NotFoundCustomException("There are not any jobs on page " + page + " for device with name: '" + device.getName() + "'!");
         }
         return jobs;
     }
@@ -215,7 +229,20 @@ public class JobServiceImpl implements JobService {
         List<Job> jobs = jobRepository.getJobsByDeviceIdAndCurrentStatusIs(deviceId, jobStatus);
 
         if (jobs.isEmpty()) {
-            throw new NotFoundCustomException("No jobs found with status: '" + statusName + " on device: " + device.getName() + "'!");
+            throw new NotFoundCustomException("No jobs found with status: '" + statusName + "' on device: " + device.getName() + "'!");
+        }
+        return jobs;
+    }
+
+    @Override
+    public List<Job> getAllJobsByStatusPageable(String deviceId, String status, int page, int pageSize, String sortBy, String sortDirection) {
+        JobStatusEnum jobStatus = JobStatusUtils.getJobStatusEnum(status);
+        Device device = deviceService.getDeviceById(deviceId);
+        Pageable pageable = SortingUtils.getPagination(Job.class, sortBy, sortDirection, page, pageSize);
+        List<Job> jobs = jobRepository.getJobsByDeviceIdAndCurrentStatusIs(deviceId, jobStatus, pageable);
+
+        if (jobs.isEmpty()) {
+            throw new NotFoundCustomException("No jobs found with status: '" + status + "' on device: " + device.getName() + "' on page " + page + "!");
         }
         return jobs;
     }

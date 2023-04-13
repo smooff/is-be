@@ -24,10 +24,14 @@ public interface JobService {
 
     List<Job> getAllJobsOnDevice(String deviceId);
 
+    List<Job> getAllJobsOnDevicePageable(String deviceId, int page, int pageSize, String sortBy, String sortDirection);
+
     List<Job> getFinishedJobsByStatus(String deviceId);
 
     List<Job> getRunningJobsByStatus(String deviceId);
 
     List<Job> getAllJobsByStatus(String deviceId, String status);
+
+    List<Job> getAllJobsByStatusPageable(String deviceId, String status, int page, int pageSize, String sortBy, String sortDirection);
 
 }

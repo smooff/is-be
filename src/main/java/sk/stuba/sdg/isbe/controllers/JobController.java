@@ -64,9 +64,15 @@ public class JobController {
     }
 
     @Operation(summary = "Get all jobs on a device")
-    @GetMapping("getAllJobs/{deviceId}")
+    @GetMapping("getAllJobsOnDevice/{deviceId}")
     public List<Job> getAllJobsOnDevice(@PathVariable String deviceId) {
         return jobService.getAllJobsOnDevice(deviceId);
+    }
+
+    @Operation(summary = "Get all jobs on a device with pagination and sorting")
+    @GetMapping("getAllJobsOnDevicePageable/{deviceId}/{page}/{pageSize}/{sortBy}/{sortDirection}")
+    public List<Job> getAllJobsOnDevicePageable(@PathVariable String deviceId, @PathVariable int page, @PathVariable int pageSize, @PathVariable String sortBy, @PathVariable String sortDirection) {
+        return jobService.getAllJobsOnDevicePageable(deviceId, page, pageSize, sortBy, sortDirection);
     }
 
     @Operation(summary = "Get finished jobs on a device")
@@ -85,5 +91,11 @@ public class JobController {
     @GetMapping("getJobsByStatus/{deviceId}/{status}")
     public List<Job> getJobsByStatus(@PathVariable String deviceId, @PathVariable String status) {
         return jobService.getAllJobsByStatus(deviceId, status);
+    }
+
+    @Operation(summary = "Get all jobs by a given status with pagination and sorting")
+    @GetMapping("getAllJobsByStatusPageable/{deviceId}/{status}/{page}/{pageSize}/{sortBy}/{sortDirection}")
+    public List<Job> getAllJobsByStatusPageable(@PathVariable String deviceId, @PathVariable String status, @PathVariable int page, @PathVariable int pageSize, @PathVariable String sortBy, @PathVariable String sortDirection) {
+        return jobService.getAllJobsByStatusPageable(deviceId, status, page, pageSize, sortBy, sortDirection);
     }
 }

@@ -89,8 +89,8 @@ public class JobStatusServiceImpl implements JobStatusService {
 
             if (deviceId != null) {
                 List<DataPointTag> dataPointTags = deviceService.getDeviceById(deviceId).getDataPointTags();
-                 List<StoredData> listStoredData = new ArrayList<>();
-                for(DataPoint dataPoint :jobStatus.getData()) {
+                List<StoredData> listStoredData = new ArrayList<>();
+                for (DataPoint dataPoint : jobStatus.getData()) {
                     DataPointTag dataPointTag = dataPointTags.stream().filter(data -> Objects.equals(data.getTag(), dataPoint.getTag())).findAny()
                             .orElse(null);
                     StoredData storedData = new StoredData();
