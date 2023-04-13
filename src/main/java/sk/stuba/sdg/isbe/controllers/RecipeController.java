@@ -60,20 +60,20 @@ public class RecipeController {
 
     @Operation(summary = "Update recipe by ID using object")
     @PutMapping("updateRecipe/{recipeId}")
-    public void updateRecipe(@PathVariable String recipeId, @Valid @RequestBody Recipe changeRecipe) {
-        recipeService.updateRecipe(recipeId, changeRecipe);
+    public Recipe updateRecipe(@PathVariable String recipeId, @Valid @RequestBody Recipe changeRecipe) {
+        return recipeService.updateRecipe(recipeId, changeRecipe);
     }
 
     @Operation(summary = "Add sub-recipe to a recipe using their IDs")
     @PutMapping("addSubRecipeToRecipe/{recipeId}/{subRecipeId}")
-    public void addSubRecipeToRecipe(@PathVariable String recipeId, @PathVariable String subRecipeId) {
-        recipeService.addSubRecipeToRecipe(recipeId, subRecipeId);
+    public Recipe addSubRecipeToRecipe(@PathVariable String recipeId, @PathVariable String subRecipeId) {
+        return recipeService.addSubRecipeToRecipe(recipeId, subRecipeId);
     }
 
     @Operation(summary = "Remove a recipe from sub-recipe using their IDs and index of the sub-recipe")
     @DeleteMapping("removeSubRecipeFromRecipe/{recipeId}/{subRecipeId}/{index}")
-    public void removeSubRecipeFromRecipe(@PathVariable String recipeId, @PathVariable String subRecipeId, @PathVariable int index) {
-        recipeService.removeSubRecipeFromRecipe(recipeId, subRecipeId, index);
+    public Recipe removeSubRecipeFromRecipe(@PathVariable String recipeId, @PathVariable String subRecipeId, @PathVariable int index) {
+        return recipeService.removeSubRecipeFromRecipe(recipeId, subRecipeId, index);
     }
 
     @Operation(summary = "Get all recipes")

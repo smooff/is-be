@@ -176,6 +176,38 @@ public class JobServiceImpl implements JobService {
         return setJobPaused(jobId, false);
     }
 
+    @Override
+    public String getJobStatus(String jobId) {
+        Job job = getJob(jobId);
+        switch(job.getCurrentStatus()) {
+            case JOB_PENDING -> {
+                return JobStatusEnum.JOB_PENDING.name() + ": Job '" + job.getName() + "' is pending!";
+            }
+            case JOB_PROCESSING -> {
+                return JobStatusEnum.JOB_PROCESSING.name() + ": Job '" + job.getName() + "' is being processed!";
+            }
+            case JOB_ERR -> {
+                return JobStatusEnum.JOB_ERR.name() + ": Job '" + job.getName() + "' ended with error!";
+            }
+            case JOB_DONE -> {
+                return JobStatusEnum.JOB_DONE.name() + ": Job '" + job.getName() + "' ended successfully!";
+            }
+            case JOB_IDLE -> {
+                return JobStatusEnum.JOB_IDLE.name() + ": Job '" + job.getName() + "' is idle!";
+            }
+            case JOB_CANCELED -> {
+                return JobStatusEnum.JOB_CANCELED.name() + ": Job '" + job.getName() + "' has been canceled by user!";
+            }
+            case JOB_FREE -> {
+                return JobStatusEnum.JOB_FREE.name() + ": Job '" + job.getName() + "' is free!";
+            }
+            case JOB_PAUSED -> {
+                return JobStatusEnum.JOB_PAUSED.name() + ": Job '" + job.getName() + "' has been paused by user!";
+            }
+        }
+        return "Status of job '" + job.getName() + "' is " + job.getCurrentStatus().name();
+    }
+
     private Job setJobPaused(String jobId, boolean paused) {
         Job job = getJob(jobId);
         job.setPaused(paused);

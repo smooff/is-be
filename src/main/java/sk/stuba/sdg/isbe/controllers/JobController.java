@@ -35,32 +35,38 @@ public class JobController {
 
     @Operation(summary = "Skip cycle in a job")
     @PutMapping("skipCycle/{jobId}")
-    public void skipCycle(@PathVariable String jobId) {
-        jobService.skipCycle(jobId);
+    public Job skipCycle(@PathVariable String jobId) {
+        return jobService.skipCycle(jobId);
     }
 
     @Operation(summary = "Skip step in a job")
     @PutMapping("skipStep/{jobId}")
-    public void skipStep(@PathVariable String jobId) {
-        jobService.skipStep(jobId);
+    public Job skipStep(@PathVariable String jobId) {
+        return jobService.skipStep(jobId);
     }
 
     @Operation(summary = "Pause a job")
     @PutMapping("pauseJob/{jobId}")
-    public void pauseJob(@PathVariable String jobId) {
-        jobService.pauseJob(jobId);
+    public Job pauseJob(@PathVariable String jobId) {
+        return jobService.pauseJob(jobId);
     }
 
     @Operation(summary = "Cancel a job")
     @PutMapping("cancelJob/{jobId}")
-    public void cancelJob(@PathVariable String jobId) {
-        jobService.cancelJob(jobId);
+    public Job cancelJob(@PathVariable String jobId) {
+        return jobService.cancelJob(jobId);
     }
 
     @Operation(summary = "Continue job when its paused")
     @PutMapping("continueJob/{jobId}")
-    public void continueJob(@PathVariable String jobId) {
-        jobService.continueJob(jobId);
+    public Job continueJob(@PathVariable String jobId) {
+        return jobService.continueJob(jobId);
+    }
+
+    @Operation(summary = "Get job's current status")
+    @GetMapping("getJobStatus/{jobId}")
+    public String getJobStatus(@PathVariable String jobId) {
+        return jobService.getJobStatus(jobId);
     }
 
     @Operation(summary = "Get all jobs on a device")

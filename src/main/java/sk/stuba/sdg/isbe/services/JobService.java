@@ -22,6 +22,8 @@ public interface JobService {
 
     Job continueJob(String jobId);
 
+    String getJobStatus(String jobId);
+
     List<Job> getAllJobsOnDevice(String deviceId);
 
     List<Job> getAllJobsOnDevicePageable(String deviceId, int page, int pageSize, String sortBy, String sortDirection);
