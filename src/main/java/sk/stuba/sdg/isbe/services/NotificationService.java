@@ -26,6 +26,8 @@ public interface NotificationService {
 
     Notification muteNotification(String notificationId, Integer minutes);
 
+    List<Notification> getNotificationsWithMessage();
+
     Notification editNotification(Notification notification);
 
     Notification deleteNotification(String notificationId);

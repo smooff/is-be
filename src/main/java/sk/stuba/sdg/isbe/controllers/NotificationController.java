@@ -61,7 +61,7 @@ public class NotificationController {
     }
 
     @Operation(summary = "Delete Notification by uid")
-    @DeleteMapping("delete/{notificationId}")
+    @DeleteMapping("/delete/{notificationId}")
     public Notification deleteNotification(@PathVariable String notificationId) {
         return this.notificationService.deleteNotification(notificationId);
     }
@@ -70,5 +70,11 @@ public class NotificationController {
     @Operation(summary = "Mute notification evaluation for certain time - minutes.")
     public Notification muteNotification(@PathVariable("notificationId") String notificationId, @PathVariable("minutes") Integer minutes) {
         return this.notificationService.muteNotification(notificationId, minutes);
+    }
+
+    @GetMapping(value = "/getNotificationsWithMessage")
+    @Operation(summary = "Get all Notifications with some message for user - triggered Notifications.")
+    public List<Notification> getNotificationsWithMessage() {
+        return this.notificationService.getNotificationsWithMessage();
     }
 }

@@ -14,6 +14,7 @@ import sk.stuba.sdg.isbe.services.NotificationService;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class NotificationServiceImpl implements NotificationService {
@@ -37,6 +38,8 @@ public class NotificationServiceImpl implements NotificationService {
         notification.setLevel(NotificationLevelEnum.NOT_SOLVED);
         notification.setNotificationMessage("");
         notification.setMutedUntil(null);
+        notification.setForTimeCounterAlreadyTriggered(false);
+        notification.setForTimeCounterActivatedAt(null);
 
         return notificationRepository.save(notification);
     }
@@ -109,6 +112,8 @@ public class NotificationServiceImpl implements NotificationService {
         existingNotification.setFirstTimeTriggeredAt(notification.getFirstTimeTriggeredAt());
         existingNotification.setLastTimeTriggeredAt(notification.getLastTimeTriggeredAt());
         existingNotification.setMutedUntil(notification.getMutedUntil());
+        existingNotification.setForTimeCounterAlreadyTriggered(notification.getForTimeCounterAlreadyTriggered());
+        existingNotification.setForTimeCounterActivatedAt(notification.getForTimeCounterActivatedAt());
 
         return notificationRepository.save(existingNotification);
     }
@@ -137,6 +142,18 @@ public class NotificationServiceImpl implements NotificationService {
         notificationToMute.setMutedUntil(Instant.now().plusMillis(muteTimeConverted).toEpochMilli());
 
         return notificationRepository.save(notificationToMute);
+    }
+
+    @Override
+    public List<Notification> getNotificationsWithMessage(){
+
+        List<Notification> notifications = notificationRepository.getNotificationByDeactivated(false);
+
+        List<Notification> filteredNotifications = notifications.stream()
+                .filter(notification -> notification.getNotificationMessage() != null && !notification.getNotificationMessage().isEmpty())
+                .toList();
+
+        return filteredNotifications;
     }
 
     @Override

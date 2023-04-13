@@ -11,14 +11,16 @@ import java.util.Map;
 @Document
 public class Notification {
 
-    public Notification(){}
+    public Notification() {
+    }
 
-    public Notification(String name, List<String> devices, Boolean deactivated, String rules){
+    public Notification(String name, List<String> devices, Boolean deactivated, String rules) {
         this.name = name;
         this.devices = devices;
         this.deactivated = deactivated;
         this.rules = rules;
     }
+
     @Id
     private String id;
 
@@ -82,7 +84,24 @@ public class Notification {
      */
     private Long createdAt;
 
-    private Map<String,List<String>> deviceAndTag = new HashMap<>();
+    /**
+     * Define if the notification (which contains forTime) has time counter triggered.
+     * This reset if notification is validating data, and these data does not meet the requirements of notification - then
+     * forTime is reseted.
+     * ForTime means: data validation in time - multiple data sent in certain time interval to trigger final state of notification.
+     */
+    private Boolean forTimeCounterAlreadyTriggered;
+
+    /**
+     * Define time when was notification (which contains forTime) first time triggered.
+     * Final state (message for user/run job) of notification will trigger after
+     * forTimeCounterActivatedAt+forTime(defined by user) has passed and all data sent to notification meet the
+     * requirements to run the counter (requirements are NOT met, when data triggers forTimeReset - then
+     * forTimeCounterActivatedAt and forTimeCounterAlreadyTriggered resets).
+     */
+    private Long forTimeCounterActivatedAt;
+
+    private Map<String, List<String>> deviceAndTag = new HashMap<>();
 
     public Map<String, List<String>> getDeviceAndTag() {
         return deviceAndTag;
@@ -95,6 +114,7 @@ public class Notification {
     public boolean hasNonEmptyName() {
         return name != null && !name.isEmpty();
     }
+
     public boolean hasNonEmptyDevices() {
         return devices != null && devices.stream().allMatch(device -> !device.isEmpty());
     }
@@ -201,6 +221,22 @@ public class Notification {
 
     public void setMutedUntil(Long mutedUntil) {
         this.mutedUntil = mutedUntil;
+    }
+
+    public Boolean getForTimeCounterAlreadyTriggered() {
+        return forTimeCounterAlreadyTriggered;
+    }
+
+    public void setForTimeCounterAlreadyTriggered(Boolean forTimeCounterAlreadyTriggered) {
+        this.forTimeCounterAlreadyTriggered = forTimeCounterAlreadyTriggered;
+    }
+
+    public Long getForTimeCounterActivatedAt() {
+        return forTimeCounterActivatedAt;
+    }
+
+    public void setForTimeCounterActivatedAt(Long forTimeCounterActivatedAt) {
+        this.forTimeCounterActivatedAt = forTimeCounterActivatedAt;
     }
 
     @Override
