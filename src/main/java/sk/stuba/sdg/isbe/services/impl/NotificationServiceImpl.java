@@ -14,7 +14,6 @@ import sk.stuba.sdg.isbe.services.NotificationService;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class NotificationServiceImpl implements NotificationService {
@@ -34,12 +33,9 @@ public class NotificationServiceImpl implements NotificationService {
         validateNotification(notification);
 
         notification.setCreatedAt(Instant.now().toEpochMilli());
-        notification.setMultiplicityCounter(0);
         notification.setLevel(NotificationLevelEnum.NOT_SOLVED);
-        notification.setNotificationMessage("");
         notification.setMutedUntil(null);
-        notification.setForTimeCounterAlreadyTriggered(false);
-        notification.setForTimeCounterActivatedAt(null);
+        notification.setForTimeCountingActivatedAt(null);
 
         return notificationRepository.save(notification);
     }
@@ -106,14 +102,11 @@ public class NotificationServiceImpl implements NotificationService {
         existingNotification.setDeactivated(notification.getDeactivated());
         existingNotification.setRules(notification.getRules());
         existingNotification.setLevel(notification.getLevel());
-        existingNotification.setNotificationMessage(notification.getNotificationMessage());
         existingNotification.setAlreadyTriggered(notification.getAlreadyTriggered());
-        existingNotification.setMultiplicityCounter(notification.getMultiplicityCounter());
-        existingNotification.setFirstTimeTriggeredAt(notification.getFirstTimeTriggeredAt());
-        existingNotification.setLastTimeTriggeredAt(notification.getLastTimeTriggeredAt());
         existingNotification.setMutedUntil(notification.getMutedUntil());
-        existingNotification.setForTimeCounterAlreadyTriggered(notification.getForTimeCounterAlreadyTriggered());
-        existingNotification.setForTimeCounterActivatedAt(notification.getForTimeCounterActivatedAt());
+        existingNotification.setForTimeCountingActivatedAt(notification.getForTimeCountingActivatedAt());
+        existingNotification.setMessageMultiplicityCounter(notification.getMessageMultiplicityCounter());
+        existingNotification.setMessageAndTriggerTime(notification.getMessageAndTriggerTime());
 
         return notificationRepository.save(existingNotification);
     }
@@ -149,11 +142,9 @@ public class NotificationServiceImpl implements NotificationService {
 
         List<Notification> notifications = notificationRepository.getNotificationByDeactivated(false);
 
-        List<Notification> filteredNotifications = notifications.stream()
-                .filter(notification -> notification.getNotificationMessage() != null && !notification.getNotificationMessage().isEmpty())
+        return notifications.stream()
+                .filter(notification -> notification.getMessageAndTriggerTime() != null && !notification.getMessageAndTriggerTime().isEmpty())
                 .toList();
-
-        return filteredNotifications;
     }
 
     @Override
@@ -167,8 +158,6 @@ public class NotificationServiceImpl implements NotificationService {
             throw new InvalidEntityException("Notification activity needs to be set correctly.");
         } else if (!notification.hasNonEmptyRules()) {
             throw new InvalidEntityException("Notification rules needs to be set correctly.");
-        } else if (notification.getNotificationMessage() == null) {
-            throw new InvalidEntityException("Notification message needs to be set correctly.");
         }
     }
 

@@ -50,29 +50,9 @@ public class Notification {
     private NotificationLevelEnum level;
 
     /**
-     * Spam counter for already sent notification.
-     */
-    private Integer multiplicityCounter;
-
-    /**
      * Define if the notification was already triggered - sent to user. This reset if users interact with notification.
      */
     private Boolean isAlreadyTriggered;
-
-    /**
-     * Message for user after notification is triggered.
-     */
-    private String notificationMessage;
-
-    /**
-     * Define time when was notification first time triggered.
-     */
-    private Long firstTimeTriggeredAt;
-
-    /**
-     * Define time when was notification last time triggered.
-     */
-    private Long lastTimeTriggeredAt;
 
     /**
      * Define time until the notification is muted.
@@ -85,22 +65,32 @@ public class Notification {
     private Long createdAt;
 
     /**
-     * Define if the notification (which contains forTime) has time counter triggered.
-     * This reset if notification is validating data, and these data does not meet the requirements of notification - then
-     * forTime is reseted.
-     * ForTime means: data validation in time - multiple data sent in certain time interval to trigger final state of notification.
-     */
-    private Boolean forTimeCounterAlreadyTriggered;
-
-    /**
-     * Define time when was notification (which contains forTime) first time triggered.
+     * Define if the notification (which contains forTime) has been triggered. Especially we need provide, which forTime return
+     * statement was triggered (notification can have multiple forTime and each one of them needs own counter).
+     * This map also define time when was notification first time triggered.
      * Final state (message for user/run job) of notification will trigger after
      * forTimeCounterActivatedAt+forTime(defined by user) has passed and all data sent to notification meet the
-     * requirements to run the counter (requirements are NOT met, when data triggers forTimeReset - then
-     * forTimeCounterActivatedAt and forTimeCounterAlreadyTriggered resets).
+     * requirements to run the counting (requirements are NOT met, when data triggers forTimeReset - then
+     * forTimeCountingActivatedAt resets).
+     * This resets if notification is validating data, and these data does not meet the requirements of notification - then
+     * notification's else statement of IF-check is executed and forTime is reset.
+     * ForTime means: data validation in time - multiple data sent in certain time interval to trigger final state of notification.
      */
-    private Long forTimeCounterActivatedAt;
+    private Map<String, Long> forTimeCountingActivatedAt = new HashMap<>();
 
+    /**
+     * This map holds all messages that notification returned (triggered) and time when trigger happened.
+     */
+    private Map<String, List<Long>> messageAndTriggerTime = new HashMap<>();
+
+    /**
+     * This map holds all messages that notification returned (triggered) and counter - how many times was message sent (triggered).
+     */
+    private Map<String, Integer> messageMultiplicityCounter = new HashMap<>();
+
+    /**
+     * This map holds all tags (DataPointTag) for every device used in certain notification.
+     */
     private Map<String, List<String>> deviceAndTag = new HashMap<>();
 
     public Map<String, List<String>> getDeviceAndTag() {
@@ -167,28 +157,12 @@ public class Notification {
         this.level = level;
     }
 
-    public Integer getMultiplicityCounter() {
-        return multiplicityCounter;
-    }
-
-    public void setMultiplicityCounter(Integer multiplicityCounter) {
-        this.multiplicityCounter = multiplicityCounter;
-    }
-
     public Long getCreatedAt() {
         return createdAt;
     }
 
     public void setCreatedAt(Long createdAt) {
         this.createdAt = createdAt;
-    }
-
-    public String getNotificationMessage() {
-        return notificationMessage;
-    }
-
-    public void setNotificationMessage(String notificationMessage) {
-        this.notificationMessage = notificationMessage;
     }
 
     public Boolean getAlreadyTriggered() {
@@ -199,22 +173,6 @@ public class Notification {
         isAlreadyTriggered = alreadyTriggered;
     }
 
-    public Long getFirstTimeTriggeredAt() {
-        return firstTimeTriggeredAt;
-    }
-
-    public void setFirstTimeTriggeredAt(Long firstTimeTriggeredAt) {
-        this.firstTimeTriggeredAt = firstTimeTriggeredAt;
-    }
-
-    public Long getLastTimeTriggeredAt() {
-        return lastTimeTriggeredAt;
-    }
-
-    public void setLastTimeTriggeredAt(Long lastTimeTriggeredAt) {
-        this.lastTimeTriggeredAt = lastTimeTriggeredAt;
-    }
-
     public Long getMutedUntil() {
         return mutedUntil;
     }
@@ -223,20 +181,28 @@ public class Notification {
         this.mutedUntil = mutedUntil;
     }
 
-    public Boolean getForTimeCounterAlreadyTriggered() {
-        return forTimeCounterAlreadyTriggered;
+    public Map<String, Long> getForTimeCountingActivatedAt() {
+        return forTimeCountingActivatedAt;
     }
 
-    public void setForTimeCounterAlreadyTriggered(Boolean forTimeCounterAlreadyTriggered) {
-        this.forTimeCounterAlreadyTriggered = forTimeCounterAlreadyTriggered;
+    public void setForTimeCountingActivatedAt(Map<String, Long> forTimeCountingActivatedAt) {
+        this.forTimeCountingActivatedAt = forTimeCountingActivatedAt;
     }
 
-    public Long getForTimeCounterActivatedAt() {
-        return forTimeCounterActivatedAt;
+    public Map<String, List<Long>> getMessageAndTriggerTime() {
+        return messageAndTriggerTime;
     }
 
-    public void setForTimeCounterActivatedAt(Long forTimeCounterActivatedAt) {
-        this.forTimeCounterActivatedAt = forTimeCounterActivatedAt;
+    public void setMessageAndTriggerTime(Map<String, List<Long>> messageAndTriggerTime) {
+        this.messageAndTriggerTime = messageAndTriggerTime;
+    }
+
+    public Map<String, Integer> getMessageMultiplicityCounter() {
+        return messageMultiplicityCounter;
+    }
+
+    public void setMessageMultiplicityCounter(Map<String, Integer> messageMultiplicityCounter) {
+        this.messageMultiplicityCounter = messageMultiplicityCounter;
     }
 
     @Override
@@ -246,10 +212,15 @@ public class Notification {
                 ", rules='" + rules + '\'' +
                 ", name='" + name + '\'' +
                 ", devices=" + devices +
-                ", active=" + deactivated +
+                ", deactivated=" + deactivated +
                 ", level=" + level +
-                ", counter=" + multiplicityCounter +
+                ", isAlreadyTriggered=" + isAlreadyTriggered +
+                ", mutedUntil=" + mutedUntil +
                 ", createdAt=" + createdAt +
+                ", forTimeCountingActivatedAt=" + forTimeCountingActivatedAt +
+                ", messageAndTriggerTime=" + messageAndTriggerTime +
+                ", messageMultiplicityCounter=" + messageMultiplicityCounter +
+                ", deviceAndTag=" + deviceAndTag +
                 '}';
     }
 }

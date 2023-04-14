@@ -24,4 +24,6 @@ public interface EventConstants {
 
     public static String HOUR = "hour";
 
+    public static String JOB = "job";
+
 }
