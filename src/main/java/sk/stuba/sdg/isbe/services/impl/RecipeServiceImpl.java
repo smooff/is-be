@@ -187,14 +187,7 @@ public class RecipeServiceImpl implements RecipeService {
             return recipeRepository.save(recipe);
         }
 
-        List<String> subRecipeIndexes = new ArrayList<>();
-        int currentIndex = 0;
-        for (Recipe subRecipeOfRecipe : recipe.getSubRecipes()) {
-            if (subRecipeOfRecipe.getId().equals(subRecipeId)) {
-                subRecipeIndexes.add(String.valueOf(currentIndex));
-            }
-            currentIndex++;
-        }
+        List<String> subRecipeIndexes = getSubRecipeIndexes(recipe, subRecipeId);
         if (subRecipeIndexes.isEmpty()) {
             throw new NotFoundCustomException("Provided recipe does not contain any sub-recipe with ID '" + subRecipeId + "'!");
         }
@@ -349,6 +342,15 @@ public class RecipeServiceImpl implements RecipeService {
             return recipeRepository.save(recipe);
         }
 
+        List<String> commandIndexes = getCommandIndexes(recipe, commandId);
+        if (commandIndexes.isEmpty()) {
+            throw new NotFoundCustomException("Provided recipe does not contain any command with ID '" + commandId + "'!");
+        }
+        throw new NotFoundCustomException("Command not found on index: " + index + "!"
+                + " Commands with this ID can be found on indexes: " + String.join(", ", commandIndexes));
+    }
+
+    private List<String> getCommandIndexes(Recipe recipe, String commandId) {
         List<String> commandIndexes = new ArrayList<>();
         int currentIndex = 0;
         for (Command command : recipe.getCommands()) {
@@ -357,12 +359,19 @@ public class RecipeServiceImpl implements RecipeService {
             }
             currentIndex++;
         }
+        return commandIndexes;
+    }
 
-        if (commandIndexes.isEmpty()) {
-            throw new NotFoundCustomException("Provided recipe does not contain any command with ID '" + commandId + "'!");
+    private List<String> getSubRecipeIndexes(Recipe recipe, String subRecipeId) {
+        List<String> subRecipeIndexes = new ArrayList<>();
+        int currentIndex = 0;
+        for (Recipe subRecipeOfRecipe : recipe.getSubRecipes()) {
+            if (subRecipeOfRecipe.getId().equals(subRecipeId)) {
+                subRecipeIndexes.add(String.valueOf(currentIndex));
+            }
+            currentIndex++;
         }
-        throw new NotFoundCustomException("Command not found on index: " + index + "!"
-                + " Commands with this ID can be found on indexes: " + String.join(", ", commandIndexes));
+        return subRecipeIndexes;
     }
 
     private boolean recipeWithNameExists(String name) {

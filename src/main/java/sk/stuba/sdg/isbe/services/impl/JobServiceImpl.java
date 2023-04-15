@@ -284,7 +284,7 @@ public class JobServiceImpl implements JobService {
         List<Job> jobs = jobRepository.getJobsByDeviceIdAndCurrentStatusIs(deviceId, jobStatus);
 
         if (jobs.isEmpty()) {
-            throw new NotFoundCustomException("No jobs found with status: '" + statusName + "' on device: " + device.getName() + "'!");
+            throw new NotFoundCustomException("No jobs found with status: '" + statusName + "' on device: '" + device.getName() + "'!");
         }
         return jobs;
     }
@@ -296,13 +296,13 @@ public class JobServiceImpl implements JobService {
         Pageable pageable = SortingUtils.getPagination(Job.class, EMPTY_STRING, NONE, 1, 1);
         List<Job> jobs = jobRepository.getJobsByDeviceIdAndCurrentStatusIs(deviceId, jobStatus, pageable);
         if (jobs.isEmpty()) {
-            throw new NotFoundCustomException("There are not any jobs with status '" + status + "' on the device: " + device.getName() + "!");
+            throw new NotFoundCustomException("There are not any jobs with status '" + status + "' on the device: '" + device.getName() + "'!");
         }
 
         pageable = SortingUtils.getPagination(Job.class, sortBy, sortDirection, page, pageSize);
         jobs = jobRepository.getJobsByDeviceIdAndCurrentStatusIs(deviceId, jobStatus, pageable);
         if (jobs.isEmpty()) {
-            throw new NotFoundCustomException("No jobs found with status: '" + status + "' on device: " + device.getName() + "' on page " + page + "!");
+            throw new NotFoundCustomException("No jobs found with status: '" + status + "' on device: '" + device.getName() + "' on page " + page + "!");
         }
         return jobs;
     }
@@ -312,7 +312,7 @@ public class JobServiceImpl implements JobService {
             throw new InvalidEntityException("Job's name is not valid!");
         }
         if (job.getCommands() == null || job.getCommands().isEmpty()) {
-            throw new InvalidEntityException("Job does not contain commands!");
+            throw new InvalidEntityException("Job does not contain any commands!");
         }
         if (job.getNoOfReps() == null || job.getNoOfReps() < 0) {
             throw new InvalidEntityException("Repetitions must be equal to or greater than 0!");
