@@ -53,69 +53,52 @@ public class JobServiceTests {
 
     @Test
     void testRunJobFromRecipe() {
-        Recipe recipe = new Recipe();
-        recipe.setSubRecipe(true);
-        recipe.setName("Recipe" + Instant.now().toEpochMilli());
-        recipe.setTypeOfDevice(DeviceTypeEnum.ESP32);
+        Recipe recipe = new Recipe("Recipe" + Instant.now().toEpochMilli(), DeviceTypeEnum.ESP32, true);
         recipeService.createRecipe(recipe);
 
-        Device device = new Device();
-        device.setName("device1" + Instant.now().toEpochMilli());
-        device.setMac("ABCD");
-        device.setType(DeviceTypeEnum.ESP32);
+        Device device = new Device("device1" + Instant.now().toEpochMilli(), "ABCD", DeviceTypeEnum.ESP32);
         deviceService.createDevice(device);
 
-        Exception exception = assertThrows(InvalidEntityException.class, () -> {
-            jobService.runJobFromRecipe(recipe.getId(), device.getUid(), 0);
-        });
-        String expected = "Recipe is only a sub-recipe, can't create a job from it!";
-        assertEquals(expected, exception.getMessage());
+        Exception exception = assertThrows(InvalidEntityException.class, () -> jobService.runJobFromRecipe(recipe.getId(), device.getUid(), 0));
+        assertEquals("Recipe is only a sub-recipe, can't create a job from it!", exception.getMessage());
 
         recipe.setSubRecipe(false);
         recipeService.updateRecipe(recipe.getId(), recipe);
-        exception = assertThrows(InvalidEntityException.class, () -> {
-            jobService.runJobFromRecipe(recipe.getId(), device.getUid(), 1);
-        });
-        expected = "The recipe and its sub-recipes do not contain any commands!";
-        assertEquals(expected, exception.getMessage());
+        exception = assertThrows(InvalidEntityException.class, () -> jobService.runJobFromRecipe(recipe.getId(), device.getUid(), 1));
+        assertEquals("The recipe and its sub-recipes do not contain any commands!", exception.getMessage());
 
-        Command command = new Command();
-        command.setName("Command" + Instant.now().toEpochMilli());
-        command.setParams(List.of(1,2,3));
-        command.setTypeOfDevice(DeviceTypeEnum.ESP32);
+        Command command = new Command("Command" + Instant.now().toEpochMilli(), List.of(1,2,3), DeviceTypeEnum.ESP32);
         commandService.createCommand(command);
+
+        Command command2 = new Command("Command2" + Instant.now().toEpochMilli(), List.of(4,5,6), DeviceTypeEnum.ESP32);
+        commandService.createCommand(command2);
+
+        Command command3 = new Command("Command3" + Instant.now().toEpochMilli(), List.of(7,8,9), DeviceTypeEnum.ESP32);
+        commandService.createCommand(command3);
 
         recipe.setCommands(List.of(command));
         recipeService.updateRecipe(recipe.getId(), recipe);
 
-        exception = assertThrows(InvalidOperationException.class, () -> {
-            jobService.runJobFromRecipe(recipe.getId(), device.getUid(), -1);
-        });
-        expected = "Repetitions must be equal to or greater than 0!";
-        assertEquals(expected, exception.getMessage());
+        exception = assertThrows(InvalidOperationException.class, () -> jobService.runJobFromRecipe(recipe.getId(), device.getUid(), -1));
+        assertEquals("Repetitions must be equal to or greater than 0!", exception.getMessage());
 
-        Recipe subRecipe = new Recipe();
-        subRecipe.setSubRecipe(true);
-        subRecipe.setName("SubRecipe" + Instant.now().toEpochMilli());
-        subRecipe.setTypeOfDevice(DeviceTypeEnum.ESP32);
-        subRecipe.setCommands(List.of(command, command));
+        Recipe subRecipe = new Recipe("SubRecipe" + Instant.now().toEpochMilli(), DeviceTypeEnum.ESP32, true);
+        subRecipe.setCommands(List.of(command2));
         recipeService.createRecipe(subRecipe);
         recipeService.addSubRecipeToRecipe(recipe.getId(), subRecipe.getId());
         recipeService.addSubRecipeToRecipe(recipe.getId(), subRecipe.getId());
 
-        Recipe subSubRecipe = new Recipe();
-        subSubRecipe.setSubRecipe(false);
-        subSubRecipe.setName("SubSubRecipe" + Instant.now().toEpochMilli());
-        subSubRecipe.setTypeOfDevice(DeviceTypeEnum.ESP32);
-        subSubRecipe.setCommands(List.of(command));
+        Recipe subSubRecipe = new Recipe("SubSubRecipe" + Instant.now().toEpochMilli(), DeviceTypeEnum.ESP32, false);
+        subSubRecipe.setCommands(List.of(command3));
         recipeService.createRecipe(subSubRecipe);
-
         recipeService.addSubRecipeToRecipe(subRecipe.getId(), subSubRecipe.getId());
 
         Job job = jobService.runJobFromRecipe(recipe.getId(), device.getUid(), 1);
-        assertEquals(7, job.getCommands().size());
+        assertEquals(5, job.getNoOfCmds());
 
         commandRepository.delete(command);
+        commandRepository.delete(command2);
+        commandRepository.delete(command3);
         recipeRepository.delete(recipe);
         recipeRepository.delete(subRecipe);
         recipeRepository.delete(subSubRecipe);
@@ -126,23 +109,13 @@ public class JobServiceTests {
 
     @Test
     void testResetJob() {
-        Device device = new Device();
-        device.setName("device1" + Instant.now().toEpochMilli());
-        device.setMac("ABCD");
-        device.setType(DeviceTypeEnum.ESP32);
+        Device device = new Device("device1" + Instant.now().toEpochMilli(), "ABCD", DeviceTypeEnum.ESP32);
         deviceService.createDevice(device);
 
-        Job job = new Job();
-        job.setName("Job " + Instant.now().toEpochMilli());
-
-        Command command = new Command();
-        command.setName("Command" + Instant.now().toEpochMilli());
-        command.setParams(List.of(1,2,3));
-        command.setTypeOfDevice(DeviceTypeEnum.ESP32);
+        Command command = new Command("Command" + Instant.now().toEpochMilli(), List.of(1,2,3), DeviceTypeEnum.ESP32);
         commandService.createCommand(command);
 
-        job.setCommands(List.of(command));
-        job.setNoOfCmds(job.getCommands().size());
+        Job job = new Job("Job " + Instant.now().toEpochMilli(), List.of(command));
 
         jobService.runJob(job, device.getUid(), 1);
         job = jobService.resetJob(job.getUid());
@@ -155,20 +128,12 @@ public class JobServiceTests {
 
     @Test
     void testSkipCycle() {
-        Command command = new Command();
-        command.setName("Command" + Instant.now().toEpochMilli());
-        command.setParams(List.of(1,2,3));
-        command.setTypeOfDevice(DeviceTypeEnum.ESP32);
+        Command command = new Command("Command" + Instant.now().toEpochMilli(), List.of(1,2,3), DeviceTypeEnum.ESP32);
 
-        Device device = new Device();
-        device.setName("device1" + Instant.now().toEpochMilli());
-        device.setMac("ABCD");
-        device.setType(DeviceTypeEnum.ESP32);
+        Device device = new Device("device1" + Instant.now().toEpochMilli(), "ABCD", DeviceTypeEnum.ESP32);
         deviceService.createDevice(device);
 
-        Job job = new Job();
-        job.setName("Job" + Instant.now().toEpochMilli());
-        job.setCommands(List.of(command));
+        Job job = new Job("Job" + Instant.now().toEpochMilli(), List.of(command));
 
         jobService.runJob(job, device.getUid(), 0);
         job.getStatus().setCurrentCycle(1);
@@ -184,21 +149,12 @@ public class JobServiceTests {
 
     @Test
     void testSkipStep() {
-        Command command = new Command();
-        command.setName("Command" + Instant.now().toEpochMilli());
-        command.setParams(List.of(1,2,3));
-        command.setTypeOfDevice(DeviceTypeEnum.ESP32);
+        Command command = new Command("Command" + Instant.now().toEpochMilli(), List.of(1,2,3), DeviceTypeEnum.ESP32);
 
-        Device device = new Device();
-        device.setName("device1" + Instant.now().toEpochMilli());
-        device.setMac("ABCD");
-        device.setType(DeviceTypeEnum.ESP32);
+        Device device = new Device("device1" + Instant.now().toEpochMilli(), "ABCD", DeviceTypeEnum.ESP32);
         deviceService.createDevice(device);
 
-        Job job = new Job();
-        job.setName("Job" + Instant.now().toEpochMilli());
-        job.setCommands(List.of(command));
-        job.setNoOfReps(1);
+        Job job = new Job("Job" + Instant.now().toEpochMilli(), List.of(command));
 
         jobService.runJob(job, device.getUid(), 0);
         job.getStatus().setTotalSteps(3);
@@ -215,35 +171,19 @@ public class JobServiceTests {
 
     @Test
     void testGetJobsByStatus() {
-        Command command = new Command();
-        command.setName("Command" + Instant.now().toEpochMilli());
-        command.setParams(List.of(1,2,3));
-        command.setTypeOfDevice(DeviceTypeEnum.ESP32);
+        Command command = new Command("Command" + Instant.now().toEpochMilli(), List.of(1,2,3), DeviceTypeEnum.ESP32);
 
-        Device device = new Device();
-        device.setName("device1" + Instant.now().toEpochMilli());
-        device.setMac("ABCD");
-        device.setType(DeviceTypeEnum.ESP32);
+        Device device = new Device("device1" + Instant.now().toEpochMilli(), "ABCD", DeviceTypeEnum.ESP32);
         deviceService.createDevice(device);
 
-        Job job = new Job();
-        job.setName("Job" + Instant.now().toEpochMilli());
-        job.setCommands(List.of(command));
-        job.setNoOfReps(1);
-
-        Job job2 = new Job();
-        job2.setName("Job" + Instant.now().toEpochMilli());
-        job2.setCommands(List.of(command));
-        job2.setNoOfReps(1);
+        Job job = new Job("Job" + Instant.now().toEpochMilli(), List.of(command));
+        Job job2 = new Job("Job" + Instant.now().toEpochMilli(), List.of(command));
 
         jobService.runJob(job, device.getUid(), 0);
         jobService.runJob(job2, device.getUid(), 0);
 
-        Exception exception = assertThrows(NotFoundCustomException.class, () -> {
-            jobService.getAllJobsByStatus(device.getUid(), "WRONG_STATUS");
-        });
-        String expected = "Job status type: '" + "WRONG_STATUS" + "' does not exist!";
-        assertEquals(expected, exception.getMessage());
+        Exception exception = assertThrows(NotFoundCustomException.class, () -> jobService.getAllJobsByStatus(device.getUid(), "WRONG_STATUS"));
+        assertEquals("Job status type: '" + "WRONG_STATUS" + "' does not exist!", exception.getMessage());
 
         List<Job> pendingJobs = jobService.getAllJobsByStatus(device.getUid(), JobStatusEnum.JOB_PENDING.name());
         assertFalse(pendingJobs.isEmpty());

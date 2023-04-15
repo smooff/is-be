@@ -21,6 +21,14 @@ public class Recipe {
     private long createdAt;
     private boolean deactivated;
 
+    public Recipe() {}
+
+    public Recipe(String name, DeviceTypeEnum typeOfDevice, Boolean isSubRecipe) {
+        this.name = name;
+        this.typeOfDevice = typeOfDevice;
+        this.isSubRecipe = isSubRecipe;
+    }
+
     public String getId() {
         return id;
     }

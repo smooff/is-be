@@ -16,6 +16,15 @@ public class Command {
     private long createdAt;
     private boolean deactivated;
 
+
+    public Command() {}
+
+    public Command(String name, List<Integer> params, DeviceTypeEnum typeOfDevice) {
+        this.name = name;
+        this.params = params;
+        this.typeOfDevice = typeOfDevice;
+    }
+
     public String getId() {
         return id;
     }

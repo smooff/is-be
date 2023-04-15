@@ -5,9 +5,6 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import sk.stuba.sdg.isbe.domain.enums.JobStatusEnum;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 @Document
@@ -27,6 +24,14 @@ public class Job {
     private Long createdAt;
     private Long startedAt;
     private Long finishedAt;
+
+    public Job() {}
+
+    public Job(String name, List<Command> commands) {
+        this.name = name;
+        this.commands = commands;
+        this.noOfCmds = commands.size();
+    }
 
     public String getUid() {
         return uid;
@@ -130,18 +135,5 @@ public class Job {
 
     public void setFinishedAt(Long finishedAt) {
         this.finishedAt = finishedAt;
-    }
-
-    public String getFormattedTime(long time) {
-        Date date = new Date(time);
-        DateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss.SSS");
-        return formatter.format(date);
-    }
-
-    public boolean isValid() {
-        return this.getName() != null &&
-                this.getCommands() != null &&
-                !this.getCommands().isEmpty() &&
-                this.getNoOfReps() != null;
     }
 }

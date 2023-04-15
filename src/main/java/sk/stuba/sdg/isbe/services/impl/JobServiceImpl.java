@@ -41,6 +41,9 @@ public class JobServiceImpl implements JobService {
     @Autowired
     private JobStatusRepository jobStatusRepository;
 
+    private static final String EMPTY_STRING = "";
+    private static final String NONE = "NONE";
+
     @Override
     public Job runJobFromRecipe(String recipeId, String deviceId, int repetitions) {
         Recipe recipe = recipeService.getRecipeById(recipeId);
@@ -51,9 +54,7 @@ public class JobServiceImpl implements JobService {
             throw new InvalidEntityException("Recipe is only a sub-recipe, can't create a job from it!");
         }
 
-        Job job = new Job();
-        job.setName(recipe.getName());
-        addCommandsFromRecipes(job, recipe);
+        Job job = new Job(recipe.getName(), getCommandsFromRecipes(recipe));
         return runJob(job, deviceId, repetitions);
     }
 
@@ -64,9 +65,7 @@ public class JobServiceImpl implements JobService {
         }
 
         job.setNoOfReps(repetitions);
-        if (!job.isValid()) {
-            throw new InvalidEntityException("Job's body is invalid! Please fill all mandatory fields!");
-        }
+        validateJob(job);
 
         Device device = deviceService.getDeviceById(deviceId);
 
@@ -75,16 +74,8 @@ public class JobServiceImpl implements JobService {
             throw new InvalidEntityException("Job can't be added! Job stack of device is full.");
         }
 
-        // create jobStatus for this new created job
-        JobStatus jobStatus = new JobStatus();
-        jobStatus.setCode(JobStatusEnum.JOB_PENDING);
-
-        // add dataPoints
-        jobStatus.setData(getDataPointsFromDevice(device));
-        jobStatus.setJobId(job.getUid());
-        jobStatusService.createJobStatus(jobStatus);
-
-        job.setStatus(jobStatus);
+        String jobId = jobRepository.save(job).getUid();
+        job.setStatus(creteJobStatusForJob(device, jobId));
         job.setDeviceId(deviceId);
         job.setCurrentStatus(JobStatusEnum.JOB_PENDING);
         job.setCreatedAt(Instant.now().toEpochMilli());
@@ -95,19 +86,25 @@ public class JobServiceImpl implements JobService {
         return job;
     }
 
+    private JobStatus creteJobStatusForJob(Device device, String jobId) {
+        JobStatus jobStatus = new JobStatus();
+        jobStatus.setCode(JobStatusEnum.JOB_PENDING);
+
+        // add dataPoints
+        jobStatus.setData(getDataPointsFromDevice(device));
+        jobStatus.setJobId(jobId);
+        return jobStatusService.createJobStatus(jobStatus);
+    }
+
     @Override
     public Job resetJob(String jobId) {
         Job job = getJob(jobId);
+        Device device = deviceService.getDeviceById(job.getDeviceId());
 
         jobStatusRepository.delete(job.getStatus());
 
-        JobStatus jobStatus = new JobStatus();
-        jobStatus.setCode(JobStatusEnum.JOB_PENDING);
-        jobStatus.setJobId(jobId);
-        jobStatusService.createJobStatus(jobStatus);
-
         job.setCurrentStatus(JobStatusEnum.JOB_PENDING);
-        job.setStatus(jobStatus);
+        job.setStatus(creteJobStatusForJob(device, jobId));
 
         job.setCreatedAt(Instant.now().toEpochMilli());
         jobRepository.save(job);
@@ -126,26 +123,26 @@ public class JobServiceImpl implements JobService {
         return dataPoints;
     }
 
-    private void addCommandsFromRecipes(Job job, Recipe recipe) {
-        job.setCommands(new ArrayList<>());
-        addCommandsRecursively(job, recipe);
+    private List<Command> getCommandsFromRecipes(Recipe recipe) {
+        List<Command> commands = new ArrayList<>();
+        addCommandsRecursively(commands, recipe);
 
-        if (job.getCommands().isEmpty()) {
+        if (commands.isEmpty()) {
             throw new InvalidEntityException("The recipe and its sub-recipes do not contain any commands!");
         }
-        job.setNoOfCmds(job.getCommands().size());
+        return commands;
     }
 
-    private void addCommandsRecursively(Job job, Recipe recipe) {
+    private void addCommandsRecursively(List<Command> commands, Recipe recipe) {
         if (recipe.getCommands() != null && !recipe.getCommands().isEmpty()) {
-            job.getCommands().addAll(recipe.getCommands());
+            commands.addAll(recipe.getCommands());
         }
         if (recipe.getSubRecipes() == null) {
             return;
         }
 
         for (Recipe subRecipe : recipe.getSubRecipes()) {
-            addCommandsRecursively(job, subRecipe);
+            addCommandsRecursively(commands, subRecipe);
         }
     }
 
@@ -196,6 +193,12 @@ public class JobServiceImpl implements JobService {
         return setJobPaused(jobId, false);
     }
 
+    private Job setJobPaused(String jobId, boolean paused) {
+        Job job = getJob(jobId);
+        job.setPaused(paused);
+        return jobRepository.save(job);
+    }
+
     @Override
     public String getJobStatus(String jobId) {
         Job job = getJob(jobId);
@@ -228,12 +231,6 @@ public class JobServiceImpl implements JobService {
         return "Status of job '" + job.getName() + "' is " + job.getCurrentStatus().name();
     }
 
-    private Job setJobPaused(String jobId, boolean paused) {
-        Job job = getJob(jobId);
-        job.setPaused(paused);
-        return jobRepository.save(job);
-    }
-
     @Override
     public List<Job> getAllJobsOnDevice(String deviceId) {
         Device device = deviceService.getDeviceById(deviceId);
@@ -247,8 +244,14 @@ public class JobServiceImpl implements JobService {
     @Override
     public List<Job> getAllJobsOnDevicePageable(String deviceId, int page, int pageSize, String sortBy, String sortDirection) {
         Device device = deviceService.getDeviceById(deviceId);
-        Pageable pageable = SortingUtils.getPagination(Job.class, sortBy, sortDirection, page, pageSize);
+        Pageable pageable = SortingUtils.getPagination(Job.class, EMPTY_STRING, NONE, 1, 1);
         List<Job> jobs = jobRepository.getJobsByDeviceId(deviceId, pageable);
+        if (jobs.isEmpty()) {
+            throw new NotFoundCustomException("There are not any jobs on the device: " + device.getName() + "!");
+        }
+
+        pageable = SortingUtils.getPagination(Job.class, sortBy, sortDirection, page, pageSize);
+        jobs = jobRepository.getJobsByDeviceId(deviceId, pageable);
         if (jobs.isEmpty()) {
             throw new NotFoundCustomException("There are not any jobs on page " + page + " for device with name: '" + device.getName() + "'!");
         }
@@ -290,12 +293,29 @@ public class JobServiceImpl implements JobService {
     public List<Job> getAllJobsByStatusPageable(String deviceId, String status, int page, int pageSize, String sortBy, String sortDirection) {
         JobStatusEnum jobStatus = JobStatusUtils.getJobStatusEnum(status);
         Device device = deviceService.getDeviceById(deviceId);
-        Pageable pageable = SortingUtils.getPagination(Job.class, sortBy, sortDirection, page, pageSize);
+        Pageable pageable = SortingUtils.getPagination(Job.class, EMPTY_STRING, NONE, 1, 1);
         List<Job> jobs = jobRepository.getJobsByDeviceIdAndCurrentStatusIs(deviceId, jobStatus, pageable);
+        if (jobs.isEmpty()) {
+            throw new NotFoundCustomException("There are not any jobs with status '" + status + "' on the device: " + device.getName() + "!");
+        }
 
+        pageable = SortingUtils.getPagination(Job.class, sortBy, sortDirection, page, pageSize);
+        jobs = jobRepository.getJobsByDeviceIdAndCurrentStatusIs(deviceId, jobStatus, pageable);
         if (jobs.isEmpty()) {
             throw new NotFoundCustomException("No jobs found with status: '" + status + "' on device: " + device.getName() + "' on page " + page + "!");
         }
         return jobs;
+    }
+
+    private void validateJob(Job job) {
+        if (job.getName() == null || job.getName().isEmpty()) {
+            throw new InvalidEntityException("Job's name is not valid!");
+        }
+        if (job.getCommands() == null || job.getCommands().isEmpty()) {
+            throw new InvalidEntityException("Job does not contain commands!");
+        }
+        if (job.getNoOfReps() == null || job.getNoOfReps() < 0) {
+            throw new InvalidEntityException("Repetitions must be equal to or greater than 0!");
+        }
     }
 }

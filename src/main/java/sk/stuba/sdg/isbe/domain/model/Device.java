@@ -27,6 +27,14 @@ public class Device {
     private String initApiKey;
     private boolean deactivated;
 
+    public Device() {}
+
+    public Device(String name, String mac, DeviceTypeEnum type) {
+        this.name = name;
+        this.mac = mac;
+        this.type = type;
+    }
+
     public List<Job> getJobs() {
         return jobs;
     }

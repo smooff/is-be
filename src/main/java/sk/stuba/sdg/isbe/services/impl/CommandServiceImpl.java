@@ -29,6 +29,9 @@ public class CommandServiceImpl implements CommandService {
     @Autowired
     private RecipeService recipeService;
 
+    private static final String EMPTY_STRING = "";
+    private static final String NONE = "NONE";
+
     @Override
     public Command createCommand(Command command) {
         if (command.getName() == null || command.getName().isEmpty()) {
@@ -69,8 +72,14 @@ public class CommandServiceImpl implements CommandService {
 
     @Override
     public List<Command> getAllCommandsPageable(int page, int pageSize, String sortBy, String sortDirection) {
-        Pageable pageable = SortingUtils.getPagination(Command.class, sortBy, sortDirection, page, pageSize);
+        Pageable pageable = SortingUtils.getPagination(Command.class, EMPTY_STRING, NONE, 1, 1);
         List<Command> commands = commandRepository.getCommandsByDeactivated(false, pageable);
+        if (commands.isEmpty()) {
+            throw new NotFoundCustomException("There are not any commands in the database yet!");
+        }
+
+        pageable = SortingUtils.getPagination(Command.class, sortBy, sortDirection, page, pageSize);
+        commands = commandRepository.getCommandsByDeactivated(false, pageable);
         if (commands.isEmpty()) {
             throw new NotFoundCustomException("There are not any commands on page " + page + "!");
         }
@@ -99,10 +108,17 @@ public class CommandServiceImpl implements CommandService {
     @Override
     public List<Command> getCommandsByDeviceTypePageable(String deviceType, int page, int pageSize, String sortBy, String sortDirection) {
         DeviceTypeEnum deviceTypeEnum = DeviceTypeUtils.getDeviceTypeEnum(deviceType);
-        Pageable pageable = SortingUtils.getPagination(Command.class, sortBy, sortDirection, page, pageSize);
+        Pageable pageable = SortingUtils.getPagination(Command.class, EMPTY_STRING, NONE, 1, 1);
         List<Command> commands = commandRepository.getCommandsByTypeOfDeviceAndDeactivated(deviceTypeEnum, false, pageable);
         if (commands.isEmpty()) {
-            throw new NotFoundCustomException("There are not any commands with type of device: '" + deviceType + "' on this page!");
+            throw new NotFoundCustomException("There are not any commands in the database of device type: " + deviceType + "!");
+        }
+
+
+        pageable = SortingUtils.getPagination(Command.class, sortBy, sortDirection, page, pageSize);
+        commands = commandRepository.getCommandsByTypeOfDeviceAndDeactivated(deviceTypeEnum, false, pageable);
+        if (commands.isEmpty()) {
+            throw new NotFoundCustomException("There are not any commands with type of device: '" + deviceType + "' on page " + page + "!");
         }
         return commands;
     }
@@ -129,9 +145,12 @@ public class CommandServiceImpl implements CommandService {
         if (updateCommand == null) {
             throw new InvalidEntityException("Command with changes is null!");
         }
-
         if (!command.getName().equals(updateCommand.getName()) && commandWithNameExists(updateCommand.getName())) {
-            throw new EntityExistsException("Recipe with name: '" + updateCommand.getName() + "' already exists!");
+            throw new EntityExistsException("Command with name: '" + updateCommand.getName() + "' already exists!");
+        }
+
+        if (updateCommand.getName() != null) {
+            command.setName(updateCommand.getName());
         }
         if (updateCommand.getParams() != null) {
             command.setParams(updateCommand.getParams());
