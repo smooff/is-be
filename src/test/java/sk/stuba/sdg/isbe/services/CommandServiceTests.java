@@ -157,8 +157,8 @@ public class CommandServiceTests {
         commands = commandService.getCommandsByDeviceTypePageable("ESP32", 1, 1, "", "NONE");
         assertEquals(1, commands.size());
 
-        Exception exception = assertThrows(NotFoundCustomException.class, () -> commandService.getCommandsByDeviceTypePageable("ESP32", 3, 1, "", "NONE"));
-        assertEquals("There are not any commands with type of device: '" + "ESP32" + "' on page " + 3 + "!", exception.getMessage());
+        Exception exception = assertThrows(NotFoundCustomException.class, () -> commandService.getCommandsByDeviceTypePageable("ESP32", 10000000, 1, "", "NONE"));
+        assertEquals("There are not any commands with type of device: '" + "ESP32" + "' on page " + 10000000 + "!", exception.getMessage());
 
         commandRepository.delete(command);
         commandRepository.delete(command2);

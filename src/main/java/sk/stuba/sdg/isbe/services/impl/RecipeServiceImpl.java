@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 @Service
 public class RecipeServiceImpl implements RecipeService {
@@ -104,8 +105,11 @@ public class RecipeServiceImpl implements RecipeService {
         if (changeRecipe.getName() != null) {
             recipe.setName(changeRecipe.getName());
         }
+        if (changeRecipe.isSubRecipe() != null) {
+            recipe.setSubRecipe(changeRecipe.isSubRecipe());
+        }
 
-        if (changeRecipe.getTypeOfDevice() != null) {
+        if (changeRecipe.getTypeOfDevice() != null && changeRecipe.getTypeOfDevice() != recipe.getTypeOfDevice()) {
             if (recipe.getCommands() != null && !recipe.getCommands().isEmpty()) {
                 throw new InvalidOperationException("Device type of recipe can't be changed, since the recipe contains commands!");
             }
@@ -115,9 +119,18 @@ public class RecipeServiceImpl implements RecipeService {
             recipe.setTypeOfDevice(changeRecipe.getTypeOfDevice());
         }
 
+        //save local changes that were made above, further changes are made on database level
+        recipeRepository.save(recipe);
+
         if (changeRecipe.getCommands() != null) {
             if (changeRecipe.getCommands().stream().allMatch(command -> command.getTypeOfDevice() == recipe.getTypeOfDevice())) {
-                recipe.setCommands(null);
+                if (recipe.getCommands() != null) {
+                    IntStream.range(0, recipe.getCommands().size())
+                            .forEach(i -> {
+                                int lastIndex = recipe.getCommands().size() - i - 1;
+                                removeCommandFromRecipe(recipeId, recipe.getCommands().get(lastIndex).getId(), lastIndex);
+                            });
+                }
                 changeRecipe.getCommands().forEach(command -> addCommandToRecipe(recipeId, command.getId()));
             } else {
                 throw new InvalidOperationException("All of the new commands require to have the same device type as the recipe!");
@@ -126,18 +139,21 @@ public class RecipeServiceImpl implements RecipeService {
 
         if (changeRecipe.getSubRecipes() != null) {
             if (changeRecipe.getSubRecipes().stream().allMatch(subrecipe -> subrecipe.getTypeOfDevice() == recipe.getTypeOfDevice())) {
-                recipe.setSubRecipes(null);
+                if (recipe.getSubRecipes() != null) {
+                    IntStream.range(0, recipe.getSubRecipes().size())
+                            .forEach(i -> {
+                                int lastIndex = recipe.getSubRecipes().size() - i - 1;
+                                removeSubRecipeFromRecipe(recipeId, recipe.getSubRecipes().get(lastIndex).getId(), lastIndex);
+                            });
+                }
                 changeRecipe.getSubRecipes().forEach(subrecipe -> addSubRecipeToRecipe(recipeId, subrecipe.getId()));
             } else {
                 throw new InvalidOperationException("All of the new sub-recipes require to have the same device type as the recipe!");
             }
         }
 
-        if (changeRecipe.isSubRecipe() != null) {
-            recipe.setSubRecipe(changeRecipe.isSubRecipe());
-        }
-
-        return recipeRepository.save(recipe);
+        //in order to return the recipe with the latest updates, we return it from the database
+        return getRecipeById(recipeId);
     }
 
     @Override
@@ -187,7 +203,10 @@ public class RecipeServiceImpl implements RecipeService {
             return recipeRepository.save(recipe);
         }
 
-        List<String> subRecipeIndexes = getSubRecipeIndexes(recipe, subRecipeId);
+        List<String> subRecipeIndexes = IntStream.range(0, recipe.getSubRecipes().size())
+                .filter(i -> recipe.getSubRecipes().get(i).getId().equals(subRecipeId))
+                .mapToObj(String::valueOf)
+                .toList();
         if (subRecipeIndexes.isEmpty()) {
             throw new NotFoundCustomException("Provided recipe does not contain any sub-recipe with ID '" + subRecipeId + "'!");
         }
@@ -342,36 +361,15 @@ public class RecipeServiceImpl implements RecipeService {
             return recipeRepository.save(recipe);
         }
 
-        List<String> commandIndexes = getCommandIndexes(recipe, commandId);
+        List<String> commandIndexes = IntStream.range(0, recipe.getCommands().size())
+                .filter(i -> recipe.getCommands().get(i).getId().equals(commandId))
+                .mapToObj(String::valueOf)
+                .toList();
         if (commandIndexes.isEmpty()) {
             throw new NotFoundCustomException("Provided recipe does not contain any command with ID '" + commandId + "'!");
         }
         throw new NotFoundCustomException("Command not found on index: " + index + "!"
                 + " Commands with this ID can be found on indexes: " + String.join(", ", commandIndexes));
-    }
-
-    private List<String> getCommandIndexes(Recipe recipe, String commandId) {
-        List<String> commandIndexes = new ArrayList<>();
-        int currentIndex = 0;
-        for (Command command : recipe.getCommands()) {
-            if (command.getId().equals(commandId)) {
-                commandIndexes.add(String.valueOf(currentIndex));
-            }
-            currentIndex++;
-        }
-        return commandIndexes;
-    }
-
-    private List<String> getSubRecipeIndexes(Recipe recipe, String subRecipeId) {
-        List<String> subRecipeIndexes = new ArrayList<>();
-        int currentIndex = 0;
-        for (Recipe subRecipeOfRecipe : recipe.getSubRecipes()) {
-            if (subRecipeOfRecipe.getId().equals(subRecipeId)) {
-                subRecipeIndexes.add(String.valueOf(currentIndex));
-            }
-            currentIndex++;
-        }
-        return subRecipeIndexes;
     }
 
     private boolean recipeWithNameExists(String name) {
