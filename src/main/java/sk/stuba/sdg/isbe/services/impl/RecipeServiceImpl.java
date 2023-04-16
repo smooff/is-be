@@ -124,12 +124,10 @@ public class RecipeServiceImpl implements RecipeService {
 
         if (changeRecipe.getCommands() != null) {
             if (changeRecipe.getCommands().stream().allMatch(command -> command.getTypeOfDevice() == recipe.getTypeOfDevice())) {
-                if (recipe.getCommands() != null) {
-                    IntStream.range(0, recipe.getCommands().size())
-                            .forEach(i -> {
-                                int lastIndex = recipe.getCommands().size() - i - 1;
-                                removeCommandFromRecipe(recipeId, recipe.getCommands().get(lastIndex).getId(), lastIndex);
-                            });
+                if (recipe.getCommands() != null && !recipe.getCommands().isEmpty()) {
+                    for (int i = recipe.getCommands().size() - 1; i >= 0; i--) {
+                        removeCommandFromRecipe(recipeId, recipe.getCommands().get(i).getId(), i);
+                    }
                 }
                 changeRecipe.getCommands().forEach(command -> addCommandToRecipe(recipeId, command.getId()));
             } else {
@@ -139,12 +137,10 @@ public class RecipeServiceImpl implements RecipeService {
 
         if (changeRecipe.getSubRecipes() != null) {
             if (changeRecipe.getSubRecipes().stream().allMatch(subrecipe -> subrecipe.getTypeOfDevice() == recipe.getTypeOfDevice())) {
-                if (recipe.getSubRecipes() != null) {
-                    IntStream.range(0, recipe.getSubRecipes().size())
-                            .forEach(i -> {
-                                int lastIndex = recipe.getSubRecipes().size() - i - 1;
-                                removeSubRecipeFromRecipe(recipeId, recipe.getSubRecipes().get(lastIndex).getId(), lastIndex);
-                            });
+                if (recipe.getSubRecipes() != null && !recipe.getSubRecipes().isEmpty()) {
+                    for (int i = recipe.getSubRecipes().size() - 1; i >= 0; i--) {
+                        removeSubRecipeFromRecipe(recipeId, recipe.getSubRecipes().get(i).getId(), i);
+                    }
                 }
                 changeRecipe.getSubRecipes().forEach(subrecipe -> addSubRecipeToRecipe(recipeId, subrecipe.getId()));
             } else {
@@ -212,7 +208,7 @@ public class RecipeServiceImpl implements RecipeService {
         }
 
         throw new NotFoundCustomException("Sub-recipe not found on index: " + index + "!"
-                                          + " Sub-recipes with this ID can be found on indexes: " + String.join(", ", subRecipeIndexes) + ".");
+                + " Sub-recipes with this ID can be found on indexes: " + String.join(", ", subRecipeIndexes) + ".");
     }
 
     @Override

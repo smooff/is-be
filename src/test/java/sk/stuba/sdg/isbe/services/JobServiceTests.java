@@ -76,6 +76,7 @@ public class JobServiceTests {
         Command command3 = new Command("Command3" + Instant.now().toEpochMilli(), List.of(7,8,9), DeviceTypeEnum.ESP32);
         commandService.createCommand(command3);
 
+        recipeService.addCommandToRecipe(recipe.getId(), command.getId());
         recipe.setCommands(List.of(command));
         recipeService.updateRecipe(recipe.getId(), recipe);
 
