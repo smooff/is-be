@@ -45,9 +45,9 @@ public class NotificationProcessor {
         List<Notification> notifications = notificationRepository.getNotificationByDevicesContainingAndDeactivated(event.getDeviceId(), false);
         if (notifications != null) {
             List<String> alreadyEvaluated = new ArrayList<>();
-            for (StoredData storedData : event.getStoredData()) {  //z1.teplota, z1.vlhkost, z1.svetlo
+            for (StoredData storedData : event.getStoredData()) {
                 Map<String, Double> dataForExpression = new HashMap<>();
-                for (Notification notification : notifications) {  //N1: z1.teplota, z1.vlhkost, z1.svetlo   - N2: z1.teplota
+                for (Notification notification : notifications) {
                     if (notification.getMutedUntil() == null || (Instant.now().toEpochMilli() > notification.getMutedUntil())) {
                         if (!alreadyEvaluated.contains(notification.getId())) {
                             Map<String, List<String>> mapDeviceAndTag = notification.getDeviceAndTag();
@@ -63,13 +63,8 @@ public class NotificationProcessor {
                                     }
                                 }
                             });
-                            /**
-                             * TODO - notification evaluation
-                             */
-                            System.out.println("-----"+dataForExpression+"-----");
-//                            System.out.println(notification.getRules());
-                            // desatinne cisla musia byt pisane s . -> 4.1
 
+                            // desatinne cisla musia byt pisane s . -> 4.1
                             String result = (String) jsonLogic.apply(notification.getRules(), dataForExpression);
                             if(notification.getMutedUntil()!= null){
                                 notification.setMutedUntil(null);
@@ -83,7 +78,7 @@ public class NotificationProcessor {
                             } else if (result.contains(EventConstants.JOB)) {
                                 handleNotificationJob(notification, result);
                             } else{
-                                System.out.println("return2");
+                                throw new InvalidOperationException("Result: "+result+" not recognized.");
                             }
                             dataForExpression.clear();
                             alreadyEvaluated.add(notification.getId());
@@ -135,8 +130,8 @@ public class NotificationProcessor {
         String jobId = result.split(":")[1];
 
         Job job = jobService.getJob(jobId);
-        if(job.getCurrentStatus().equals(JobStatusEnum.JOB_DONE) || true){ //MOZNO DOPLNIT PODMIENKY
-//            jobService.resetJob(jobId);
+        if(job.getCurrentStatus().equals(JobStatusEnum.JOB_DONE) || job.getCurrentStatus().equals(JobStatusEnum.JOB_ERR)){
+            jobService.resetJob(jobId);
             //trigger time (multiple values) for certain job
             if (notification.getJobAndTriggerTime().containsKey(jobId)) {
                 notification.getJobAndTriggerTime().get(jobId).add(Instant.now().toEpochMilli());
@@ -146,9 +141,6 @@ public class NotificationProcessor {
                 notification.getJobAndTriggerTime().put(jobId, triggeredAt);
             }
         }
-
-        // dotiahnut si job s jobId(ktory by sa mal spustit) -> pozriet sa na tento job a na jeho retCode/code -> podla toho sa spusti job
-
         if(!notification.getAlreadyTriggered()){
             notification.setAlreadyTriggered(true);
         }
@@ -170,6 +162,8 @@ public class NotificationProcessor {
                 if(Instant.now().toEpochMilli() >= timeUntil){
                     if(result.contains(EventConstants.NOTIFICATION_MESSAGE)){
                         handleNotificationMessage(notification, notificationReturnStatement);
+                    } else if(result.contains(EventConstants.JOB)){
+                        handleNotificationJob(notification, notificationReturnStatement);
                     }
                 }
             } else{
@@ -183,26 +177,3 @@ public class NotificationProcessor {
         }
     }
 }
-
-//{
-//        "retCode": "JOB_FREE",
-//        "code": "JOB_FREE",
-//        "jobId": "643040271b6f0305d03b258d",
-//        "currentStep": 0,
-//        "totalSteps": 0,
-//        "currentCycle": 0,
-//        "data": [
-//        {
-//        "tag": "teplota",
-//        "value": 1
-//        },
-//        {
-//        "tag": "vlhkost",
-//        "value": 0
-//        },
-//        {
-//        "tag": "svetlo",
-//        "value": 4
-//        }
-//        ]
-//        }
