@@ -58,27 +58,27 @@ public class NotificationProcessor {
                                     StoredData lastStoredData = storedDataRepository.findFirstStoredDataByDeviceIdAndTagOrderByMeasureAddDesc(k, tag);
                                     if (lastStoredData != null) {
                                         dataForExpression.put(lastStoredData.getDeviceId() + lastStoredData.getTag(), lastStoredData.getValue());
-                                    }else {
-                                        throw new InvalidOperationException("Notification with id: "+notification.getId()+" can not be evaluated, because of missing Stored Data for tag: "+tag);
+                                    } else {
+                                        throw new InvalidOperationException("Notification with id: " + notification.getId() + " can not be evaluated, because of missing Stored Data for tag: " + tag);
                                     }
                                 }
                             });
 
                             // desatinne cisla musia byt pisane s . -> 4.1
                             String result = (String) jsonLogic.apply(notification.getRules(), dataForExpression);
-                            if(notification.getMutedUntil()!= null){
+                            if (notification.getMutedUntil() != null) {
                                 notification.setMutedUntil(null);
                             }
                             if (result.contains(EventConstants.NO_ACTION)) {
                                 System.out.println("no action");
-                            } else if (result.contains(EventConstants.FOR_TIME)){
+                            } else if (result.contains(EventConstants.FOR_TIME)) {
                                 handleNotificationForTime(notification, result);
                             } else if (result.contains(EventConstants.NOTIFICATION_MESSAGE)) {
                                 handleNotificationMessage(notification, result);
                             } else if (result.contains(EventConstants.JOB)) {
                                 handleNotificationJob(notification, result);
-                            } else{
-                                throw new InvalidOperationException("Result: "+result+" not recognized.");
+                            } else {
+                                throw new InvalidOperationException("Result: " + result + " not recognized.");
                             }
                             dataForExpression.clear();
                             alreadyEvaluated.add(notification.getId());
@@ -89,7 +89,7 @@ public class NotificationProcessor {
         }
     }
 
-    public Long calculateUntilTime(Long activatedAt, Long forTime, String timeUnit){
+    public Long calculateUntilTime(Long activatedAt, Long forTime, String timeUnit) {
 
         long timeToAdd = switch (timeUnit) {
             case EventConstants.SEC -> forTime * 1000;
@@ -101,7 +101,7 @@ public class NotificationProcessor {
         return activatedAt + timeToAdd;
     }
 
-    public void handleNotificationMessage(Notification notification, String result){
+    public void handleNotificationMessage(Notification notification, String result) {
 
         String message = result.split(":")[1];
 
@@ -115,22 +115,22 @@ public class NotificationProcessor {
         }
         //trigger count for certain message
         if (notification.getMessageMultiplicityCounter().containsKey(message)) {
-            notification.getMessageMultiplicityCounter().put(message, notification.getMessageMultiplicityCounter().get(message)+1);
-        }else{
+            notification.getMessageMultiplicityCounter().put(message, notification.getMessageMultiplicityCounter().get(message) + 1);
+        } else {
             notification.getMessageMultiplicityCounter().put(message, 1);
         }
 
-        if(!notification.getAlreadyTriggered()){
+        if (!notification.getAlreadyTriggered()) {
             notification.setAlreadyTriggered(true);
         }
         notificationService.editNotification(notification);
     }
 
-    public void handleNotificationJob(Notification notification, String result){
+    public void handleNotificationJob(Notification notification, String result) {
         String jobId = result.split(":")[1];
 
         Job job = jobService.getJob(jobId);
-        if(job.getCurrentStatus().equals(JobStatusEnum.JOB_DONE) || job.getCurrentStatus().equals(JobStatusEnum.JOB_ERR)){
+        if (job.getCurrentStatus().equals(JobStatusEnum.JOB_DONE) || job.getCurrentStatus().equals(JobStatusEnum.JOB_ERR)) {
             jobService.resetJob(jobId);
             //trigger time (multiple values) for certain job
             if (notification.getJobAndTriggerTime().containsKey(jobId)) {
@@ -140,37 +140,37 @@ public class NotificationProcessor {
                 triggeredAt.add(Instant.now().toEpochMilli());
                 notification.getJobAndTriggerTime().put(jobId, triggeredAt);
             }
+            if (!notification.getAlreadyTriggered()) {
+                notification.setAlreadyTriggered(true);
+            }
+            notificationService.editNotification(notification);
         }
-        if(!notification.getAlreadyTriggered()){
-            notification.setAlreadyTriggered(true);
-        }
-        notificationService.editNotification(notification);
     }
 
-    public void handleNotificationForTime(Notification notification, String result){
+    public void handleNotificationForTime(Notification notification, String result) {
 
         String forTimeSubType = result.split(":")[1];
 
-        if(forTimeSubType.equals(EventConstants.FOR_TIME_SET)){
+        if (forTimeSubType.equals(EventConstants.FOR_TIME_SET)) {
 
             String notificationReturnStatement = result.split(":")[4] + ":" + result.split(":")[5];
 
             //check if return statement was ever triggered
-            if(notification.getForTimeCountingActivatedAt().containsKey(notificationReturnStatement)){
+            if (notification.getForTimeCountingActivatedAt().containsKey(notificationReturnStatement)) {
                 Long timeUntil = calculateUntilTime(notification.getForTimeCountingActivatedAt().get(notificationReturnStatement), Long.valueOf(result.split(":")[2]), result.split(":")[3]);
 
-                if(Instant.now().toEpochMilli() >= timeUntil){
-                    if(result.contains(EventConstants.NOTIFICATION_MESSAGE)){
+                if (Instant.now().toEpochMilli() >= timeUntil) {
+                    if (result.contains(EventConstants.NOTIFICATION_MESSAGE)) {
                         handleNotificationMessage(notification, notificationReturnStatement);
-                    } else if(result.contains(EventConstants.JOB)){
+                    } else if (result.contains(EventConstants.JOB)) {
                         handleNotificationJob(notification, notificationReturnStatement);
                     }
                 }
-            } else{
+            } else {
                 notification.getForTimeCountingActivatedAt().put(notificationReturnStatement, Instant.now().toEpochMilli());
                 notificationService.editNotification(notification);
             }
-        } else if (forTimeSubType.equals(EventConstants.FOR_TIME_RESET)){
+        } else if (forTimeSubType.equals(EventConstants.FOR_TIME_RESET)) {
             String notificationReturnStatement = result.split(":")[2] + ":" + result.split(":")[3];
             notification.getForTimeCountingActivatedAt().remove(notificationReturnStatement);
             notificationService.editNotification(notification);
