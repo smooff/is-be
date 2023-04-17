@@ -37,23 +37,17 @@ public class NotificationScheduler {
         return new MongoLockProvider(database);
     }
 
-    @Scheduled(cron = "15 * * * * *")
-    @SchedulerLock(name = "scheduledTaskName", lockAtMostFor = "20m", lockAtLeastFor = "1m")
-    public void removeOldStoredNotificationData() {
-        System.out.println("TEST LOCKER");
+    // execute every 24 hours
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void storeNotificationJobTriggers() {
+        this.notificationService.storeNotificationJobTriggers();
     }
 
-    // execute every 24 hours
-//    @Scheduled(cron = "0 0 0 * * ?")
-//    public void storeNotificationJobTriggers() {
-//        this.notificationService.storeNotificationJobTriggers();
-//    }
-
     // execute once every week - Monday
-//    @Scheduled(cron = "0 0 0 * * 1")
-//    @SchedulerLock(name = "scheduledTaskName", lockAtMostForString = "PT14M", lockAtLeastForString = "PT14M")
-//    public void removeOldStoredNotificationData() {
-//        storedResolvedNotificationService.removeOldStoredNotificationData();
-//    }
+    @Scheduled(cron = "0 0 0 * * 1")
+    @SchedulerLock(name = "scheduledTaskName", lockAtMostFor = "20m", lockAtLeastFor = "1m")
+    public void removeOldStoredNotificationData() {
+        storedResolvedNotificationService.removeOldStoredNotificationData();
+    }
 
 }
