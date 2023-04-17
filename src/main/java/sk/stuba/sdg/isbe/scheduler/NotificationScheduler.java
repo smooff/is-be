@@ -39,13 +39,14 @@ public class NotificationScheduler {
 
     // execute every 24 hours
     @Scheduled(cron = "0 0 0 * * ?")
+    @SchedulerLock(name = "scheduledTaskStoreNotificationJobTriggers", lockAtMostFor = "20m", lockAtLeastFor = "1m")
     public void storeNotificationJobTriggers() {
         this.notificationService.storeNotificationJobTriggers();
     }
 
     // execute once every week - Monday
     @Scheduled(cron = "0 0 0 * * 1")
-    @SchedulerLock(name = "scheduledTaskName", lockAtMostFor = "20m", lockAtLeastFor = "1m")
+    @SchedulerLock(name = "scheduledTaskRemoveOldStoredNotificationData", lockAtMostFor = "20m", lockAtLeastFor = "1m")
     public void removeOldStoredNotificationData() {
         storedResolvedNotificationService.removeOldStoredNotificationData();
     }
