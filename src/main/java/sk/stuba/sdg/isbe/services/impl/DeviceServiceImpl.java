@@ -24,6 +24,7 @@ import java.util.Optional;
 public class DeviceServiceImpl implements DeviceService {
 
     private static final String EMPTY_STRING = "";
+    private static final String NONE = "NONE";
 
     @Value("${sdg.http.auth-token-header-name}")
     private String apiKey;
@@ -158,12 +159,12 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Override
     public List<Job> getPendingDeviceJobs(String deviceId) {
-        return jobService.getAllJobsByStatus(deviceId, JobStatusEnum.JOB_PENDING.name());
+        return jobService.getAllJobsByStatus(deviceId, JobStatusEnum.JOB_PENDING.name(), NONE, NONE);
     }
 
     @Override
     public String getDeviceStatus(String deviceId) {
-        List<Job> runningJobs = jobService.getAllJobsByStatus(deviceId, JobStatusEnum.JOB_PROCESSING.name());
+        List<Job> runningJobs = jobService.getAllJobsByStatus(deviceId, JobStatusEnum.JOB_PROCESSING.name(), NONE, NONE);
         LocalDateTime lastUpdated = runningJobs.get(0).getStatus().getLastUpdated();
 
         if (LocalDateTime.now().minusSeconds(10).isAfter(lastUpdated)) {

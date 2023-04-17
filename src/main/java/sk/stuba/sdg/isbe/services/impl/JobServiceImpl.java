@@ -232,9 +232,9 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public List<Job> getAllJobsOnDevice(String deviceId) {
+    public List<Job> getAllJobsOnDevice(String deviceId, String sortBy, String sortDirection) {
         Device device = deviceService.getDeviceById(deviceId);
-        List<Job> jobs = jobRepository.getJobsByDeviceId(deviceId);
+        List<Job> jobs = jobRepository.getJobsByDeviceId(deviceId, SortingUtils.getSort(Job.class, sortBy, sortDirection));
         if (jobs.isEmpty()) {
             throw new NotFoundCustomException("There are not any jobs on the device with name: '" + device.getName() + "'!");
         }
@@ -259,13 +259,13 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public List<Job> getFinishedJobsByStatus(String deviceId) {
-        return getAllJobsByStatus(deviceId, JobStatusEnum.JOB_DONE.name());
+    public List<Job> getFinishedJobsByStatus(String deviceId, String sortBy, String sortDirection) {
+        return getAllJobsByStatus(deviceId, JobStatusEnum.JOB_DONE.name(), sortBy, sortDirection);
     }
 
     @Override
-    public List<Job> getRunningJobsByStatus(String deviceId) {
-        return getAllJobsByStatus(deviceId, JobStatusEnum.JOB_PROCESSING.name());
+    public List<Job> getRunningJobsByStatus(String deviceId, String sortBy, String sortDirection) {
+        return getAllJobsByStatus(deviceId, JobStatusEnum.JOB_PROCESSING.name(), sortBy, sortDirection);
     }
 
     @Override
@@ -278,10 +278,10 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public List<Job> getAllJobsByStatus(String deviceId, String statusName) {
+    public List<Job> getAllJobsByStatus(String deviceId, String statusName, String sortBy, String sortDirection) {
         JobStatusEnum jobStatus = JobStatusUtils.getJobStatusEnum(statusName);
         Device device = deviceService.getDeviceById(deviceId);
-        List<Job> jobs = jobRepository.getJobsByDeviceIdAndCurrentStatusIs(deviceId, jobStatus);
+        List<Job> jobs = jobRepository.getJobsByDeviceIdAndCurrentStatusIs(deviceId, jobStatus, SortingUtils.getSort(Job.class, sortBy, sortDirection));
 
         if (jobs.isEmpty()) {
             throw new NotFoundCustomException("No jobs found with status: '" + statusName + "' on device: '" + device.getName() + "'!");

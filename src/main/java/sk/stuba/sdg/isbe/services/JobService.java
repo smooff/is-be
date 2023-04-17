@@ -26,15 +26,15 @@ public interface JobService {
 
     String getJobStatus(String jobId);
 
-    List<Job> getAllJobsOnDevice(String deviceId);
+    List<Job> getAllJobsOnDevice(String deviceId, String sortBy, String sortDirection);
 
     List<Job> getAllJobsOnDevicePageable(String deviceId, int page, int pageSize, String sortBy, String sortDirection);
 
-    List<Job> getFinishedJobsByStatus(String deviceId);
+    List<Job> getFinishedJobsByStatus(String deviceId, String sortBy, String sortDirection);
 
-    List<Job> getRunningJobsByStatus(String deviceId);
+    List<Job> getRunningJobsByStatus(String deviceId, String sortBy, String sortDirection);
 
-    List<Job> getAllJobsByStatus(String deviceId, String status);
+    List<Job> getAllJobsByStatus(String deviceId, String status, String sortBy, String sortDirection);
 
     List<Job> getAllJobsByStatusPageable(String deviceId, String status, int page, int pageSize, String sortBy, String sortDirection);
 

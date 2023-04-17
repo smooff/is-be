@@ -76,9 +76,9 @@ public class JobController {
     }
 
     @Operation(summary = "Get all jobs on a device")
-    @GetMapping("getAllJobsOnDevice/{deviceId}")
-    public List<Job> getAllJobsOnDevice(@PathVariable String deviceId) {
-        return jobService.getAllJobsOnDevice(deviceId);
+    @GetMapping("getAllJobsOnDevice/{deviceId}/{sortBy}/{sortDirection}")
+    public List<Job> getAllJobsOnDevice(@PathVariable String deviceId, @PathVariable String sortBy, @PathVariable String sortDirection) {
+        return jobService.getAllJobsOnDevice(deviceId, sortBy, sortDirection);
     }
 
     @Operation(summary = "Get all jobs on a device with pagination and sorting")
@@ -88,21 +88,21 @@ public class JobController {
     }
 
     @Operation(summary = "Get finished jobs on a device")
-    @GetMapping("getFinishedJobs/{deviceId}")
-    public List<Job> getFinishedJobsByStatus(@PathVariable String deviceId) {
-        return jobService.getFinishedJobsByStatus(deviceId);
+    @GetMapping("getFinishedJobs/{deviceId}/{sortBy}/{sortDirection}")
+    public List<Job> getFinishedJobsByStatus(@PathVariable String deviceId, @PathVariable String sortBy, @PathVariable String sortDirection) {
+        return jobService.getFinishedJobsByStatus(deviceId, sortBy, sortDirection);
     }
 
     @Operation(summary = "Get running jobs on a device")
-    @GetMapping("getRunningJobs/{deviceId}")
-    public List<Job> getRunningJobsByStatus(@PathVariable String deviceId) {
-        return jobService.getRunningJobsByStatus(deviceId);
+    @GetMapping("getRunningJobs/{deviceId}/{sortBy}/{sortDirection}")
+    public List<Job> getRunningJobsByStatus(@PathVariable String deviceId, @PathVariable String sortBy, @PathVariable String sortDirection) {
+        return jobService.getRunningJobsByStatus(deviceId, sortBy, sortDirection);
     }
 
     @Operation(summary = "Get all jobs by a given status")
-    @GetMapping("getJobsByStatus/{deviceId}/{status}")
-    public List<Job> getJobsByStatus(@PathVariable String deviceId, @PathVariable String status) {
-        return jobService.getAllJobsByStatus(deviceId, status);
+    @GetMapping("getJobsByStatus/{deviceId}/{status}/{sortBy}/{sortDirection}")
+    public List<Job> getJobsByStatus(@PathVariable String deviceId, @PathVariable String status, @PathVariable String sortBy, @PathVariable String sortDirection) {
+        return jobService.getAllJobsByStatus(deviceId, status, sortBy, sortDirection);
     }
 
     @Operation(summary = "Get all jobs by a given status with pagination and sorting")

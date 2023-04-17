@@ -1,6 +1,7 @@
 package sk.stuba.sdg.isbe.repositories;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 import sk.stuba.sdg.isbe.domain.enums.DeviceTypeEnum;
@@ -13,15 +14,15 @@ import java.util.Optional;
 @Repository
 public interface RecipeRepository extends MongoRepository<Recipe, String> {
 
-    List<Recipe> getRecipesByDeactivated(boolean deactivated);
+    List<Recipe> getRecipesByDeactivated(boolean deactivated, Sort sort);
 
     List<Recipe> getRecipesByDeactivated(boolean deactivated, Pageable pageable);
 
-    List<Recipe> getRecipesByTypeOfDeviceAndDeactivated(DeviceTypeEnum typeOfDevice, boolean deactivated);
+    List<Recipe> getRecipesByTypeOfDeviceAndDeactivated(DeviceTypeEnum typeOfDevice, boolean deactivated, Sort sort);
 
     List<Recipe> getRecipesByTypeOfDeviceAndDeactivated(DeviceTypeEnum typeOfDevice, boolean deactivated, Pageable pageable);
 
-    List<Recipe> getRecipesByIsSubRecipeAndTypeOfDeviceAndDeactivated(boolean isSubRecipe, DeviceTypeEnum typeOfDevice, boolean deactivated);
+    List<Recipe> getRecipesByIsSubRecipeAndTypeOfDeviceAndDeactivated(boolean isSubRecipe, DeviceTypeEnum typeOfDevice, boolean deactivated, Sort sort);
 
     List<Recipe> getRecipesByIsSubRecipeAndTypeOfDeviceAndDeactivated(boolean isSubRecipe, DeviceTypeEnum typeOfDevice, boolean deactivated, Pageable pageable);
 

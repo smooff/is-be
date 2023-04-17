@@ -35,9 +35,9 @@ public class CommandController {
     }
 
     @Operation(summary = "Get all commands")
-    @GetMapping("getAllCommands/")
-    public List<Command> getAllCommands() {
-        return commandService.getAllCommands();
+    @GetMapping("getAllCommands/{sortBy}/{sortDirection}")
+    public List<Command> getAllCommands(@PathVariable String sortBy, @PathVariable String sortDirection) {
+        return commandService.getAllCommands(sortBy, sortDirection);
     }
 
     @Operation(summary = "Get all commands with pagination and sorting")
@@ -47,9 +47,9 @@ public class CommandController {
     }
 
     @Operation(summary = "Get command by device-type")
-    @GetMapping("getCommandByDeviceType/{deviceType}")
-    public List<Command> getCommandsByDeviceType(@PathVariable String deviceType) {
-        return commandService.getCommandsByDeviceType(deviceType);
+    @GetMapping("getCommandByDeviceType/{deviceType}/{sortBy}/{sortDirection}")
+    public List<Command> getCommandsByDeviceType(@PathVariable String deviceType, @PathVariable String sortBy, @PathVariable String sortDirection) {
+        return commandService.getCommandsByDeviceType(deviceType, sortBy, sortDirection);
     }
 
     @Operation(summary = "Get command by device-type and with pagination and sorting")

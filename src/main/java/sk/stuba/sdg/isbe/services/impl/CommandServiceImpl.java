@@ -62,8 +62,8 @@ public class CommandServiceImpl implements CommandService {
     }
 
     @Override
-    public List<Command> getAllCommands() {
-        List<Command> commands = commandRepository.getCommandsByDeactivated(false);
+    public List<Command> getAllCommands(String sortBy, String sortDirection) {
+        List<Command> commands = commandRepository.getCommandsByDeactivated(false, SortingUtils.getSort(Command.class, sortBy, sortDirection));
         if (commands.isEmpty()) {
             throw new NotFoundCustomException("There are not any commands in the database!");
         }
@@ -96,9 +96,9 @@ public class CommandServiceImpl implements CommandService {
     }
 
     @Override
-    public List<Command> getCommandsByDeviceType(String deviceType) {
+    public List<Command> getCommandsByDeviceType(String deviceType, String sortBy, String sortDirection) {
         DeviceTypeEnum deviceTypeEnum = DeviceTypeUtils.getDeviceTypeEnum(deviceType);
-        List<Command> commands = commandRepository.getCommandsByTypeOfDeviceAndDeactivated(deviceTypeEnum, false);
+        List<Command> commands = commandRepository.getCommandsByTypeOfDeviceAndDeactivated(deviceTypeEnum, false, SortingUtils.getSort(Command.class, sortBy, sortDirection));
         if (commands.isEmpty()) {
             throw new NotFoundCustomException("There are not any commands with this type of device in the database!");
         }

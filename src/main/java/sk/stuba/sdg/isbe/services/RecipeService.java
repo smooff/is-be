@@ -15,7 +15,7 @@ public interface RecipeService {
 
     Recipe removeCommandFromRecipe(String recipeId, String commandId, int index);
 
-    List<Recipe> getRecipesByTypeOfDevice(String typeOfDevice);
+    List<Recipe> getRecipesByTypeOfDevice(String typeOfDevice, String sortBy, String sortDirection);
 
     List<Recipe> getRecipesByTypeOfDevicePageable(String typeOfDevice, int page, int pageSize, String sortBy, String sortDirection);
 
@@ -29,13 +29,13 @@ public interface RecipeService {
 
     Recipe deleteRecipe(String recipeId);
 
-    List<Recipe> getAllRecipes();
+    List<Recipe> getAllRecipes(String sortBy, String sortDirection);
 
     List<Recipe> getAllRecipesPageable(int page, int pageSize, String sortBy, String sortDirection);
 
-    List<Recipe> getFullRecipes(String typeOfDevice);
+    List<Recipe> getFullRecipes(String typeOfDevice, String sortBy, String sortDirection);
 
-    List<Recipe> getSubRecipes(String typeOfDevice);
+    List<Recipe> getSubRecipes(String typeOfDevice, String sortBy, String sortDirection);
 
     List<Recipe> getFullRecipesPageable(String typeOfDevice, int page, int pageSize, String sortBy, String sortDirection);
 

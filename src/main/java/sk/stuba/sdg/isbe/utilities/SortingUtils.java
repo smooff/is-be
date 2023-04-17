@@ -7,11 +7,12 @@ import sk.stuba.sdg.isbe.domain.enums.SortDirectionEnum;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidOperationException;
 import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
 
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 
 public final class SortingUtils {
+
+    private static final String NO_SORT = "NONE";
 
     public static SortDirectionEnum getSortDirection(String sortDirection) {
         try {
@@ -30,13 +31,15 @@ public final class SortingUtils {
     }
 
     public static String getValidSortingField(String sortBy, Class<?> klass) {
-        List<String> recipeSortingFields = Arrays.stream(klass.getDeclaredFields()).map(Field::getName).toList();
+        List<String> recipeSortingFields = Arrays.stream(klass.getDeclaredFields())
+                .map(field -> field.getName().toUpperCase())
+                .toList();
         for (String field : recipeSortingFields) {
             if (field.equalsIgnoreCase(sortBy)) {
                 return field;
             }
         }
-        throw new NotFoundCustomException("Sorting field: " + sortBy + " can't be found in " + klass.getName() + " class!" +
+        throw new NotFoundCustomException("Sorting field: '" + sortBy + "' can't be found in " + klass.getName() + " class!" +
                 " Possible sorting fields: " + String.join(", ", recipeSortingFields));
     }
 
@@ -48,11 +51,14 @@ public final class SortingUtils {
             throw new InvalidOperationException("Size of the page must be greater than 0!");
         }
 
-        if (SortDirectionEnum.NONE == getSortDirection(sortDirection)) {
-            return PageRequest.of(page - 1, pageSize);
-        }
-
-        Sort sorting = getDirectedSorting(Sort.by(getValidSortingField(sortBy, klass)), sortDirection);
+        Sort sorting = getSort(klass, sortBy, sortDirection);
         return PageRequest.of(page - 1, pageSize, sorting);
+    }
+
+    public static Sort getSort(Class<?> klass, String sortBy, String sortDirection) {
+        if (NO_SORT.equals(sortBy) || SortDirectionEnum.NONE == getSortDirection(sortDirection)) {
+            return Sort.unsorted();
+        }
+        return getDirectedSorting(Sort.by(getValidSortingField(sortBy, klass)), sortDirection);
     }
 }

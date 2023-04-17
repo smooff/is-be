@@ -41,9 +41,9 @@ public class RecipeController {
     }
 
     @Operation(summary = "Get recipes by device-type")
-    @GetMapping("getByTypeOfDevice/{type}")
-    public List<Recipe> getRecipesByTypeOfDevice(@PathVariable String type) {
-        return recipeService.getRecipesByTypeOfDevice(type);
+    @GetMapping("getByTypeOfDevice/{type}/{sortBy}/{sortDirection}")
+    public List<Recipe> getRecipesByTypeOfDevice(@PathVariable String type, @PathVariable String sortBy, @PathVariable String sortDirection) {
+        return recipeService.getRecipesByTypeOfDevice(type, sortBy, sortDirection);
     }
 
     @Operation(summary = "Get recipes by device-type and pages with sorting")
@@ -76,10 +76,10 @@ public class RecipeController {
         return recipeService.removeSubRecipeFromRecipe(recipeId, subRecipeId, index);
     }
 
-    @Operation(summary = "Get all recipes")
-    @GetMapping("getAllRecipes")
-    public List<Recipe> getAllRecipes() {
-        return recipeService.getAllRecipes();
+    @Operation(summary = "Get all recipes sorted by a field or non-sorted - NONE.")
+    @GetMapping("getAllRecipes/{sortBy}/{sortDirection}")
+    public List<Recipe> getAllRecipes(@PathVariable String sortBy, @PathVariable String sortDirection) {
+        return recipeService.getAllRecipes(sortBy, sortDirection);
     }
 
     @Operation(summary = "Get all recipes with pagination and sorting")
@@ -89,9 +89,9 @@ public class RecipeController {
     }
 
     @Operation(summary = "Get non-sub-recipes by device-type")
-    @GetMapping("getFullRecipesByDeviceType/{typeOfDevice}")
-    public List<Recipe> getFullRecipes(@PathVariable String typeOfDevice) {
-        return recipeService.getFullRecipes(typeOfDevice);
+    @GetMapping("getFullRecipesByDeviceType/{typeOfDevice}/{sortBy}/{sortDirection}")
+    public List<Recipe> getFullRecipes(@PathVariable String typeOfDevice, @PathVariable String sortBy, @PathVariable String sortDirection) {
+        return recipeService.getFullRecipes(typeOfDevice, sortBy, sortDirection);
     }
 
     @Operation(summary = "Get non-sub-recipes by device-type and pages with sorting")
@@ -101,9 +101,9 @@ public class RecipeController {
     }
 
     @Operation(summary = "Get sub-recipes by device-type")
-    @GetMapping("getSubRecipesByDeviceType/{typeOfDevice}")
-    public List<Recipe> getSubRecipes(@PathVariable String typeOfDevice) {
-        return recipeService.getSubRecipes(typeOfDevice);
+    @GetMapping("getSubRecipesByDeviceType/{typeOfDevice}/{sortBy}/{sortDirection}")
+    public List<Recipe> getSubRecipes(@PathVariable String typeOfDevice, @PathVariable String sortBy, @PathVariable String sortDirection) {
+        return recipeService.getSubRecipes(typeOfDevice, sortBy, sortDirection);
     }
 
     @Operation(summary = "Get sub-recipes by device-type and pages with sorting")

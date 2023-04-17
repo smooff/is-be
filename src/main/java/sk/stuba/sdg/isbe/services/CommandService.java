@@ -8,7 +8,7 @@ public interface CommandService {
 
     Command createCommand(Command command);
 
-    List<Command> getAllCommands();
+    List<Command> getAllCommands(String sortBy, String sortDirection);
 
     List<Command> getAllCommandsPageable(int page, int pageSize, String sortBy, String sortDirection);
 
@@ -20,7 +20,7 @@ public interface CommandService {
 
     Command updateCommand(String commandId, Command updateCommand);
 
-    List<Command> getCommandsByDeviceType(String deviceType);
+    List<Command> getCommandsByDeviceType(String deviceType, String sortBy, String sortDirection);
 
     List<Command> getCommandsByDeviceTypePageable(String deviceType, int page, int pageSize, String sortBy, String sortDirection);
 }

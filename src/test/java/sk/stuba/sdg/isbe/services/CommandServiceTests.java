@@ -22,14 +22,20 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @Profile("!deployment")
 public class CommandServiceTests {
+
     @Autowired
     private CommandService commandService;
+
     @Autowired
     private CommandRepository commandRepository;
+
     @Autowired
     private RecipeService recipeService;
+
     @Autowired
     private RecipeRepository recipeRepository;
+
+    private static final String NONE = "NONE";
 
     @Test
     void testCreateCommand() {
@@ -131,11 +137,11 @@ public class CommandServiceTests {
         Command command2 = new Command("command2 " + Instant.now().toEpochMilli(), List.of(1,2,3), DeviceTypeEnum.SDG_CUBE);
         commandService.createCommand(command2);
 
-        List<Command> espCommands = commandService.getCommandsByDeviceType("ESP32");
+        List<Command> espCommands = commandService.getCommandsByDeviceType(DeviceTypeEnum.ESP32.name(), NONE, NONE);
         assertFalse(espCommands.isEmpty());
         assertTrue(espCommands.stream().allMatch(c -> c.getTypeOfDevice() == DeviceTypeEnum.ESP32));
 
-        List<Command> sdgCommands = commandService.getCommandsByDeviceType("SDG_CUBE");
+        List<Command> sdgCommands = commandService.getCommandsByDeviceType(DeviceTypeEnum.SDG_CUBE.name(), NONE, NONE);
         assertFalse(sdgCommands.isEmpty());
         assertTrue(sdgCommands.stream().allMatch(c -> c.getTypeOfDevice() == DeviceTypeEnum.SDG_CUBE));
 
@@ -151,13 +157,13 @@ public class CommandServiceTests {
         commandService.createCommand(command2);
 
         List<Command> commands;
-        commands = commandService.getCommandsByDeviceTypePageable("ESP32", 1, 2, "", "NONE");
+        commands = commandService.getCommandsByDeviceTypePageable("ESP32", 1, 2, NONE, NONE);
         assertEquals(2, commands.size());
 
-        commands = commandService.getCommandsByDeviceTypePageable("ESP32", 1, 1, "", "NONE");
+        commands = commandService.getCommandsByDeviceTypePageable("ESP32", 1, 1, NONE, NONE);
         assertEquals(1, commands.size());
 
-        Exception exception = assertThrows(NotFoundCustomException.class, () -> commandService.getCommandsByDeviceTypePageable("ESP32", 10000000, 1, "", "NONE"));
+        Exception exception = assertThrows(NotFoundCustomException.class, () -> commandService.getCommandsByDeviceTypePageable("ESP32", 10000000, 1, NONE, NONE));
         assertEquals("There are not any commands with type of device: '" + "ESP32" + "' on page " + 10000000 + "!", exception.getMessage());
 
         commandRepository.delete(command);

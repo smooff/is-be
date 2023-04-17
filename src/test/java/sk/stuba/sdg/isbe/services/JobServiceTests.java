@@ -51,6 +51,8 @@ public class JobServiceTests {
     @Autowired
     private JobStatusRepository jobStatusRepository;
 
+    private static final String NONE = "NONE";
+
     @Test
     void testRunJobFromRecipe() {
         Recipe recipe = new Recipe("Recipe" + Instant.now().toEpochMilli(), DeviceTypeEnum.ESP32, true);
@@ -183,10 +185,10 @@ public class JobServiceTests {
         jobService.runJob(job, device.getUid(), 0);
         jobService.runJob(job2, device.getUid(), 0);
 
-        Exception exception = assertThrows(NotFoundCustomException.class, () -> jobService.getAllJobsByStatus(device.getUid(), "WRONG_STATUS"));
+        Exception exception = assertThrows(NotFoundCustomException.class, () -> jobService.getAllJobsByStatus(device.getUid(), "WRONG_STATUS", NONE, NONE));
         assertEquals("Job status type: '" + "WRONG_STATUS" + "' does not exist!", exception.getMessage());
 
-        List<Job> pendingJobs = jobService.getAllJobsByStatus(device.getUid(), JobStatusEnum.JOB_PENDING.name());
+        List<Job> pendingJobs = jobService.getAllJobsByStatus(device.getUid(), JobStatusEnum.JOB_PENDING.name(), NONE, NONE);
         assertFalse(pendingJobs.isEmpty());
 
         jobRepository.delete(job);

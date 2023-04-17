@@ -56,9 +56,9 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public List<Recipe> getRecipesByTypeOfDevice(String typeOfDevice) {
+    public List<Recipe> getRecipesByTypeOfDevice(String typeOfDevice, String sortBy, String sortDirection) {
         DeviceTypeEnum deviceType = DeviceTypeUtils.getDeviceTypeEnum(typeOfDevice);
-        List<Recipe> recipes = recipeRepository.getRecipesByTypeOfDeviceAndDeactivated(deviceType, false);
+        List<Recipe> recipes = recipeRepository.getRecipesByTypeOfDeviceAndDeactivated(deviceType, false, SortingUtils.getSort(Recipe.class, sortBy, sortDirection));
         if (recipes.isEmpty()) {
             throw new NotFoundCustomException("There are not any recipes with type of Device: " + typeOfDevice + " in the database!");
         }
@@ -227,8 +227,8 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public List<Recipe> getAllRecipes() {
-        List<Recipe> recipes = recipeRepository.getRecipesByDeactivated(false);
+    public List<Recipe> getAllRecipes(String sortBy, String sortDirection) {
+        List<Recipe> recipes = recipeRepository.getRecipesByDeactivated(false, SortingUtils.getSort(Recipe.class, sortBy, sortDirection));
         if (recipes.isEmpty()) {
             throw new NotFoundCustomException("There are not any recipes in the database yet!");
         }
@@ -252,18 +252,18 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public List<Recipe> getFullRecipes(String typeOfDevice) {
-        return getFullOrSubRecipes(typeOfDevice, false);
+    public List<Recipe> getFullRecipes(String typeOfDevice, String sortBy, String sortDirection) {
+        return getFullOrSubRecipes(typeOfDevice, false, sortBy, sortDirection);
     }
 
     @Override
-    public List<Recipe> getSubRecipes(String typeOfDevice) {
-        return getFullOrSubRecipes(typeOfDevice, true);
+    public List<Recipe> getSubRecipes(String typeOfDevice, String sortBy, String sortDirection) {
+        return getFullOrSubRecipes(typeOfDevice, true, sortBy, sortDirection);
     }
 
-    private List<Recipe> getFullOrSubRecipes(String deviceType, boolean isSubRecipe) {
+    private List<Recipe> getFullOrSubRecipes(String deviceType, boolean isSubRecipe, String sortBy, String sortDirection) {
         DeviceTypeEnum deviceTypeEnum = DeviceTypeUtils.getDeviceTypeEnum(deviceType);
-        List<Recipe> recipes = recipeRepository.getRecipesByIsSubRecipeAndTypeOfDeviceAndDeactivated(isSubRecipe, deviceTypeEnum, false);
+        List<Recipe> recipes = recipeRepository.getRecipesByIsSubRecipeAndTypeOfDeviceAndDeactivated(isSubRecipe, deviceTypeEnum, false, SortingUtils.getSort(Recipe.class, sortBy, sortDirection));
         if (recipes.isEmpty()) {
             String recipeType = isSubRecipe ? "sub-recipes" : "recipes";
             throw new NotFoundCustomException("There are not any " + recipeType + " in the database yet!");
