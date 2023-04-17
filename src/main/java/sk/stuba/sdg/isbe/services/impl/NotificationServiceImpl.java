@@ -2,16 +2,21 @@ package sk.stuba.sdg.isbe.services.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import sk.stuba.sdg.isbe.domain.enums.NotificationActionType;
 import sk.stuba.sdg.isbe.domain.enums.NotificationLevelEnum;
 import sk.stuba.sdg.isbe.domain.model.Notification;
+import sk.stuba.sdg.isbe.domain.model.StoredResolvedNotification;
 import sk.stuba.sdg.isbe.handlers.exceptions.EntityExistsException;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidEntityException;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidOperationException;
 import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
 import sk.stuba.sdg.isbe.repositories.NotificationRepository;
+import sk.stuba.sdg.isbe.repositories.StoredResolvedNotificationRepository;
 import sk.stuba.sdg.isbe.services.NotificationService;
+import sk.stuba.sdg.isbe.utilities.NotificationLevelUtils;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +25,9 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Autowired
     private NotificationRepository notificationRepository;
+
+    @Autowired
+    private StoredResolvedNotificationRepository storedResolvedNotificationRepository;
 
     @Override
     public Notification createNotification(Notification notification) {
@@ -33,7 +41,6 @@ public class NotificationServiceImpl implements NotificationService {
         validateNotification(notification);
 
         notification.setCreatedAt(Instant.now().toEpochMilli());
-        notification.setLevel(NotificationLevelEnum.NOT_SOLVED);
         notification.setMutedUntil(null);
         notification.setForTimeCountingActivatedAt(null);
 
@@ -101,12 +108,12 @@ public class NotificationServiceImpl implements NotificationService {
         existingNotification.setDevices(notification.getDevices());
         existingNotification.setDeactivated(notification.getDeactivated());
         existingNotification.setRules(notification.getRules());
-        existingNotification.setLevel(notification.getLevel());
         existingNotification.setAlreadyTriggered(notification.getAlreadyTriggered());
         existingNotification.setMutedUntil(notification.getMutedUntil());
         existingNotification.setForTimeCountingActivatedAt(notification.getForTimeCountingActivatedAt());
         existingNotification.setMessageMultiplicityCounter(notification.getMessageMultiplicityCounter());
         existingNotification.setMessageAndTriggerTime(notification.getMessageAndTriggerTime());
+        existingNotification.setJobAndTriggerTime(notification.getJobAndTriggerTime());
 
         return notificationRepository.save(existingNotification);
     }
@@ -145,6 +152,57 @@ public class NotificationServiceImpl implements NotificationService {
         return notifications.stream()
                 .filter(notification -> notification.getMessageAndTriggerTime() != null && !notification.getMessageAndTriggerTime().isEmpty())
                 .toList();
+    }
+
+    @Override
+    public Notification resolveNotification(String notificationId, String notificationLevel){
+
+        validateNotificationId(notificationId);
+        Notification notificationToResolve = getNotificationById(notificationId);
+
+        NotificationLevelEnum notificationLevelEnum = NotificationLevelUtils.getNotificationLevelEnum(notificationLevel);
+
+        StoredResolvedNotification storedResolvedNotification = new StoredResolvedNotification();
+        storedResolvedNotification.setNotificationId(notificationId);
+        storedResolvedNotification.setCreatedAt(Instant.now().toEpochMilli());
+        storedResolvedNotification.setLevel(notificationLevelEnum);
+        storedResolvedNotification.getMessageAndTriggerTime().putAll(notificationToResolve.getMessageAndTriggerTime());
+        storedResolvedNotification.getMessageMultiplicityCounter().putAll(notificationToResolve.getMessageMultiplicityCounter());
+        storedResolvedNotification.setNotificationActionType(NotificationActionType.MESSAGE);
+
+        notificationToResolve.setAlreadyTriggered(false);
+        notificationToResolve.getMessageAndTriggerTime().clear();
+        notificationToResolve.getMessageMultiplicityCounter().clear();
+
+        notificationRepository.save(notificationToResolve);
+
+        storedResolvedNotificationRepository.save(storedResolvedNotification);
+
+        return notificationToResolve;
+    }
+
+    @Override
+    public void storeNotificationJobTriggers(){
+
+        List<Notification> notifications = notificationRepository.findAllWithJobAndTriggerTime();
+
+        List<StoredResolvedNotification> storedResolvedNotificationList = new ArrayList<>();
+        for (Notification notification : notifications) {
+            StoredResolvedNotification storedResolvedNotification = new StoredResolvedNotification();
+            storedResolvedNotification.setNotificationId(notification.getId());
+            storedResolvedNotification.setCreatedAt(Instant.now().toEpochMilli());
+            storedResolvedNotification.setLevel(null);
+            storedResolvedNotification.getJobAndTriggerTime().putAll(notification.getJobAndTriggerTime());
+            storedResolvedNotification.setNotificationActionType(NotificationActionType.JOB);
+
+            storedResolvedNotificationList.add(storedResolvedNotification);
+
+            notification.setAlreadyTriggered(false);
+            notification.getJobAndTriggerTime().clear();
+        }
+
+        storedResolvedNotificationRepository.saveAll(storedResolvedNotificationList);
+        notificationRepository.saveAll(notifications);
     }
 
     @Override

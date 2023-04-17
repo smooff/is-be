@@ -20,4 +20,7 @@ public interface NotificationRepository extends MongoRepository<Notification, St
    @Query("{'deviceAndTag.?0': ?1}")
    List<Notification> getNotificationByDeviceAndTag(String device, String tag);
 
+    @Query("{ 'jobAndTriggerTime' : { $exists : true, $ne : {} } }")
+    List<Notification> findAllWithJobAndTriggerTime();
+
 }

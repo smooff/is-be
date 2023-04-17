@@ -1,6 +1,7 @@
 package sk.stuba.sdg.isbe.services;
 
 import org.springframework.http.ResponseEntity;
+import sk.stuba.sdg.isbe.domain.enums.NotificationLevelEnum;
 import sk.stuba.sdg.isbe.domain.model.Device;
 import sk.stuba.sdg.isbe.domain.model.Notification;
 
@@ -27,6 +28,10 @@ public interface NotificationService {
     Notification muteNotification(String notificationId, Integer minutes);
 
     List<Notification> getNotificationsWithMessage();
+
+    Notification resolveNotification(String notificationId, String notificationLevelEnum);
+
+    void storeNotificationJobTriggers();
 
     Notification editNotification(Notification notification);
 

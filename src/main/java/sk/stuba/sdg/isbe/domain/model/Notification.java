@@ -2,7 +2,6 @@ package sk.stuba.sdg.isbe.domain.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import sk.stuba.sdg.isbe.domain.enums.NotificationLevelEnum;
 
 import java.util.HashMap;
 import java.util.List;
@@ -43,11 +42,6 @@ public class Notification {
      * Define if notification is active.
      */
     private Boolean deactivated;
-
-    /**
-     * Define notification level - response from user to notfication.
-     */
-    private NotificationLevelEnum level;
 
     /**
      * Define if the notification was already triggered - sent to user. This reset if users interact with notification.
@@ -92,6 +86,11 @@ public class Notification {
      * This map holds all tags (DataPointTag) for every device used in certain notification.
      */
     private Map<String, List<String>> deviceAndTag = new HashMap<>();
+
+    /**
+     * This map holds all jobs that notification returned (triggered) and time when trigger happened.
+     */
+    private Map<String, List<Long>> jobAndTriggerTime = new HashMap<>();
 
     public Map<String, List<String>> getDeviceAndTag() {
         return deviceAndTag;
@@ -149,14 +148,6 @@ public class Notification {
         this.deactivated = deactivated;
     }
 
-    public NotificationLevelEnum getLevel() {
-        return level;
-    }
-
-    public void setLevel(NotificationLevelEnum level) {
-        this.level = level;
-    }
-
     public Long getCreatedAt() {
         return createdAt;
     }
@@ -205,6 +196,14 @@ public class Notification {
         this.messageMultiplicityCounter = messageMultiplicityCounter;
     }
 
+    public Map<String, List<Long>> getJobAndTriggerTime() {
+        return jobAndTriggerTime;
+    }
+
+    public void setJobAndTriggerTime(Map<String, List<Long>> jobAndTriggerTime) {
+        this.jobAndTriggerTime = jobAndTriggerTime;
+    }
+
     @Override
     public String toString() {
         return "Notification{" +
@@ -213,7 +212,6 @@ public class Notification {
                 ", name='" + name + '\'' +
                 ", devices=" + devices +
                 ", deactivated=" + deactivated +
-                ", level=" + level +
                 ", isAlreadyTriggered=" + isAlreadyTriggered +
                 ", mutedUntil=" + mutedUntil +
                 ", createdAt=" + createdAt +

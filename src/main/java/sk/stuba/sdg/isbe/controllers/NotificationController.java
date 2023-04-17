@@ -3,6 +3,7 @@ package sk.stuba.sdg.isbe.controllers;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
+import sk.stuba.sdg.isbe.domain.enums.NotificationLevelEnum;
 import sk.stuba.sdg.isbe.domain.model.Notification;
 import sk.stuba.sdg.isbe.services.NotificationService;
 
@@ -76,5 +77,17 @@ public class NotificationController {
     @Operation(summary = "Get all Notifications with some message for user - triggered Notifications.")
     public List<Notification> getNotificationsWithMessage() {
         return this.notificationService.getNotificationsWithMessage();
+    }
+
+    @PostMapping(value = "/resolveNotification/{notificationId}/{notificationLevel}")
+    @Operation(summary = "Resolve certain notification.")
+    public Notification resolveNotification(@PathVariable("notificationId") String notificationId, @PathVariable("notificationLevel") String notificationLevel) {
+        return this.notificationService.resolveNotification(notificationId, notificationLevel);
+    }
+
+    @GetMapping(value = "/storeNotificationJobTriggers")
+    @Operation(summary = "Store data about notification trigger related to run (reset) job.")
+    public void storeNotificationJobTriggers() {
+        this.notificationService.storeNotificationJobTriggers();
     }
 }

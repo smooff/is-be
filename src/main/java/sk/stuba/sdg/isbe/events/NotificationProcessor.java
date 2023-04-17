@@ -6,11 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import sk.stuba.sdg.isbe.domain.enums.JobStatusEnum;
+import sk.stuba.sdg.isbe.domain.model.Job;
 import sk.stuba.sdg.isbe.domain.model.Notification;
 import sk.stuba.sdg.isbe.domain.model.StoredData;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidOperationException;
 import sk.stuba.sdg.isbe.repositories.NotificationRepository;
 import sk.stuba.sdg.isbe.repositories.StoredDataRepository;
+import sk.stuba.sdg.isbe.services.JobService;
 import sk.stuba.sdg.isbe.services.NotificationService;
 
 import java.time.Instant;
@@ -30,6 +33,9 @@ public class NotificationProcessor {
 
     @Autowired
     StoredDataRepository storedDataRepository;
+
+    @Autowired
+    JobService jobService;
 
     JsonLogic jsonLogic = new JsonLogic();
 
@@ -127,25 +133,22 @@ public class NotificationProcessor {
 
     public void handleNotificationJob(Notification notification, String result){
         String jobId = result.split(":")[1];
+
+        Job job = jobService.getJob(jobId);
+        if(job.getCurrentStatus().equals(JobStatusEnum.JOB_DONE) || true){ //MOZNO DOPLNIT PODMIENKY
+//            jobService.resetJob(jobId);
+            //trigger time (multiple values) for certain job
+            if (notification.getJobAndTriggerTime().containsKey(jobId)) {
+                notification.getJobAndTriggerTime().get(jobId).add(Instant.now().toEpochMilli());
+            } else {
+                List<Long> triggeredAt = new ArrayList<>();
+                triggeredAt.add(Instant.now().toEpochMilli());
+                notification.getJobAndTriggerTime().put(jobId, triggeredAt);
+            }
+        }
+
         // dotiahnut si job s jobId(ktory by sa mal spustit) -> pozriet sa na tento job a na jeho retCode/code -> podla toho sa spusti job
 
-
-//        if (notification.getAlreadyTriggered()) {
-//            notification.setMultiplicityCounter(notification.getMultiplicityCounter() + 1);
-//            notification.setLastTimeTriggeredAt(Instant.now().toEpochMilli());
-//            System.out.println("already triggered:"+notification.getMultiplicityCounter()+" times");
-//        } else {
-//            notification.setAlreadyTriggered(true);
-//            notification.setFirstTimeTriggeredAt(Instant.now().toEpochMilli());
-//            if (notification.getLastTimeTriggeredAt() == null) {
-//                notification.setLastTimeTriggeredAt(Instant.now().toEpochMilli());
-//            }
-//            notification.setNotificationMessage(result.split(":")[1]);
-//            System.out.println("message:"+result.split(":")[1]);
-//        }
-//        if(notification.getMutedUntil()!= null){
-//            notification.setMutedUntil(null);
-//        }
         if(!notification.getAlreadyTriggered()){
             notification.setAlreadyTriggered(true);
         }
