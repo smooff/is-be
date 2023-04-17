@@ -2,19 +2,25 @@ package sk.stuba.sdg.isbe.scheduler;
 
 
 import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoDatabase;
+import net.javacrumbs.shedlock.core.LockProvider;
+import net.javacrumbs.shedlock.provider.mongo.MongoLockProvider;
+import net.javacrumbs.shedlock.spring.annotation.EnableSchedulerLock;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import sk.stuba.sdg.isbe.services.NotificationService;
 import sk.stuba.sdg.isbe.services.StoredResolvedNotificationService;
-import net.javacrumbs.shedlock.core.LockProvider;
-import net.javacrumbs.shedlock.provider.mongo.MongoLockProvider;
 
 
 @Component
-public class StoredResolvedNotificationScheduler {
+@EnableScheduling
+@EnableSchedulerLock(defaultLockAtMostFor = "5m")
+public class NotificationScheduler {
 
     @Autowired
     private NotificationService notificationService;
@@ -22,13 +28,18 @@ public class StoredResolvedNotificationScheduler {
     @Autowired
     StoredResolvedNotificationService storedResolvedNotificationService;
 
+    @Value("${spring.data.mongodb.database}")
+    private String mongoDbName;
+
     @Bean
     public LockProvider lockProvider(MongoClient mongo) {
-        return new MongoLockProvider(mongo.getDatabase("is-sdg-database"));
+        MongoDatabase database = mongo.getDatabase(mongoDbName);
+        System.out.println("name:" + mongoDbName);
+        return new MongoLockProvider(database);
     }
 
     @Scheduled(cron = "15 * * * * *")
-    @SchedulerLock(name = "scheduledTaskName", lockAtMostFor = "14m", lockAtLeastFor = "14m")
+    @SchedulerLock(name = "scheduledTaskName", lockAtMostFor = "20m", lockAtLeastFor = "20m")
     public void removeOldStoredNotificationData() {
         System.out.println("TEST LOCKER");
     }
