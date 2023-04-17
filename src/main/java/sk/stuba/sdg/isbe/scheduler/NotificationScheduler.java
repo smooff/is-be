@@ -34,12 +34,11 @@ public class NotificationScheduler {
     @Bean
     public LockProvider lockProvider(MongoClient mongo) {
         MongoDatabase database = mongo.getDatabase(mongoDbName);
-        System.out.println("name:" + mongoDbName);
         return new MongoLockProvider(database);
     }
 
     @Scheduled(cron = "15 * * * * *")
-    @SchedulerLock(name = "scheduledTaskName", lockAtMostFor = "20m", lockAtLeastFor = "20m")
+    @SchedulerLock(name = "scheduledTaskName", lockAtMostFor = "20m", lockAtLeastFor = "1m")
     public void removeOldStoredNotificationData() {
         System.out.println("TEST LOCKER");
     }
