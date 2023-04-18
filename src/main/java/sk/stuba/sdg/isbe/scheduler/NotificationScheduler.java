@@ -28,12 +28,12 @@ public class NotificationScheduler {
     @Autowired
     StoredResolvedNotificationService storedResolvedNotificationService;
 
-    @Value("${sdg.mongodb-name.schedule-lock}")
+    @Value("${spring.data.mongodb.database}")
     private String mongoDbName;
 
     @Bean
     public LockProvider lockProvider(MongoClient mongo) {
-        MongoDatabase database = mongo.getDatabase("test");
+        MongoDatabase database = mongo.getDatabase(mongoDbName);
         return new MongoLockProvider(database);
     }
 
