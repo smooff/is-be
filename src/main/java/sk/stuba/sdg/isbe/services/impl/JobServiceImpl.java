@@ -98,7 +98,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public Job resetJob(String jobId) {
-        Job job = getJob(jobId);
+        Job job = getJobById(jobId);
         Device device = deviceService.getDeviceById(job.getDeviceId());
 
         jobStatusRepository.delete(job.getStatus());
@@ -148,7 +148,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public Job skipCycle(String jobId) {
-        Job job = getJob(jobId);
+        Job job = getJobById(jobId);
         Integer currentCycle = job.getStatus().getCurrentCycle();
         Integer maxCycles = job.getNoOfReps();
 
@@ -163,7 +163,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public Job skipStep(String jobId) {
-        Job job = getJob(jobId);
+        Job job = getJobById(jobId);
         Integer currentStep = job.getStatus().getCurrentStep();
         Integer maxSteps = job.getStatus().getTotalSteps();
 
@@ -178,7 +178,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public Job cancelJob(String jobId) {
-        Job job = getJob(jobId);
+        Job job = getJobById(jobId);
         job.setToCancel(true);
         return jobRepository.save(job);
     }
@@ -194,14 +194,14 @@ public class JobServiceImpl implements JobService {
     }
 
     private Job setJobPaused(String jobId, boolean paused) {
-        Job job = getJob(jobId);
+        Job job = getJobById(jobId);
         job.setPaused(paused);
         return jobRepository.save(job);
     }
 
     @Override
     public String getJobStatus(String jobId) {
-        Job job = getJob(jobId);
+        Job job = getJobById(jobId);
         switch(job.getCurrentStatus()) {
             case JOB_PENDING -> {
                 return JobStatusEnum.JOB_PENDING.name() + ": Job '" + job.getName() + "' is pending!";
@@ -269,10 +269,19 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public Job getJob(String jobId) {
+    public Job getJobById(String jobId) {
         Optional<Job> optionalJob = jobRepository.findById(jobId);
         if (optionalJob.isEmpty()) {
             throw new NotFoundCustomException("Job with ID: '" + jobId + "' was not found!");
+        }
+        return optionalJob.get();
+    }
+
+    @Override
+    public Job getJobByName(String name) {
+        Optional<Job> optionalJob = jobRepository.getJobByName(name);
+        if (optionalJob.isEmpty()) {
+            throw new NotFoundCustomException("Job with name: '" + name + "' was not found!");
         }
         return optionalJob.get();
     }

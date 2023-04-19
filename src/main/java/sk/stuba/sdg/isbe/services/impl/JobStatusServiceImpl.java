@@ -112,7 +112,7 @@ public class JobStatusServiceImpl implements JobStatusService {
     }
 
     private void changeJobsCurrentStatus(String jobId, JobStatusEnum jobStatus) {
-        Job job = jobService.getJob(jobId);
+        Job job = jobService.getJobById(jobId);
         job.setCurrentStatus(jobStatus);
         jobRepository.save(job);
     }

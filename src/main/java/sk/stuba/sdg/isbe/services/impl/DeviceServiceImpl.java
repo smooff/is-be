@@ -122,7 +122,7 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Override
     public ResponseEntity<Job> addJobToDevice(String deviceId, String jobId){
-        Job job = jobService.getJob(jobId);
+        Job job = jobService.getJobById(jobId);
 
         Device device = getDeviceById(deviceId);
         device.getJobs().add(job);

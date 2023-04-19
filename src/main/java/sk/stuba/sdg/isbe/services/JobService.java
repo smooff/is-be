@@ -12,7 +12,9 @@ public interface JobService {
 
     Job resetJob(String jobId);
 
-    Job getJob(String jobId);
+    Job getJobById(String jobId);
+
+    Job getJobByName(String jobId);
 
     Job skipCycle(String jobId);
 

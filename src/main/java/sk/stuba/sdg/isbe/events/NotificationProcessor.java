@@ -129,7 +129,7 @@ public class NotificationProcessor {
     public void handleNotificationJob(Notification notification, String result) {
         String jobId = result.split(":")[1];
 
-        Job job = jobService.getJob(jobId);
+        Job job = jobService.getJobById(jobId);
         if (job.getCurrentStatus().equals(JobStatusEnum.JOB_DONE) || job.getCurrentStatus().equals(JobStatusEnum.JOB_ERR)) {
             jobService.resetJob(jobId);
             //trigger time (multiple values) for certain job

@@ -36,8 +36,14 @@ public class JobController {
 
     @Operation(summary = "Get job by its ID")
     @GetMapping("getJobById/{jobId}")
-    public Job getJob(@PathVariable String jobId) {
-        return jobService.getJob(jobId);
+    public Job getJobById(@PathVariable String jobId) {
+        return jobService.getJobById(jobId);
+    }
+
+    @Operation(summary = "Get job by its name")
+    @GetMapping("getJobByName/{name}")
+    public Job getJobByName(@PathVariable String name) {
+        return jobService.getJobByName(name);
     }
 
     @Operation(summary = "Skip cycle in a job")

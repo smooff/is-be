@@ -8,9 +8,12 @@ import sk.stuba.sdg.isbe.domain.enums.JobStatusEnum;
 import sk.stuba.sdg.isbe.domain.model.Job;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface JobRepository extends MongoRepository<Job, String> {
+
+    Optional<Job> getJobByName(String name);
 
     List<Job> getJobsByDeviceIdAndCurrentStatusIs(String deviceId, JobStatusEnum currentStatus, Sort sort);
 
