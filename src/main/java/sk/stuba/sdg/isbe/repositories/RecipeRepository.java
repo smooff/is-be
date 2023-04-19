@@ -18,13 +18,13 @@ public interface RecipeRepository extends MongoRepository<Recipe, String> {
 
     List<Recipe> getRecipesByDeactivated(boolean deactivated, Pageable pageable);
 
-    List<Recipe> getRecipesByTypeOfDeviceAndDeactivated(DeviceTypeEnum typeOfDevice, boolean deactivated, Sort sort);
+    List<Recipe> getRecipesByDeviceTypeAndDeactivated(DeviceTypeEnum deviceType, boolean deactivated, Sort sort);
 
-    List<Recipe> getRecipesByTypeOfDeviceAndDeactivated(DeviceTypeEnum typeOfDevice, boolean deactivated, Pageable pageable);
+    List<Recipe> getRecipesByDeviceTypeAndDeactivated(DeviceTypeEnum deviceType, boolean deactivated, Pageable pageable);
 
-    List<Recipe> getRecipesByIsSubRecipeAndTypeOfDeviceAndDeactivated(boolean isSubRecipe, DeviceTypeEnum typeOfDevice, boolean deactivated, Sort sort);
+    List<Recipe> getRecipesByIsSubRecipeAndDeviceTypeAndDeactivated(boolean isSubRecipe, DeviceTypeEnum deviceType, boolean deactivated, Sort sort);
 
-    List<Recipe> getRecipesByIsSubRecipeAndTypeOfDeviceAndDeactivated(boolean isSubRecipe, DeviceTypeEnum typeOfDevice, boolean deactivated, Pageable pageable);
+    List<Recipe> getRecipesByIsSubRecipeAndDeviceTypeAndDeactivated(boolean isSubRecipe, DeviceTypeEnum deviceType, boolean deactivated, Pageable pageable);
 
     Optional<Recipe> getRecipeByNameAndDeactivated(String name, boolean deactivated);
 

@@ -43,7 +43,7 @@ public class CommandServiceImpl implements CommandService {
         if (command.getParams() == null || command.getParams().isEmpty()) {
             throw new InvalidEntityException("Command does not contain any parameters!");
         }
-        if (command.getTypeOfDevice() == null) {
+        if (command.getDeviceType() == null) {
             throw new InvalidEntityException("Type of device for command must be set!");
         }
 
@@ -98,7 +98,7 @@ public class CommandServiceImpl implements CommandService {
     @Override
     public List<Command> getCommandsByDeviceType(String deviceType, String sortBy, String sortDirection) {
         DeviceTypeEnum deviceTypeEnum = DeviceTypeUtils.getDeviceTypeEnum(deviceType);
-        List<Command> commands = commandRepository.getCommandsByTypeOfDeviceAndDeactivated(deviceTypeEnum, false, SortingUtils.getSort(Command.class, sortBy, sortDirection));
+        List<Command> commands = commandRepository.getCommandsByDeviceTypeAndDeactivated(deviceTypeEnum, false, SortingUtils.getSort(Command.class, sortBy, sortDirection));
         if (commands.isEmpty()) {
             throw new NotFoundCustomException("There are not any commands with this type of device in the database!");
         }
@@ -109,14 +109,14 @@ public class CommandServiceImpl implements CommandService {
     public List<Command> getCommandsByDeviceTypePageable(String deviceType, int page, int pageSize, String sortBy, String sortDirection) {
         DeviceTypeEnum deviceTypeEnum = DeviceTypeUtils.getDeviceTypeEnum(deviceType);
         Pageable pageable = SortingUtils.getPagination(Command.class, EMPTY_STRING, NONE, 1, 1);
-        List<Command> commands = commandRepository.getCommandsByTypeOfDeviceAndDeactivated(deviceTypeEnum, false, pageable);
+        List<Command> commands = commandRepository.getCommandsByDeviceTypeAndDeactivated(deviceTypeEnum, false, pageable);
         if (commands.isEmpty()) {
             throw new NotFoundCustomException("There are not any commands in the database of device type: " + deviceType + "!");
         }
 
 
         pageable = SortingUtils.getPagination(Command.class, sortBy, sortDirection, page, pageSize);
-        commands = commandRepository.getCommandsByTypeOfDeviceAndDeactivated(deviceTypeEnum, false, pageable);
+        commands = commandRepository.getCommandsByDeviceTypeAndDeactivated(deviceTypeEnum, false, pageable);
         if (commands.isEmpty()) {
             throw new NotFoundCustomException("There are not any commands with type of device: '" + deviceType + "' on page " + page + "!");
         }
@@ -155,7 +155,7 @@ public class CommandServiceImpl implements CommandService {
         if (updateCommand.getParams() != null) {
             command.setParams(updateCommand.getParams());
         }
-        if (updateCommand.getTypeOfDevice() != null) {
+        if (updateCommand.getDeviceType() != null) {
             List<Recipe> recipesUsingCommand = recipeService.getRecipesContainingCommand(command);
             List<String> recipeNames = recipesUsingCommand.stream().map(Recipe::getName).toList();
 
@@ -163,7 +163,7 @@ public class CommandServiceImpl implements CommandService {
                 throw new InvalidOperationException("Command is used in Recipes: " + String.join(", ", recipeNames)
                         + ". Remove this command from recipes to be able to change its type!");
             }
-            command.setTypeOfDevice(updateCommand.getTypeOfDevice());
+            command.setDeviceType(updateCommand.getDeviceType());
         }
 
         return commandRepository.save(command);

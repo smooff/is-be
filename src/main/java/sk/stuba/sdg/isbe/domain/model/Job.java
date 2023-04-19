@@ -9,20 +9,69 @@ import java.util.List;
 
 @Document
 public class Job {
+
     @Id
     private String uid;
+
+    /**
+     * Device's id on which the job is running.
+     */
     private String deviceId;
+
+    /**
+     * Job's name - set automatically to recipe name if run from recipe.
+     */
     private String name;
+
+    /**
+     * Number of commands in the job.
+     */
     private Integer noOfCmds;
+
+    /**
+     * Number of repetitions, how many times should the job repeat itself.
+     */
     private Integer noOfReps;
+
+    /**
+     * All information regarding the job's status.
+     */
     @DBRef
     private JobStatus status;
+
+    /**
+     * Current status of job - added for option to be able to query based on this attribute.
+     */
     private JobStatusEnum currentStatus;
+
+    /**
+     * Commands which are executed on the device when the job is running.
+     */
     private List<Command> commands;
+
+    /**
+     * Flag to indicate for the device that the job has to be cancelled. Can be set via end-point by user.
+     */
     private boolean toCancel;
+
+    /**
+     * Flag to indicate for the device that the job has to be paused. Can be set via end-point by user.
+     */
     private boolean paused;
+
+    /**
+     * Job's creation date - set when job is created by the user.
+     */
     private Long createdAt;
+
+    /**
+     * Job's start date - set by the device, when the job is run.
+     */
     private Long startedAt;
+
+    /**
+     * Job's finish date - set by the device, when the job has finished.
+     */
     private Long finishedAt;
 
     public Job() {}

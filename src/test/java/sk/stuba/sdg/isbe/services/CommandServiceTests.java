@@ -139,11 +139,11 @@ public class CommandServiceTests {
 
         List<Command> espCommands = commandService.getCommandsByDeviceType(DeviceTypeEnum.ESP32.name(), NONE, NONE);
         assertFalse(espCommands.isEmpty());
-        assertTrue(espCommands.stream().allMatch(c -> c.getTypeOfDevice() == DeviceTypeEnum.ESP32));
+        assertTrue(espCommands.stream().allMatch(c -> c.getDeviceType() == DeviceTypeEnum.ESP32));
 
         List<Command> sdgCommands = commandService.getCommandsByDeviceType(DeviceTypeEnum.SDG_CUBE.name(), NONE, NONE);
         assertFalse(sdgCommands.isEmpty());
-        assertTrue(sdgCommands.stream().allMatch(c -> c.getTypeOfDevice() == DeviceTypeEnum.SDG_CUBE));
+        assertTrue(sdgCommands.stream().allMatch(c -> c.getDeviceType() == DeviceTypeEnum.SDG_CUBE));
 
         commandRepository.delete(command);
         commandRepository.delete(command2);
@@ -157,14 +157,14 @@ public class CommandServiceTests {
         commandService.createCommand(command2);
 
         List<Command> commands;
-        commands = commandService.getCommandsByDeviceTypePageable("ESP32", 1, 2, NONE, NONE);
+        commands = commandService.getCommandsByDeviceTypePageable(DeviceTypeEnum.ESP32.name(), 1, 2, NONE, NONE);
         assertEquals(2, commands.size());
 
-        commands = commandService.getCommandsByDeviceTypePageable("ESP32", 1, 1, NONE, NONE);
+        commands = commandService.getCommandsByDeviceTypePageable(DeviceTypeEnum.ESP32.name(), 1, 1, NONE, NONE);
         assertEquals(1, commands.size());
 
-        Exception exception = assertThrows(NotFoundCustomException.class, () -> commandService.getCommandsByDeviceTypePageable("ESP32", 10000000, 1, NONE, NONE));
-        assertEquals("There are not any commands with type of device: '" + "ESP32" + "' on page " + 10000000 + "!", exception.getMessage());
+        Exception exception = assertThrows(NotFoundCustomException.class, () -> commandService.getCommandsByDeviceTypePageable(DeviceTypeEnum.ESP32.name(), 10000000, 1, NONE, NONE));
+        assertEquals("There are not any commands with type of device: '" + DeviceTypeEnum.ESP32.name() + "' on page " + 10000000 + "!", exception.getMessage());
 
         commandRepository.delete(command);
         commandRepository.delete(command2);

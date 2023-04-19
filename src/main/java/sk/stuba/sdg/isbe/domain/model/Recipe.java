@@ -9,23 +9,52 @@ import java.util.List;
 
 @Document
 public class Recipe {
+
     @Id
     private String id;
+
+    /**
+     * Recipe's name.
+     */
     private String name;
+
+    /**
+     * Commands which have to be executed when the recipe is run as job.
+     */
     @DBRef
     private List<Command> commands;
+
+    /**
+     * All recipes are able to contain sub-recipes, so that it is easier for the user to create new recipes.
+     */
     @DBRef
     private List<Recipe> subRecipes;
-    private DeviceTypeEnum typeOfDevice;
+
+    /**
+     * Device type on which the recipe can be run as a job.
+     */
+    private DeviceTypeEnum deviceType;
+
+    /**
+     * Flag that indicates if the recipe is only a sub-recipe. Sub-recipe can't be run as stand-alone.
+     */
     private Boolean isSubRecipe;
+
+    /**
+     * Recipe's creation date - set when the user saves the recipe.
+     */
     private long createdAt;
+
+    /**
+     * Flag that is set when the user deletes a recipe. It provides the option to retrieve deleted recipes from the database.
+     */
     private boolean deactivated;
 
     public Recipe() {}
 
-    public Recipe(String name, DeviceTypeEnum typeOfDevice, Boolean isSubRecipe) {
+    public Recipe(String name, DeviceTypeEnum deviceType, Boolean isSubRecipe) {
         this.name = name;
-        this.typeOfDevice = typeOfDevice;
+        this.deviceType = deviceType;
         this.isSubRecipe = isSubRecipe;
     }
 
@@ -53,12 +82,12 @@ public class Recipe {
         this.commands = commands;
     }
 
-    public DeviceTypeEnum getTypeOfDevice() {
-        return typeOfDevice;
+    public DeviceTypeEnum getDeviceType() {
+        return deviceType;
     }
 
-    public void setTypeOfDevice(DeviceTypeEnum typeOfDevice) {
-        this.typeOfDevice = typeOfDevice;
+    public void setDeviceType(DeviceTypeEnum deviceType) {
+        this.deviceType = deviceType;
     }
 
     public Boolean isSubRecipe() {

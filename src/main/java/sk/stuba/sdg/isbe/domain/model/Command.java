@@ -8,21 +8,42 @@ import java.util.List;
 
 @Document
 public class Command {
+
     @Id
     private String id;
+
+    /**
+     * Command's name.
+     */
     private String name;
+
+    /**
+     * Parameters which are executed by the device. These are given by the user when creating a command.
+     */
     private List<Integer> params;
-    private DeviceTypeEnum typeOfDevice;
+
+    /**
+     * Device type on which the commands can be executed. Also helps when adding command to a recipe to prevent user from adding a non-supported command.
+     */
+    private DeviceTypeEnum deviceType;
+
+    /**
+     * Command's creation date.
+     */
     private long createdAt;
+
+    /**
+     * Flag that is set when the user deletes a command. It provides the option to retrieve deleted commands from the database.
+     */
     private boolean deactivated;
 
 
     public Command() {}
 
-    public Command(String name, List<Integer> params, DeviceTypeEnum typeOfDevice) {
+    public Command(String name, List<Integer> params, DeviceTypeEnum deviceType) {
         this.name = name;
         this.params = params;
-        this.typeOfDevice = typeOfDevice;
+        this.deviceType = deviceType;
     }
 
     public String getId() {
@@ -49,12 +70,12 @@ public class Command {
         this.params = params;
     }
 
-    public DeviceTypeEnum getTypeOfDevice() {
-        return typeOfDevice;
+    public DeviceTypeEnum getDeviceType() {
+        return deviceType;
     }
 
-    public void setTypeOfDevice(DeviceTypeEnum typeOfDevice) {
-        this.typeOfDevice = typeOfDevice;
+    public void setDeviceType(DeviceTypeEnum deviceType) {
+        this.deviceType = deviceType;
     }
 
     public long getCreatedAt() {

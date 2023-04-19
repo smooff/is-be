@@ -43,7 +43,7 @@ public class RecipeServiceImpl implements RecipeService {
         if (recipeWithNameExists(recipe.getName())) {
             throw new InvalidEntityException("Recipe with name: '" + recipe.getName() + "' already exists!");
         }
-        if (recipe.getTypeOfDevice() == null) {
+        if (recipe.getDeviceType() == null) {
             throw new InvalidEntityException("Type of device for recipe is missing!");
         }
         if (recipe.isSubRecipe() == null) {
@@ -56,28 +56,28 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public List<Recipe> getRecipesByTypeOfDevice(String typeOfDevice, String sortBy, String sortDirection) {
-        DeviceTypeEnum deviceType = DeviceTypeUtils.getDeviceTypeEnum(typeOfDevice);
-        List<Recipe> recipes = recipeRepository.getRecipesByTypeOfDeviceAndDeactivated(deviceType, false, SortingUtils.getSort(Recipe.class, sortBy, sortDirection));
+    public List<Recipe> getRecipesByDeviceType(String deviceType, String sortBy, String sortDirection) {
+        DeviceTypeEnum deviceTypeEnum = DeviceTypeUtils.getDeviceTypeEnum(deviceType);
+        List<Recipe> recipes = recipeRepository.getRecipesByDeviceTypeAndDeactivated(deviceTypeEnum, false, SortingUtils.getSort(Recipe.class, sortBy, sortDirection));
         if (recipes.isEmpty()) {
-            throw new NotFoundCustomException("There are not any recipes with type of Device: " + typeOfDevice + " in the database!");
+            throw new NotFoundCustomException("There are not any recipes with type of Device: " + deviceType + " in the database!");
         }
         return recipes;
     }
 
     @Override
-    public List<Recipe> getRecipesByTypeOfDevicePageable(String typeOfDevice, int page, int pageSize, String sortBy, String sortDirection) {
-        DeviceTypeEnum deviceType = DeviceTypeUtils.getDeviceTypeEnum(typeOfDevice);
+    public List<Recipe> getRecipesByDeviceTypePageable(String deviceType, int page, int pageSize, String sortBy, String sortDirection) {
+        DeviceTypeEnum deviceTypeEnum = DeviceTypeUtils.getDeviceTypeEnum(deviceType);
         Pageable pageable = SortingUtils.getPagination(Recipe.class, EMPTY_STRING, NONE, 1, 1);
-        List<Recipe> recipes = recipeRepository.getRecipesByTypeOfDeviceAndDeactivated(deviceType, false, pageable);
+        List<Recipe> recipes = recipeRepository.getRecipesByDeviceTypeAndDeactivated(deviceTypeEnum, false, pageable);
         if (recipes.isEmpty()) {
-            throw new NotFoundCustomException("There are not any recipe of device type '" + typeOfDevice + "' in the database!");
+            throw new NotFoundCustomException("There are not any recipe of device type '" + deviceType + "' in the database!");
         }
 
         pageable = SortingUtils.getPagination(Recipe.class, sortBy, sortDirection, page, pageSize);
-        recipes = recipeRepository.getRecipesByTypeOfDeviceAndDeactivated(deviceType, false, pageable);
+        recipes = recipeRepository.getRecipesByDeviceTypeAndDeactivated(deviceTypeEnum, false, pageable);
         if (recipes.isEmpty()) {
-            throw new NotFoundCustomException("There are not any recipes of type of device: " + typeOfDevice + " on this page!");
+            throw new NotFoundCustomException("There are not any recipes of type of device: " + deviceType + " on this page!");
         }
         return recipes;
     }
@@ -109,21 +109,21 @@ public class RecipeServiceImpl implements RecipeService {
             recipe.setSubRecipe(changeRecipe.isSubRecipe());
         }
 
-        if (changeRecipe.getTypeOfDevice() != null && changeRecipe.getTypeOfDevice() != recipe.getTypeOfDevice()) {
+        if (changeRecipe.getDeviceType() != null && changeRecipe.getDeviceType() != recipe.getDeviceType()) {
             if (recipe.getCommands() != null && !recipe.getCommands().isEmpty()) {
                 throw new InvalidOperationException("Device type of recipe can't be changed, since the recipe contains commands!");
             }
             if (recipe.getSubRecipes() != null && !recipe.getSubRecipes().isEmpty()) {
                 throw new InvalidOperationException("Device type of recipe can't be changed, since the recipe contains sub-recipes!");
             }
-            recipe.setTypeOfDevice(changeRecipe.getTypeOfDevice());
+            recipe.setDeviceType(changeRecipe.getDeviceType());
         }
 
         //save local changes that were made above, further changes are made on database level
         recipeRepository.save(recipe);
 
         if (changeRecipe.getCommands() != null) {
-            if (changeRecipe.getCommands().stream().allMatch(command -> command.getTypeOfDevice() == recipe.getTypeOfDevice())) {
+            if (changeRecipe.getCommands().stream().allMatch(command -> command.getDeviceType() == recipe.getDeviceType())) {
                 if (recipe.getCommands() != null && !recipe.getCommands().isEmpty()) {
                     for (int i = recipe.getCommands().size() - 1; i >= 0; i--) {
                         removeCommandFromRecipe(recipeId, recipe.getCommands().get(i).getId(), i);
@@ -136,7 +136,7 @@ public class RecipeServiceImpl implements RecipeService {
         }
 
         if (changeRecipe.getSubRecipes() != null) {
-            if (changeRecipe.getSubRecipes().stream().allMatch(subrecipe -> subrecipe.getTypeOfDevice() == recipe.getTypeOfDevice())) {
+            if (changeRecipe.getSubRecipes().stream().allMatch(subrecipe -> subrecipe.getDeviceType() == recipe.getDeviceType())) {
                 if (recipe.getSubRecipes() != null && !recipe.getSubRecipes().isEmpty()) {
                     for (int i = recipe.getSubRecipes().size() - 1; i >= 0; i--) {
                         removeSubRecipeFromRecipe(recipeId, recipe.getSubRecipes().get(i).getId(), i);
@@ -161,10 +161,10 @@ public class RecipeServiceImpl implements RecipeService {
         Recipe recipe = getRecipeById(recipeId);
         Recipe subRecipe = getRecipeById(subRecipeId);
 
-        if (recipe.getTypeOfDevice() != subRecipe.getTypeOfDevice()) {
+        if (recipe.getDeviceType() != subRecipe.getDeviceType()) {
             throw new InvalidEntityException("Device types of the recipes do not match!"
-            + " Recipe's device type: " + recipe.getTypeOfDevice()
-            + ", Sub-recipe's device type: " + subRecipe.getTypeOfDevice());
+            + " Recipe's device type: " + recipe.getDeviceType()
+            + ", Sub-recipe's device type: " + subRecipe.getDeviceType());
         }
 
         if (subRecipe.getSubRecipes() != null) {
@@ -252,18 +252,18 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public List<Recipe> getFullRecipes(String typeOfDevice, String sortBy, String sortDirection) {
-        return getFullOrSubRecipes(typeOfDevice, false, sortBy, sortDirection);
+    public List<Recipe> getFullRecipes(String deviceType, String sortBy, String sortDirection) {
+        return getFullOrSubRecipes(deviceType, false, sortBy, sortDirection);
     }
 
     @Override
-    public List<Recipe> getSubRecipes(String typeOfDevice, String sortBy, String sortDirection) {
-        return getFullOrSubRecipes(typeOfDevice, true, sortBy, sortDirection);
+    public List<Recipe> getSubRecipes(String deviceType, String sortBy, String sortDirection) {
+        return getFullOrSubRecipes(deviceType, true, sortBy, sortDirection);
     }
 
     private List<Recipe> getFullOrSubRecipes(String deviceType, boolean isSubRecipe, String sortBy, String sortDirection) {
         DeviceTypeEnum deviceTypeEnum = DeviceTypeUtils.getDeviceTypeEnum(deviceType);
-        List<Recipe> recipes = recipeRepository.getRecipesByIsSubRecipeAndTypeOfDeviceAndDeactivated(isSubRecipe, deviceTypeEnum, false, SortingUtils.getSort(Recipe.class, sortBy, sortDirection));
+        List<Recipe> recipes = recipeRepository.getRecipesByIsSubRecipeAndDeviceTypeAndDeactivated(isSubRecipe, deviceTypeEnum, false, SortingUtils.getSort(Recipe.class, sortBy, sortDirection));
         if (recipes.isEmpty()) {
             String recipeType = isSubRecipe ? "sub-recipes" : "recipes";
             throw new NotFoundCustomException("There are not any " + recipeType + " in the database yet!");
@@ -285,13 +285,13 @@ public class RecipeServiceImpl implements RecipeService {
         DeviceTypeEnum deviceTypeEnum = DeviceTypeUtils.getDeviceTypeEnum(deviceType);
         Pageable pageable = SortingUtils.getPagination(Recipe.class, EMPTY_STRING, NONE, 1, 1);
         String recipeType = isSubRecipe ? "sub-recipes" : "recipes";
-        List<Recipe> recipes = recipeRepository.getRecipesByIsSubRecipeAndTypeOfDeviceAndDeactivated(isSubRecipe, deviceTypeEnum, false, pageable);
+        List<Recipe> recipes = recipeRepository.getRecipesByIsSubRecipeAndDeviceTypeAndDeactivated(isSubRecipe, deviceTypeEnum, false, pageable);
         if (recipes.isEmpty()) {
             throw new NotFoundCustomException("There are not any " + recipeType + " in the database of type of device: " + deviceType + "!");
         }
 
         pageable = SortingUtils.getPagination(Recipe.class, sortBy, sortDirection, page, pageSize);
-        recipes = recipeRepository.getRecipesByIsSubRecipeAndTypeOfDeviceAndDeactivated(isSubRecipe, deviceTypeEnum, false, pageable);
+        recipes = recipeRepository.getRecipesByIsSubRecipeAndDeviceTypeAndDeactivated(isSubRecipe, deviceTypeEnum, false, pageable);
         if (recipes.isEmpty()) {
             throw new NotFoundCustomException("There are not any " + recipeType + " of type of device: " + deviceType + " on page " + page + "!");
         }
@@ -320,10 +320,10 @@ public class RecipeServiceImpl implements RecipeService {
         if (command.isDeactivated()) {
             throw new InvalidOperationException("Command can't be found!");
         }
-        if (command.getTypeOfDevice() != recipe.getTypeOfDevice()) {
+        if (command.getDeviceType() != recipe.getDeviceType()) {
             throw new InvalidOperationException("Types of devices of the command and recipe do not match!"
-            + " Recipes device type: " + recipe.getTypeOfDevice()
-            + ", Commands device type: " + command.getTypeOfDevice());
+            + " Recipes device type: " + recipe.getDeviceType()
+            + ", Commands device type: " + command.getDeviceType());
         }
         if (command.getName() == null || command.getName().isEmpty()) {
             throw new InvalidOperationException("Command does not have any name set!");

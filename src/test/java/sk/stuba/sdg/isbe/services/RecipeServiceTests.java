@@ -46,7 +46,7 @@ public class RecipeServiceTests {
         exception = assertThrows(InvalidEntityException.class, () -> recipeService.createRecipe(recipe));
         assertEquals("Type of device for recipe is missing!", exception.getMessage());
 
-        recipe.setTypeOfDevice(DeviceTypeEnum.ESP32);
+        recipe.setDeviceType(DeviceTypeEnum.ESP32);
         exception = assertThrows(InvalidEntityException.class, () -> recipeService.createRecipe(recipe));
         assertEquals("Recipe's sub-recipe status not defined!", exception.getMessage());
 
@@ -85,37 +85,37 @@ public class RecipeServiceTests {
     }
 
     @Test
-    void testGetRecipesByTypeOfDevice() {
+    void testGetRecipesByDeviceType() {
         Recipe recipe = new Recipe("recipe " + Instant.now().toEpochMilli(), DeviceTypeEnum.ESP32, false);
         recipeService.createRecipe(recipe);
         Recipe recipe2 = new Recipe("recipe2 " + Instant.now().toEpochMilli(), DeviceTypeEnum.SDG_CUBE, false);
         recipeService.createRecipe(recipe2);
 
-        List<Recipe> recipes = recipeService.getRecipesByTypeOfDevice("ESP32", NONE, NONE);
-        assertTrue(recipes.stream().allMatch(r -> r.getTypeOfDevice() == DeviceTypeEnum.ESP32));
+        List<Recipe> recipes = recipeService.getRecipesByDeviceType(DeviceTypeEnum.ESP32.name(), NONE, NONE);
+        assertTrue(recipes.stream().allMatch(r -> r.getDeviceType() == DeviceTypeEnum.ESP32));
 
-        recipes = recipeService.getRecipesByTypeOfDevice("SDG_CUBE", NONE, NONE);
-        assertTrue(recipes.stream().allMatch(r -> r.getTypeOfDevice() == DeviceTypeEnum.SDG_CUBE));
+        recipes = recipeService.getRecipesByDeviceType(DeviceTypeEnum.SDG_CUBE.name(), NONE, NONE);
+        assertTrue(recipes.stream().allMatch(r -> r.getDeviceType() == DeviceTypeEnum.SDG_CUBE));
 
         recipeRepository.delete(recipe);
         recipeRepository.delete(recipe2);
     }
 
     @Test
-    void testGetRecipesByTypeOfDevicePageable() {
+    void testGetRecipesByDeviceTypePageable() {
         Recipe recipe = new Recipe("recipe " + Instant.now().toEpochMilli(), DeviceTypeEnum.ESP32, false);
         recipeService.createRecipe(recipe);
         Recipe recipe2 = new Recipe("recipe2 " + Instant.now().toEpochMilli(), DeviceTypeEnum.ESP32, false);
         recipeService.createRecipe(recipe2);
 
-        List<Recipe> recipes = recipeService.getRecipesByTypeOfDevicePageable("ESP32", 1, 2, "", NONE);
+        List<Recipe> recipes = recipeService.getRecipesByDeviceTypePageable(DeviceTypeEnum.ESP32.name(), 1, 2, "", NONE);
         assertEquals(2, recipes.size());
 
-        recipes = recipeService.getRecipesByTypeOfDevicePageable("ESP32", 1, 1, "", NONE);
+        recipes = recipeService.getRecipesByDeviceTypePageable(DeviceTypeEnum.ESP32.name(), 1, 1, "", NONE);
         assertEquals(1, recipes.size());
 
-        Exception exception = assertThrows(NotFoundCustomException.class, () -> recipeService.getRecipesByTypeOfDevicePageable("SDG_CUBE", 1, 1, "", NONE));
-        assertEquals("There are not any recipe of device type '" + "SDG_CUBE" + "' in the database!", exception.getMessage());
+        Exception exception = assertThrows(NotFoundCustomException.class, () -> recipeService.getRecipesByDeviceTypePageable(DeviceTypeEnum.SDG_CUBE.name(), 1, 1, "", NONE));
+        assertEquals("There are not any recipe of device type '" + DeviceTypeEnum.SDG_CUBE.name() + "' in the database!", exception.getMessage());
 
         recipeRepository.delete(recipe);
         recipeRepository.delete(recipe2);
@@ -170,7 +170,7 @@ public class RecipeServiceTests {
         assertNotNull(recipeDb);
         assertEquals(recipeDb.getName(), updateRecipe.getName());
         assertEquals(recipeDb.isSubRecipe(), updateRecipe.isSubRecipe());
-        assertEquals(recipeDb.getTypeOfDevice(), updateRecipe.getTypeOfDevice());
+        assertEquals(recipeDb.getDeviceType(), updateRecipe.getDeviceType());
 
         recipeRepository.delete(recipeDb);
         recipeRepository.delete(recipe2);
@@ -184,12 +184,12 @@ public class RecipeServiceTests {
         recipeService.createRecipe(recipe2);
 
         String expected = "Device types of the recipes do not match!"
-                + " Recipe's device type: " + recipe.getTypeOfDevice()
-                + ", Sub-recipe's device type: " + recipe2.getTypeOfDevice();
+                + " Recipe's device type: " + recipe.getDeviceType()
+                + ", Sub-recipe's device type: " + recipe2.getDeviceType();
         Exception exception = assertThrows(InvalidEntityException.class, () -> recipeService.addSubRecipeToRecipe(recipe.getId(), recipe2.getId()));
         assertEquals(expected, exception.getMessage());
 
-        recipe2.setTypeOfDevice(DeviceTypeEnum.ESP32);
+        recipe2.setDeviceType(DeviceTypeEnum.ESP32);
         recipeService.updateRecipe(recipe2.getId(), recipe2);
 
         recipeService.addSubRecipeToRecipe(recipe.getId(), recipe2.getId());

@@ -1,6 +1,7 @@
 package sk.stuba.sdg.isbe.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import sk.stuba.sdg.isbe.domain.model.Job;
@@ -75,39 +76,51 @@ public class JobController {
         return jobService.getJobStatus(jobId);
     }
 
-    @Operation(summary = "Get all jobs on a device")
+    @Operation(summary = "Get all jobs on a device optionally with sorting")
     @GetMapping("getAllJobsOnDevice/{deviceId}/{sortBy}/{sortDirection}")
-    public List<Job> getAllJobsOnDevice(@PathVariable String deviceId, @PathVariable String sortBy, @PathVariable String sortDirection) {
+    public List<Job> getAllJobsOnDevice(@PathVariable String deviceId,
+                                        @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortBy,
+                                        @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortDirection) {
         return jobService.getAllJobsOnDevice(deviceId, sortBy, sortDirection);
     }
 
-    @Operation(summary = "Get all jobs on a device with pagination and sorting")
+    @Operation(summary = "Get all jobs on a device with pagination optionally with sorting")
     @GetMapping("getAllJobsOnDevicePageable/{deviceId}/{page}/{pageSize}/{sortBy}/{sortDirection}")
-    public List<Job> getAllJobsOnDevicePageable(@PathVariable String deviceId, @PathVariable int page, @PathVariable int pageSize, @PathVariable String sortBy, @PathVariable String sortDirection) {
+    public List<Job> getAllJobsOnDevicePageable(@PathVariable String deviceId, @PathVariable int page, @PathVariable int pageSize,
+                                                @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortBy,
+                                                @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortDirection) {
         return jobService.getAllJobsOnDevicePageable(deviceId, page, pageSize, sortBy, sortDirection);
     }
 
-    @Operation(summary = "Get finished jobs on a device")
+    @Operation(summary = "Get finished jobs on a device optionally with sorting")
     @GetMapping("getFinishedJobs/{deviceId}/{sortBy}/{sortDirection}")
-    public List<Job> getFinishedJobsByStatus(@PathVariable String deviceId, @PathVariable String sortBy, @PathVariable String sortDirection) {
+    public List<Job> getFinishedJobsByStatus(@PathVariable String deviceId,
+                                             @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortBy,
+                                             @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortDirection) {
         return jobService.getFinishedJobsByStatus(deviceId, sortBy, sortDirection);
     }
 
-    @Operation(summary = "Get running jobs on a device")
+    @Operation(summary = "Get running jobs on a device optionally with sorting")
     @GetMapping("getRunningJobs/{deviceId}/{sortBy}/{sortDirection}")
-    public List<Job> getRunningJobsByStatus(@PathVariable String deviceId, @PathVariable String sortBy, @PathVariable String sortDirection) {
+    public List<Job> getRunningJobsByStatus(@PathVariable String deviceId,
+                                            @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortBy,
+                                            @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortDirection) {
         return jobService.getRunningJobsByStatus(deviceId, sortBy, sortDirection);
     }
 
-    @Operation(summary = "Get all jobs by a given status")
+    @Operation(summary = "Get all jobs by a given status optionally with sorting")
     @GetMapping("getJobsByStatus/{deviceId}/{status}/{sortBy}/{sortDirection}")
-    public List<Job> getJobsByStatus(@PathVariable String deviceId, @PathVariable String status, @PathVariable String sortBy, @PathVariable String sortDirection) {
+    public List<Job> getJobsByStatus(@PathVariable String deviceId, @PathVariable String status,
+                                     @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortBy,
+                                     @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortDirection) {
         return jobService.getAllJobsByStatus(deviceId, status, sortBy, sortDirection);
     }
 
-    @Operation(summary = "Get all jobs by a given status with pagination and sorting")
+    @Operation(summary = "Get all jobs by a given status with pagination optionally with sorting")
     @GetMapping("getAllJobsByStatusPageable/{deviceId}/{status}/{page}/{pageSize}/{sortBy}/{sortDirection}")
-    public List<Job> getAllJobsByStatusPageable(@PathVariable String deviceId, @PathVariable String status, @PathVariable int page, @PathVariable int pageSize, @PathVariable String sortBy, @PathVariable String sortDirection) {
+    public List<Job> getAllJobsByStatusPageable(@PathVariable String deviceId, @PathVariable String status, @PathVariable int page, @PathVariable int pageSize,
+                                                @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortBy,
+                                                @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortDirection) {
         return jobService.getAllJobsByStatusPageable(deviceId, status, page, pageSize, sortBy, sortDirection);
     }
 }

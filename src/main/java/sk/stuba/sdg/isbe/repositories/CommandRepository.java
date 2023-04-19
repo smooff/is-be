@@ -21,7 +21,7 @@ public interface CommandRepository extends MongoRepository<Command, String> {
 
     List<Command> getCommandsByDeactivated(boolean deactivated, Pageable pageable);
 
-    List<Command> getCommandsByTypeOfDeviceAndDeactivated(DeviceTypeEnum deviceType, boolean deactivated, Sort sort);
+    List<Command> getCommandsByDeviceTypeAndDeactivated(DeviceTypeEnum deviceType, boolean deactivated, Sort sort);
 
-    List<Command> getCommandsByTypeOfDeviceAndDeactivated(DeviceTypeEnum deviceType, boolean deactivated, Pageable pageable);
+    List<Command> getCommandsByDeviceTypeAndDeactivated(DeviceTypeEnum deviceType, boolean deactivated, Pageable pageable);
 }

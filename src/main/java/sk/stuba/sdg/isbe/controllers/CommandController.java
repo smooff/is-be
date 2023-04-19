@@ -1,6 +1,7 @@
 package sk.stuba.sdg.isbe.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -36,25 +37,32 @@ public class CommandController {
 
     @Operation(summary = "Get all commands")
     @GetMapping("getAllCommands/{sortBy}/{sortDirection}")
-    public List<Command> getAllCommands(@PathVariable String sortBy, @PathVariable String sortDirection) {
+    public List<Command> getAllCommands(@PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortBy,
+                                        @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortDirection) {
         return commandService.getAllCommands(sortBy, sortDirection);
     }
 
-    @Operation(summary = "Get all commands with pagination and sorting")
+    @Operation(summary = "Get all commands with pagination optionally with sorting")
     @GetMapping("getAllCommandsWithPagination/{page}/{pageSize}/{sortBy}/{sortDirection}")
-    public List<Command> getAllCommandsPageable(@PathVariable int page, @PathVariable int pageSize, @PathVariable String sortBy, @PathVariable String sortDirection) {
+    public List<Command> getAllCommandsPageable(@PathVariable int page, @PathVariable int pageSize,
+                                                @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortBy,
+                                                @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortDirection) {
         return commandService.getAllCommandsPageable(page, pageSize, sortBy, sortDirection);
     }
 
-    @Operation(summary = "Get command by device-type")
+    @Operation(summary = "Get command by device-type optionally with sorting")
     @GetMapping("getCommandByDeviceType/{deviceType}/{sortBy}/{sortDirection}")
-    public List<Command> getCommandsByDeviceType(@PathVariable String deviceType, @PathVariable String sortBy, @PathVariable String sortDirection) {
+    public List<Command> getCommandsByDeviceType(@PathVariable String deviceType,
+                                                 @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortBy,
+                                                 @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortDirection) {
         return commandService.getCommandsByDeviceType(deviceType, sortBy, sortDirection);
     }
 
-    @Operation(summary = "Get command by device-type and with pagination and sorting")
+    @Operation(summary = "Get command by device-type and with pagination optionally with sorting")
     @GetMapping("getCommandByDeviceTypeAndPages/{deviceType}/{page}/{pageSize}/{sortBy}/{sortDirection}")
-    public List<Command> getCommandsByDeviceTypePageable(@PathVariable String deviceType, @PathVariable int page, @PathVariable int pageSize, @PathVariable String sortBy, @PathVariable String sortDirection) {
+    public List<Command> getCommandsByDeviceTypePageable(@PathVariable String deviceType, @PathVariable int page, @PathVariable int pageSize,
+                                                         @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortBy,
+                                                         @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortDirection) {
         return commandService.getCommandsByDeviceTypePageable(deviceType, page, pageSize, sortBy, sortDirection);
     }
 

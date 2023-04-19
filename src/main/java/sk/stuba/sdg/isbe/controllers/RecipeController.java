@@ -1,6 +1,7 @@
 package sk.stuba.sdg.isbe.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +29,18 @@ public class RecipeController {
         return recipeService.deleteRecipe(recipeId);
     }
 
+    @Operation(summary = "Get recipe by name")
+    @GetMapping("getRecipeByName/{name}")
+    public Recipe getRecipeByName(@PathVariable String name) {
+        return recipeService.getRecipeByName(name);
+    }
+
+    @Operation(summary = "Get recipe by id")
+    @GetMapping("getRecipeById/{id}")
+    public Recipe getRecipeById(@PathVariable String id) {
+        return recipeService.getRecipeById(id);
+    }
+
     @Operation(summary = "Assign a command to a recipe by their ID")
     @PutMapping("addCommandToRecipe/{recipeId}/{commandId}")
     public Recipe addCommandToRecipe(@PathVariable String recipeId, @PathVariable String commandId) {
@@ -40,22 +53,20 @@ public class RecipeController {
         return recipeService.removeCommandFromRecipe(recipeId, commandId, index);
     }
 
-    @Operation(summary = "Get recipes by device-type")
-    @GetMapping("getByTypeOfDevice/{type}/{sortBy}/{sortDirection}")
-    public List<Recipe> getRecipesByTypeOfDevice(@PathVariable String type, @PathVariable String sortBy, @PathVariable String sortDirection) {
-        return recipeService.getRecipesByTypeOfDevice(type, sortBy, sortDirection);
+    @Operation(summary = "Get recipes by device-type optionally with sorting")
+    @GetMapping("getByDeviceType/{type}/{sortBy}/{sortDirection}")
+    public List<Recipe> getRecipesByDeviceType(@PathVariable String type,
+                                                 @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortBy,
+                                                 @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortDirection) {
+        return recipeService.getRecipesByDeviceType(type, sortBy, sortDirection);
     }
 
-    @Operation(summary = "Get recipes by device-type and pages with sorting")
-    @GetMapping("getByTypeOfDeviceAndPages/{type}/{page}/{pageSize}/{sortBy}/{sortDirection}")
-    public List<Recipe> getRecipesByTypeOfDevicePageable(@PathVariable String type, @PathVariable int page, @PathVariable int pageSize, @PathVariable String sortBy, @PathVariable String sortDirection) {
-        return recipeService.getRecipesByTypeOfDevicePageable(type, page, pageSize, sortBy, sortDirection);
-    }
-
-    @Operation(summary = "Get recipe by name")
-    @GetMapping("getByName/{name}")
-    public Recipe getRecipeByName(@PathVariable String name) {
-        return recipeService.getRecipeByName(name);
+    @Operation(summary = "Get recipes by device-type and pages optionally with sorting")
+    @GetMapping("getByDeviceTypeAndPages/{type}/{page}/{pageSize}/{sortBy}/{sortDirection}")
+    public List<Recipe> getRecipesByDeviceTypePageable(@PathVariable String type, @PathVariable int page, @PathVariable int pageSize,
+                                                         @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortBy,
+                                                         @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortDirection) {
+        return recipeService.getRecipesByDeviceTypePageable(type, page, pageSize, sortBy, sortDirection);
     }
 
     @Operation(summary = "Update recipe by ID using object")
@@ -76,39 +87,50 @@ public class RecipeController {
         return recipeService.removeSubRecipeFromRecipe(recipeId, subRecipeId, index);
     }
 
-    @Operation(summary = "Get all recipes sorted by a field or non-sorted - NONE.")
+    @Operation(summary = "Get all recipes optionally with sorting")
     @GetMapping("getAllRecipes/{sortBy}/{sortDirection}")
-    public List<Recipe> getAllRecipes(@PathVariable String sortBy, @PathVariable String sortDirection) {
+    public List<Recipe> getAllRecipes(@PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortBy,
+                                      @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortDirection) {
         return recipeService.getAllRecipes(sortBy, sortDirection);
     }
 
-    @Operation(summary = "Get all recipes with pagination and sorting")
+    @Operation(summary = "Get all recipes with pagination optionally with sorting")
     @GetMapping("getAllRecipesPageable/{page}/{pageSize}/{sortBy}/{sortDirection}")
-    public List<Recipe> getAllRecipesPageable(@PathVariable int page, @PathVariable int pageSize, @PathVariable String sortBy, @PathVariable String sortDirection) {
+    public List<Recipe> getAllRecipesPageable(@PathVariable int page, @PathVariable int pageSize,
+                                              @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortBy,
+                                              @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortDirection) {
         return recipeService.getAllRecipesPageable(page, pageSize, sortBy, sortDirection);
     }
 
-    @Operation(summary = "Get non-sub-recipes by device-type")
-    @GetMapping("getFullRecipesByDeviceType/{typeOfDevice}/{sortBy}/{sortDirection}")
-    public List<Recipe> getFullRecipes(@PathVariable String typeOfDevice, @PathVariable String sortBy, @PathVariable String sortDirection) {
-        return recipeService.getFullRecipes(typeOfDevice, sortBy, sortDirection);
+    @Operation(summary = "Get non-sub-recipes by device-type optionally with sorting")
+    @GetMapping("getFullRecipesByDeviceType/{deviceType}/{sortBy}/{sortDirection}")
+    public List<Recipe> getFullRecipes(@PathVariable String deviceType,
+                                       @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortBy,
+                                       @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortDirection) {
+        return recipeService.getFullRecipes(deviceType, sortBy, sortDirection);
     }
 
-    @Operation(summary = "Get non-sub-recipes by device-type and pages with sorting")
-    @GetMapping("getFullRecipesByDeviceTypeAndPages/{typeOfDevice}/{page}/{pageSize}/{sortBy}/{sortDirection}")
-    public List<Recipe> getFullRecipesPageable(@PathVariable String typeOfDevice, @PathVariable int page, @PathVariable int pageSize, @PathVariable String sortBy, @PathVariable String sortDirection) {
-        return recipeService.getFullRecipesPageable(typeOfDevice, page, pageSize, sortBy, sortDirection);
+    @Operation(summary = "Get non-sub-recipes by device-type and pages optionally with sorting")
+    @GetMapping("getFullRecipesByDeviceTypeAndPages/{deviceType}/{page}/{pageSize}/{sortBy}/{sortDirection}")
+    public List<Recipe> getFullRecipesPageable(@PathVariable String deviceType, @PathVariable int page, @PathVariable int pageSize,
+                                               @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortBy,
+                                               @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortDirection) {
+        return recipeService.getFullRecipesPageable(deviceType, page, pageSize, sortBy, sortDirection);
     }
 
-    @Operation(summary = "Get sub-recipes by device-type")
-    @GetMapping("getSubRecipesByDeviceType/{typeOfDevice}/{sortBy}/{sortDirection}")
-    public List<Recipe> getSubRecipes(@PathVariable String typeOfDevice, @PathVariable String sortBy, @PathVariable String sortDirection) {
-        return recipeService.getSubRecipes(typeOfDevice, sortBy, sortDirection);
+    @Operation(summary = "Get sub-recipes by device-type optionally with sorting")
+    @GetMapping("getSubRecipesByDeviceType/{deviceType}/{sortBy}/{sortDirection}")
+    public List<Recipe> getSubRecipes(@PathVariable String deviceType,
+                                      @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortBy,
+                                      @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortDirection) {
+        return recipeService.getSubRecipes(deviceType, sortBy, sortDirection);
     }
 
-    @Operation(summary = "Get sub-recipes by device-type and pages with sorting")
-    @GetMapping("getSubRecipesByDeviceType/{typeOfDevice}/{page}/{pageSize}/{sortBy}/{sortDirection}")
-    public List<Recipe> getSubRecipesPageable(@PathVariable String typeOfDevice, @PathVariable int page, @PathVariable int pageSize, @PathVariable String sortBy, @PathVariable String sortDirection) {
-        return recipeService.getSubRecipesPageable(typeOfDevice, page, pageSize, sortBy, sortDirection);
+    @Operation(summary = "Get sub-recipes by device-type and pages with sorting optionally with sorting")
+    @GetMapping("getSubRecipesByDeviceType/{deviceType}/{page}/{pageSize}/{sortBy}/{sortDirection}")
+    public List<Recipe> getSubRecipesPageable(@PathVariable String deviceType, @PathVariable int page, @PathVariable int pageSize,
+                                              @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortBy,
+                                              @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortDirection) {
+        return recipeService.getSubRecipesPageable(deviceType, page, pageSize, sortBy, sortDirection);
     }
 }

@@ -56,7 +56,7 @@ public final class SortingUtils {
     }
 
     public static Sort getSort(Class<?> klass, String sortBy, String sortDirection) {
-        if (NO_SORT.equals(sortBy) || SortDirectionEnum.NONE == getSortDirection(sortDirection)) {
+        if (sortBy == null || NO_SORT.equals(sortBy) || sortDirection == null || SortDirectionEnum.NONE == getSortDirection(sortDirection)) {
             return Sort.unsorted();
         }
         return getDirectedSorting(Sort.by(getValidSortingField(sortBy, klass)), sortDirection);
