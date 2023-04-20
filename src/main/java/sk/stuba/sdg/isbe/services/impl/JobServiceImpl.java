@@ -74,8 +74,10 @@ public class JobServiceImpl implements JobService {
             throw new InvalidEntityException("Job can't be added! Job stack of device is full.");
         }
 
-        String jobId = jobRepository.save(job).getUid();
-        job.setStatus(creteJobStatusForJob(device, jobId));
+        //save job to get an ID for it
+        job = jobRepository.save(job);
+
+        job.setStatus(creteJobStatusForJob(device, job));
         job.setDeviceId(deviceId);
         job.setCurrentStatus(JobStatusEnum.JOB_PENDING);
         job.setCreatedAt(Instant.now().toEpochMilli());
@@ -86,13 +88,14 @@ public class JobServiceImpl implements JobService {
         return job;
     }
 
-    private JobStatus creteJobStatusForJob(Device device, String jobId) {
+    private JobStatus creteJobStatusForJob(Device device, Job job) {
         JobStatus jobStatus = new JobStatus();
         jobStatus.setCode(JobStatusEnum.JOB_PENDING);
 
         // add dataPoints
         jobStatus.setData(getDataPointsFromDevice(device));
-        jobStatus.setJobId(jobId);
+        jobStatus.setJobId(job.getUid());
+        jobStatus.setTotalSteps(job.getNoOfCmds());
         return jobStatusService.createJobStatus(jobStatus);
     }
 
@@ -104,7 +107,7 @@ public class JobServiceImpl implements JobService {
         jobStatusRepository.delete(job.getStatus());
 
         job.setCurrentStatus(JobStatusEnum.JOB_PENDING);
-        job.setStatus(creteJobStatusForJob(device, jobId));
+        job.setStatus(creteJobStatusForJob(device, job));
 
         job.setCreatedAt(Instant.now().toEpochMilli());
         jobRepository.save(job);
