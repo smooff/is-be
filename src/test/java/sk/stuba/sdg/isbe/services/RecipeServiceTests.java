@@ -157,22 +157,30 @@ public class RecipeServiceTests {
     @Test
     void testUpdateRecipe() {
         Recipe recipe = new Recipe("recipe " + Instant.now().toEpochMilli(), DeviceTypeEnum.ESP32, false);
-        Recipe recipe2 = new Recipe("recipe2 " + Instant.now().toEpochMilli(), DeviceTypeEnum.ESP32, false);
+        Recipe recipe2 = new Recipe("recipe2 " + Instant.now().toEpochMilli(), DeviceTypeEnum.SDG_CUBE, false);
         recipeService.createRecipe(recipe);
         recipeService.createRecipe(recipe2);
 
-        Exception exception = assertThrows(EntityExistsException.class, () -> recipeService.updateRecipe(recipe.getId(), new Recipe(recipe2.getName(), DeviceTypeEnum.ESP32, false)));
+        Command command = new Command("command" + Instant.now().toEpochMilli(), List.of(1,2,3), DeviceTypeEnum.SDG_CUBE);
+        commandService.createCommand(command);
+
+        String recipeId = recipe.getId();
+        Exception exception = assertThrows(EntityExistsException.class, () -> recipeService.updateRecipe(recipeId, new Recipe(recipe2.getName(), DeviceTypeEnum.ESP32, false)));
         assertEquals("Recipe with name: '" + recipe2.getName() + "' already exists!", exception.getMessage());
 
         Recipe updateRecipe = new Recipe("updatedRecipe " + Instant.now().toEpochMilli(), DeviceTypeEnum.SDG_CUBE, true);
+        updateRecipe.setCommands(List.of(command));
+        updateRecipe.setSubRecipes(List.of(recipe2));
         recipeService.updateRecipe(recipe.getId(), updateRecipe);
-        Recipe recipeDb = recipeService.getRecipeById(recipe.getId());
-        assertNotNull(recipeDb);
-        assertEquals(recipeDb.getName(), updateRecipe.getName());
-        assertEquals(recipeDb.isSubRecipe(), updateRecipe.isSubRecipe());
-        assertEquals(recipeDb.getDeviceType(), updateRecipe.getDeviceType());
+        recipe = recipeService.getRecipeById(recipe.getId());
+        assertNotNull(recipe);
+        assertEquals(recipe.getName(), updateRecipe.getName());
+        assertEquals(recipe.isSubRecipe(), updateRecipe.isSubRecipe());
+        assertEquals(recipe.getDeviceType(), updateRecipe.getDeviceType());
+        assertEquals(1, recipe.getCommands().size());
+        assertEquals(1, recipe.getSubRecipes().size());
 
-        recipeRepository.delete(recipeDb);
+        recipeRepository.delete(recipe);
         recipeRepository.delete(recipe2);
     }
 

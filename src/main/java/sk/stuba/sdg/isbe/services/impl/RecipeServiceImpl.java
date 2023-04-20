@@ -121,14 +121,28 @@ public class RecipeServiceImpl implements RecipeService {
 
         if (changeRecipe.getCommands() != null) {
             recipe = removeAllCommandsFromRecipe(recipe);
-            changeRecipe.getCommands().forEach(command -> addCommandToRecipe(recipeId, command.getId()));
+            recipe = addAllCommandsToRecipe(recipe, changeRecipe.getCommands());
         }
 
         if (changeRecipe.getSubRecipes() != null) {
             recipe = removeAllSubRecipesFromRecipe(recipe);
-            changeRecipe.getSubRecipes().forEach(subrecipe -> addSubRecipeToRecipe(recipeId, subrecipe.getId()));
+            recipe = addAllSubRecipesToRecipe(recipe, changeRecipe.getSubRecipes());
         }
 
+        return recipe;
+    }
+
+    private Recipe addAllCommandsToRecipe(Recipe recipe, List<Command> commands) {
+        for (Command command : commands) {
+            recipe = addCommandToRecipe(recipe.getId(), command.getId());
+        }
+        return recipe;
+    }
+
+    private Recipe addAllSubRecipesToRecipe(Recipe recipe, List<Recipe> recipes) {
+        for (Recipe subRecipe : recipes) {
+            recipe = addSubRecipeToRecipe(recipe.getId(), subRecipe.getId());
+        }
         return recipe;
     }
 
