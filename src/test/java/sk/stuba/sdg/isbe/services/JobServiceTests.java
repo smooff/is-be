@@ -79,6 +79,7 @@ public class JobServiceTests {
         commandService.createCommand(command3);
 
         recipeService.addCommandToRecipe(recipe.getId(), command.getId());
+        recipeService.addCommandToRecipe(recipe.getId(), command.getId());
         recipe.setCommands(List.of(command));
         recipeService.updateRecipe(recipe.getId(), recipe);
 

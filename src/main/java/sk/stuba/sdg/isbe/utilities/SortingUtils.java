@@ -61,4 +61,8 @@ public final class SortingUtils {
         }
         return getDirectedSorting(Sort.by(getValidSortingField(sortBy, klass)), sortDirection);
     }
+
+    public static Pageable getFirstEntry(Class<?> klass) {
+        return getPagination(klass, NO_SORT, NO_SORT, 1, 1);
+    }
 }

@@ -29,9 +29,6 @@ public class CommandServiceImpl implements CommandService {
     @Autowired
     private RecipeService recipeService;
 
-    private static final String EMPTY_STRING = "";
-    private static final String NONE = "NONE";
-
     @Override
     public Command createCommand(Command command) {
         if (command.getName() == null || command.getName().isEmpty()) {
@@ -72,7 +69,7 @@ public class CommandServiceImpl implements CommandService {
 
     @Override
     public List<Command> getAllCommandsPageable(int page, int pageSize, String sortBy, String sortDirection) {
-        Pageable pageable = SortingUtils.getPagination(Command.class, EMPTY_STRING, NONE, 1, 1);
+        Pageable pageable = SortingUtils.getFirstEntry(Command.class);
         List<Command> commands = commandRepository.getCommandsByDeactivated(false, pageable);
         if (commands.isEmpty()) {
             throw new NotFoundCustomException("There are not any commands in the database yet!");
@@ -108,7 +105,7 @@ public class CommandServiceImpl implements CommandService {
     @Override
     public List<Command> getCommandsByDeviceTypePageable(String deviceType, int page, int pageSize, String sortBy, String sortDirection) {
         DeviceTypeEnum deviceTypeEnum = DeviceTypeUtils.getDeviceTypeEnum(deviceType);
-        Pageable pageable = SortingUtils.getPagination(Command.class, EMPTY_STRING, NONE, 1, 1);
+        Pageable pageable = SortingUtils.getFirstEntry(Command.class);
         List<Command> commands = commandRepository.getCommandsByDeviceTypeAndDeactivated(deviceTypeEnum, false, pageable);
         if (commands.isEmpty()) {
             throw new NotFoundCustomException("There are not any commands in the database of device type: " + deviceType + "!");

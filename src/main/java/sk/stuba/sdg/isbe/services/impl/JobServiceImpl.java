@@ -41,9 +41,6 @@ public class JobServiceImpl implements JobService {
     @Autowired
     private JobStatusRepository jobStatusRepository;
 
-    private static final String EMPTY_STRING = "";
-    private static final String NONE = "NONE";
-
     @Override
     public Job runJobFromRecipe(String recipeId, String deviceId, int repetitions) {
         Recipe recipe = recipeService.getRecipeById(recipeId);
@@ -247,7 +244,7 @@ public class JobServiceImpl implements JobService {
     @Override
     public List<Job> getAllJobsOnDevicePageable(String deviceId, int page, int pageSize, String sortBy, String sortDirection) {
         Device device = deviceService.getDeviceById(deviceId);
-        Pageable pageable = SortingUtils.getPagination(Job.class, EMPTY_STRING, NONE, 1, 1);
+        Pageable pageable = SortingUtils.getFirstEntry(Job.class);
         List<Job> jobs = jobRepository.getJobsByDeviceId(deviceId, pageable);
         if (jobs.isEmpty()) {
             throw new NotFoundCustomException("There are not any jobs on the device: " + device.getName() + "!");
@@ -305,7 +302,7 @@ public class JobServiceImpl implements JobService {
     public List<Job> getAllJobsByStatusPageable(String deviceId, String status, int page, int pageSize, String sortBy, String sortDirection) {
         JobStatusEnum jobStatus = JobStatusUtils.getJobStatusEnum(status);
         Device device = deviceService.getDeviceById(deviceId);
-        Pageable pageable = SortingUtils.getPagination(Job.class, EMPTY_STRING, NONE, 1, 1);
+        Pageable pageable = SortingUtils.getFirstEntry(Job.class);
         List<Job> jobs = jobRepository.getJobsByDeviceIdAndCurrentStatusIs(deviceId, jobStatus, pageable);
         if (jobs.isEmpty()) {
             throw new NotFoundCustomException("There are not any jobs with status '" + status + "' on the device: '" + device.getName() + "'!");

@@ -32,9 +32,6 @@ public class RecipeServiceImpl implements RecipeService {
     @Autowired
     private CommandService commandService;
 
-    private static final String EMPTY_STRING = "";
-    private static final String NONE = "NONE";
-
     @Override
     public Recipe createRecipe(Recipe recipe) {
         if (recipe.getName() == null || recipe.getName().isEmpty()) {
@@ -68,7 +65,7 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     public List<Recipe> getRecipesByDeviceTypePageable(String deviceType, int page, int pageSize, String sortBy, String sortDirection) {
         DeviceTypeEnum deviceTypeEnum = DeviceTypeUtils.getDeviceTypeEnum(deviceType);
-        Pageable pageable = SortingUtils.getPagination(Recipe.class, EMPTY_STRING, NONE, 1, 1);
+        Pageable pageable = SortingUtils.getFirstEntry(Recipe.class);
         List<Recipe> recipes = recipeRepository.getRecipesByDeviceTypeAndDeactivated(deviceTypeEnum, false, pageable);
         if (recipes.isEmpty()) {
             throw new NotFoundCustomException("There are not any recipe of device type '" + deviceType + "' in the database!");
@@ -123,33 +120,36 @@ public class RecipeServiceImpl implements RecipeService {
         recipeRepository.save(recipe);
 
         if (changeRecipe.getCommands() != null) {
-            if (changeRecipe.getCommands().stream().allMatch(command -> command.getDeviceType() == recipe.getDeviceType())) {
-                if (recipe.getCommands() != null && !recipe.getCommands().isEmpty()) {
-                    for (int i = recipe.getCommands().size() - 1; i >= 0; i--) {
-                        removeCommandFromRecipe(recipeId, recipe.getCommands().get(i).getId(), i);
-                    }
-                }
-                changeRecipe.getCommands().forEach(command -> addCommandToRecipe(recipeId, command.getId()));
-            } else {
-                throw new InvalidOperationException("All of the new commands require to have the same device type as the recipe!");
-            }
+            recipe = removeAllCommandsFromRecipe(recipe);
+            changeRecipe.getCommands().forEach(command -> addCommandToRecipe(recipeId, command.getId()));
         }
 
         if (changeRecipe.getSubRecipes() != null) {
-            if (changeRecipe.getSubRecipes().stream().allMatch(subrecipe -> subrecipe.getDeviceType() == recipe.getDeviceType())) {
-                if (recipe.getSubRecipes() != null && !recipe.getSubRecipes().isEmpty()) {
-                    for (int i = recipe.getSubRecipes().size() - 1; i >= 0; i--) {
-                        removeSubRecipeFromRecipe(recipeId, recipe.getSubRecipes().get(i).getId(), i);
-                    }
-                }
-                changeRecipe.getSubRecipes().forEach(subrecipe -> addSubRecipeToRecipe(recipeId, subrecipe.getId()));
-            } else {
-                throw new InvalidOperationException("All of the new sub-recipes require to have the same device type as the recipe!");
-            }
+            recipe = removeAllSubRecipesFromRecipe(recipe);
+            changeRecipe.getSubRecipes().forEach(subrecipe -> addSubRecipeToRecipe(recipeId, subrecipe.getId()));
         }
 
-        //in order to return the recipe with the latest updates, we return it from the database
-        return getRecipeById(recipeId);
+        return recipe;
+    }
+
+    private Recipe removeAllCommandsFromRecipe(Recipe recipe) {
+        if (recipe.getCommands() != null && !recipe.getCommands().isEmpty()) {
+            int lastIndex = recipe.getCommands().size() - 1;
+            for (int i = lastIndex; i >= 0; i--) {
+                recipe = removeCommandFromRecipe(recipe.getId(), recipe.getCommands().get(i).getId(), i);
+            }
+        }
+        return recipe;
+    }
+
+    private Recipe removeAllSubRecipesFromRecipe(Recipe recipe) {
+        if (recipe.getSubRecipes() != null && !recipe.getSubRecipes().isEmpty()) {
+            int lastIndex = recipe.getSubRecipes().size() - 1;
+            for (int i = lastIndex; i >= 0; i--) {
+                recipe = removeSubRecipeFromRecipe(recipe.getId(), recipe.getSubRecipes().get(i).getId(), i);
+            }
+        }
+        return recipe;
     }
 
     @Override
@@ -237,7 +237,7 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public List<Recipe> getAllRecipesPageable(int page, int pageSize, String sortBy, String sortDirection) {
-        Pageable pageable = SortingUtils.getPagination(Recipe.class, EMPTY_STRING, NONE, 1, 1);
+        Pageable pageable = SortingUtils.getFirstEntry(Recipe.class);
         List<Recipe> recipes = recipeRepository.getRecipesByDeactivated(false, pageable);
         if (recipes.isEmpty()) {
             throw new NotFoundCustomException("There are not any recipes in the database!");
@@ -283,7 +283,7 @@ public class RecipeServiceImpl implements RecipeService {
 
     private List<Recipe> getFullOrSubRecipesPageable(String deviceType, boolean isSubRecipe, int page, int pageSize, String sortBy, String sortDirection) {
         DeviceTypeEnum deviceTypeEnum = DeviceTypeUtils.getDeviceTypeEnum(deviceType);
-        Pageable pageable = SortingUtils.getPagination(Recipe.class, EMPTY_STRING, NONE, 1, 1);
+        Pageable pageable = SortingUtils.getFirstEntry(Recipe.class);
         String recipeType = isSubRecipe ? "sub-recipes" : "recipes";
         List<Recipe> recipes = recipeRepository.getRecipesByIsSubRecipeAndDeviceTypeAndDeactivated(isSubRecipe, deviceTypeEnum, false, pageable);
         if (recipes.isEmpty()) {
