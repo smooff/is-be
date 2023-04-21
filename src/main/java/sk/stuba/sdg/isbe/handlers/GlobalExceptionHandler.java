@@ -70,7 +70,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         String message = ex.getMessage();
         details.add(message);
 
-        ApiError err = new ApiError(LocalDateTime.now(),HttpStatus.ACCEPTED, "Device is not working properly!", details);
+        ApiError err = new ApiError(LocalDateTime.now(),HttpStatus.SERVICE_UNAVAILABLE, "Device is not working properly!", details);
         logger.error(message, ex);
 
         return ResponseEntityBuilder.build(err);

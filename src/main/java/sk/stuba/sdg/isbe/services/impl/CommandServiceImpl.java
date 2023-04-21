@@ -111,7 +111,6 @@ public class CommandServiceImpl implements CommandService {
             throw new NotFoundCustomException("There are not any commands in the database of device type: " + deviceType + "!");
         }
 
-
         pageable = SortingUtils.getPagination(Command.class, sortBy, sortDirection, page, pageSize);
         commands = commandRepository.getCommandsByDeviceTypeAndDeactivated(deviceTypeEnum, false, pageable);
         if (commands.isEmpty()) {
