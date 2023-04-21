@@ -122,13 +122,7 @@ public class CommandServiceImpl implements CommandService {
     @Override
     public Command deleteCommand(String commandId) {
         Command command = getCommandById(commandId);
-        List<Recipe> recipesUsingCommand = recipeService.getRecipesContainingCommand(command);
-        List<String> recipeNames = recipesUsingCommand.stream().map(Recipe::getName).toList();
-
-        if (!recipeNames.isEmpty()) {
-            throw new InvalidOperationException("Command is used in Recipes: " + String.join(", ", recipeNames)
-                    + ". Remove this command from recipes to be able to delete it!");
-        }
+        checkCommandUsedByRecipe(command, "Remove this command from recipes to be able to delete it!");
 
         command.setDeactivated(true);
         return commandRepository.save(command);
@@ -141,28 +135,33 @@ public class CommandServiceImpl implements CommandService {
         if (updateCommand == null) {
             throw new InvalidEntityException("Command with changes is null!");
         }
-        if (!command.getName().equals(updateCommand.getName()) && commandWithNameExists(updateCommand.getName())) {
-            throw new EntityExistsException("Command with name: '" + updateCommand.getName() + "' already exists!");
-        }
 
         if (updateCommand.getName() != null) {
-            command.setName(updateCommand.getName());
+            if (!command.getName().equals(updateCommand.getName()) && commandWithNameExists(updateCommand.getName())) {
+                throw new EntityExistsException("Command with name: '" + updateCommand.getName() + "' already exists!");
+            } else {
+                command.setName(updateCommand.getName());
+            }
         }
         if (updateCommand.getParams() != null) {
             command.setParams(updateCommand.getParams());
         }
         if (updateCommand.getDeviceType() != null) {
-            List<Recipe> recipesUsingCommand = recipeService.getRecipesContainingCommand(command);
-            List<String> recipeNames = recipesUsingCommand.stream().map(Recipe::getName).toList();
-
-            if (!recipeNames.isEmpty()) {
-                throw new InvalidOperationException("Command is used in Recipes: " + String.join(", ", recipeNames)
-                        + ". Remove this command from recipes to be able to change its type!");
-            }
+            checkCommandUsedByRecipe(command, "Remove this command from recipes to be able to change its type!");
             command.setDeviceType(updateCommand.getDeviceType());
         }
 
         return commandRepository.save(command);
+    }
+
+    private void checkCommandUsedByRecipe(Command command, String additionalMsg) {
+        List<Recipe> recipesUsingCommand = recipeService.getRecipesContainingCommand(command);
+
+        if (!recipesUsingCommand.isEmpty()) {
+            List<String> recipeNames = recipesUsingCommand.stream().map(Recipe::getName).toList();
+            throw new InvalidOperationException("Command is used in Recipes: " + String.join(", ", recipeNames)
+                    + "." + (additionalMsg != null && !additionalMsg.isEmpty() ? " " + additionalMsg : ""));
+        }
     }
 
     private boolean commandWithNameExists(String name) {

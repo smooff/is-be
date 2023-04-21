@@ -95,13 +95,14 @@ public class RecipeServiceImpl implements RecipeService {
         if (changeRecipe == null) {
             throw new InvalidEntityException("Recipe with changes is null!");
         }
-        if (!recipe.getName().equals(changeRecipe.getName()) && recipeWithNameExists(changeRecipe.getName())) {
-            throw new EntityExistsException("Recipe with name: '" + changeRecipe.getName() + "' already exists!");
+        if (changeRecipe.getName() != null) {
+            if (!recipe.getName().equals(changeRecipe.getName()) && recipeWithNameExists(changeRecipe.getName())) {
+                throw new EntityExistsException("Recipe with name: '" + changeRecipe.getName() + "' already exists!");
+            } else {
+                recipe.setName(changeRecipe.getName());
+            }
         }
 
-        if (changeRecipe.getName() != null) {
-            recipe.setName(changeRecipe.getName());
-        }
         if (changeRecipe.isSubRecipe() != null) {
             recipe.setSubRecipe(changeRecipe.isSubRecipe());
         }
