@@ -7,6 +7,7 @@ import sk.stuba.sdg.isbe.domain.enums.SortDirectionEnum;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidOperationException;
 import sk.stuba.sdg.isbe.handlers.exceptions.NotFoundCustomException;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 
@@ -32,7 +33,7 @@ public final class SortingUtils {
 
     public static String getValidSortingField(String sortBy, Class<?> klass) {
         List<String> recipeSortingFields = Arrays.stream(klass.getDeclaredFields())
-                .map(field -> field.getName().toUpperCase())
+                .map(Field::getName)
                 .toList();
         for (String field : recipeSortingFields) {
             if (field.equalsIgnoreCase(sortBy)) {
