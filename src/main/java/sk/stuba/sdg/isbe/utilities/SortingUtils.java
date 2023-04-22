@@ -32,16 +32,16 @@ public final class SortingUtils {
     }
 
     public static String getValidSortingField(String sortBy, Class<?> klass) {
-        List<String> recipeSortingFields = Arrays.stream(klass.getDeclaredFields())
+        List<String> sortingFields = Arrays.stream(klass.getDeclaredFields())
                 .map(Field::getName)
                 .toList();
-        for (String field : recipeSortingFields) {
+        for (String field : sortingFields) {
             if (field.equalsIgnoreCase(sortBy)) {
                 return field;
             }
         }
         throw new NotFoundCustomException("Sorting field: '" + sortBy + "' can't be found in " + klass.getName() + " class!" +
-                " Possible sorting fields: " + String.join(", ", recipeSortingFields));
+                " Possible sorting fields: " + String.join(", ", sortingFields));
     }
 
     public static Pageable getPagination(Class<?> klass, String sortBy, String sortDirection, int page, int pageSize) {
