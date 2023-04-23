@@ -230,9 +230,9 @@ public class RecipeServiceImpl implements RecipeService {
     public Recipe deleteRecipe(String recipeId) {
         Recipe recipeToDelete = getRecipeById(recipeId);
         List<Recipe> recipesUsingThis = recipeRepository.getRecipesBySubRecipesContainingAndDeactivated(recipeToDelete, false);
-        List<String> recipeNames = recipesUsingThis.stream().map(Recipe::getName).toList();
 
         if (!recipesUsingThis.isEmpty()) {
+            List<String> recipeNames = recipesUsingThis.stream().map(Recipe::getName).toList();
             throw new InvalidOperationException("Recipe is used in Recipes as sub-recipe: " + String.join(", ", recipeNames)
                     + ". Remove recipe from all recipes to be able to delete it!");
         }
