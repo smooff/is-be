@@ -44,23 +44,27 @@ public class NotificationProcessor {
     public void handleDataSavedEvent(DataStoredEvent event) throws JsonLogicException {
         List<Notification> notifications = notificationRepository.getNotificationByDevicesContainingAndDeactivated(event.getDeviceId(), false);
         if (notifications != null) {
-            List<String> alreadyEvaluated = new ArrayList<>();
             for (StoredData storedData : event.getStoredData()) {
                 Map<String, Double> dataForExpression = new HashMap<>();
                 for (Notification notification : notifications) {
-                    if (notification.getMutedUntil() == null || (Instant.now().toEpochMilli() > notification.getMutedUntil())) {
-                        if (!alreadyEvaluated.contains(notification.getId())) {
+                    // check, if notification associated with deviceId should be evaluating for this storedData
+                    if (notification.getDeviceAndTag().get(event.getDeviceId()).contains(storedData.getTag())) {
+                        if (notification.getMutedUntil() == null || (Instant.now().toEpochMilli() > notification.getMutedUntil())) {
                             Map<String, List<String>> mapDeviceAndTag = notification.getDeviceAndTag();
-                            mapDeviceAndTag.get(event.getDeviceId()).remove(storedData.getTag());
                             dataForExpression.put(storedData.getDeviceId() + storedData.getTag(), storedData.getValue());
                             mapDeviceAndTag.forEach((k, v) -> {
                                 for (String tag : v) {
-                                    StoredData lastStoredData = storedDataRepository.findFirstStoredDataByDeviceIdAndTagOrderByMeasureAddDesc(k, tag);
-                                    if (lastStoredData != null) {
-                                        dataForExpression.put(lastStoredData.getDeviceId() + lastStoredData.getTag(), lastStoredData.getValue());
+                                    if (k.equals(event.getDeviceId()) && tag.equals(storedData.getTag())) {
+                                        // we can skip one DB call, because we already put actual storedData to dataForExpression
                                     } else {
-                                        throw new InvalidOperationException("Notification with id: " + notification.getId() + " can not be evaluated, because of missing Stored Data for tag: " + tag);
+                                        StoredData lastStoredData = storedDataRepository.findFirstStoredDataByDeviceIdAndTagOrderByMeasureAddDesc(k, tag);
+                                        if (lastStoredData != null) {
+                                            dataForExpression.put(lastStoredData.getDeviceId() + lastStoredData.getTag(), lastStoredData.getValue());
+                                        } else {
+                                            throw new InvalidOperationException("Notification with id: " + notification.getId() + " can not be evaluated, because of missing Stored Data for tag: " + tag);
+                                        }
                                     }
+
                                 }
                             });
 
@@ -81,7 +85,6 @@ public class NotificationProcessor {
                                 throw new InvalidOperationException("Result: " + result + " not recognized.");
                             }
                             dataForExpression.clear();
-                            alreadyEvaluated.add(notification.getId());
                         }
                     }
                 }
