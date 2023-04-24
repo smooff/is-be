@@ -35,6 +35,8 @@ public class StoredResolvedNotificationServiceImpl implements StoredResolvedNoti
 
         List<StoredResolvedNotification> storedResolvedNotificationList = storedResolvedNotificationRepository.findByCreatedAtLessThan(timeMinusWeek);
 
-        storedResolvedNotificationRepository.deleteAll(storedResolvedNotificationList);
+        if (!storedResolvedNotificationList.isEmpty()) {
+            storedResolvedNotificationRepository.deleteAll(storedResolvedNotificationList);
+        }
     }
 }
