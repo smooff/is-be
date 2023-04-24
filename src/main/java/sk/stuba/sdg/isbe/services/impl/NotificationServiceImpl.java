@@ -145,7 +145,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public List<Notification> getNotificationsWithMessage(){
+    public List<Notification> getNotificationsWithMessage() {
 
         List<Notification> notifications = notificationRepository.getNotificationByDeactivated(false);
 
@@ -155,7 +155,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public Notification resolveNotification(String notificationId, String notificationLevel){
+    public Notification resolveNotification(String notificationId, String notificationLevel) {
 
         validateNotificationId(notificationId);
         Notification notificationToResolve = getNotificationById(notificationId);
@@ -182,7 +182,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void storeNotificationJobTriggers(){
+    public void storeNotificationJobTriggers() {
 
         List<Notification> notifications = notificationRepository.findAllWithJobAndTriggerTime();
 
@@ -201,8 +201,10 @@ public class NotificationServiceImpl implements NotificationService {
             notification.getJobAndTriggerTime().clear();
         }
 
-        storedResolvedNotificationRepository.saveAll(storedResolvedNotificationList);
-        notificationRepository.saveAll(notifications);
+        if (!storedResolvedNotificationList.isEmpty()) {
+            storedResolvedNotificationRepository.saveAll(storedResolvedNotificationList);
+            notificationRepository.saveAll(notifications);
+        }
     }
 
     @Override
