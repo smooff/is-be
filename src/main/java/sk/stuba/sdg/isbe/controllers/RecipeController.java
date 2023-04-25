@@ -18,13 +18,13 @@ public class RecipeController {
     private RecipeService recipeService;
 
     @Operation(summary = "Create a recipe in database using object")
-    @PostMapping("create")
+    @PostMapping("createRecipe")
     public Recipe createRecipe(@Valid @RequestBody Recipe recipe) {
          return recipeService.createRecipe(recipe);
     }
 
     @Operation(summary = "Delete recipe by ID")
-    @DeleteMapping("delete/{recipeId}")
+    @DeleteMapping("deleteRecipeById/{recipeId}")
     public Recipe deleteRecipe(@PathVariable String recipeId) {
         return recipeService.deleteRecipe(recipeId);
     }
