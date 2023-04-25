@@ -57,7 +57,7 @@ public class NotificationController {
 
     @PutMapping(value = "/edit")
     @Operation(summary = "Edit existing Notification")
-    public Notification editNotification(@Valid @RequestBody Notification notification){
+    public Notification editNotification(@Valid @RequestBody Notification notification) {
         return this.notificationService.editNotification(notification);
     }
 
@@ -89,5 +89,29 @@ public class NotificationController {
     @Operation(summary = "Store data about notification trigger related to run (reset) job.")
     public void storeNotificationJobTriggers() {
         this.notificationService.storeNotificationJobTriggers();
+    }
+
+    @PostMapping(value = "/setNotificationActiveAtHour/{notificationId}/{activeHours}")
+    @Operation(summary = "Set active hours (hours when Notification is evaluating) for Notification.")
+    public void setNotificationActiveAtHour(@PathVariable("notificationId") String notificationId, @PathVariable("activeHours") List<Integer> activeHours) {
+        this.notificationService.setNotificationActiveAtHour(notificationId, activeHours);
+    }
+
+    @PostMapping(value = "/setNotificationActiveAtDay/{notificationId}/{activeDays}")
+    @Operation(summary = "Set active days (days when Notification is evaluating) for Notification.")
+    public void setNotificationActiveAtDay(@PathVariable("notificationId") String notificationId, @PathVariable("activeDays") List<Integer> activeDays) {
+        this.notificationService.setNotificationActiveAtDay(notificationId, activeDays);
+    }
+
+    @GetMapping(value = "/removeNotificationActiveAtHour/{notificationId}")
+    @Operation(summary = "Remove active hours (hours when Notification is evaluating) for Notification.")
+    public void removeNotificationActiveAtHour(@PathVariable("notificationId") String notificationId) {
+        this.notificationService.removeNotificationActiveAtHour(notificationId);
+    }
+
+    @GetMapping(value = "/removeNotificationActiveAtDay/{notificationId}")
+    @Operation(summary = "Remove active days (days when Notification is evaluating) for Notification.")
+    public void removeNotificationActiveAtDay(@PathVariable("notificationId") String notificationId) {
+        this.notificationService.removeNotificationActiveAtDay(notificationId);
     }
 }

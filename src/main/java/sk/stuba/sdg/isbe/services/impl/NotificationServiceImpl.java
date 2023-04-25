@@ -217,6 +217,52 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    public Notification setNotificationActiveAtHour(String notificationId, List<Integer> hours) {
+
+        validateNotificationId(notificationId);
+        Notification notification = getNotificationById(notificationId);
+
+        notification.getActiveAtHour().clear();
+        notification.getActiveAtHour().addAll(hours);
+
+        return notificationRepository.save(notification);
+    }
+
+    @Override
+    public Notification setNotificationActiveAtDay(String notificationId, List<Integer> days) {
+
+        validateNotificationId(notificationId);
+        Notification notification = getNotificationById(notificationId);
+
+        notification.getActiveAtDay().clear();
+        notification.getActiveAtDay().addAll(days);
+
+        return notificationRepository.save(notification);
+    }
+
+    @Override
+    public Notification removeNotificationActiveAtHour(String notificationId) {
+
+        validateNotificationId(notificationId);
+        Notification notification = getNotificationById(notificationId);
+
+        notification.getActiveAtHour().clear();
+
+        return notificationRepository.save(notification);
+    }
+
+    @Override
+    public Notification removeNotificationActiveAtDay(String notificationId) {
+
+        validateNotificationId(notificationId);
+        Notification notification = getNotificationById(notificationId);
+
+        notification.getActiveAtDay().clear();
+
+        return notificationRepository.save(notification);
+    }
+
+    @Override
     public void validateNotification(Notification notification) {
 
         if (!notification.hasNonEmptyName()) {
