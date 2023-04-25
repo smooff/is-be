@@ -17,10 +17,7 @@ import sk.stuba.sdg.isbe.services.JobService;
 import sk.stuba.sdg.isbe.services.NotificationService;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class NotificationProcessor {
@@ -42,49 +39,61 @@ public class NotificationProcessor {
     @Async
     @EventListener
     public void handleDataSavedEvent(DataStoredEvent event) throws JsonLogicException {
+        Calendar calendar = Calendar.getInstance();
+        int actualDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+        int actualHour = calendar.get(Calendar.HOUR_OF_DAY);
+
         List<Notification> notifications = notificationRepository.getNotificationByDevicesContainingAndDeactivated(event.getDeviceId(), false);
         if (notifications != null) {
             for (StoredData storedData : event.getStoredData()) {
                 Map<String, Double> dataForExpression = new HashMap<>();
                 for (Notification notification : notifications) {
-                    // check, if notification associated with deviceId should be evaluating for this storedData
-                    if (notification.getDeviceAndTag().get(event.getDeviceId()).contains(storedData.getTag())) {
-                        if (notification.getMutedUntil() == null || (Instant.now().toEpochMilli() > notification.getMutedUntil())) {
-                            Map<String, List<String>> mapDeviceAndTag = notification.getDeviceAndTag();
-                            dataForExpression.put(storedData.getDeviceId() + storedData.getTag(), storedData.getValue());
-                            mapDeviceAndTag.forEach((k, v) -> {
-                                for (String tag : v) {
-                                    if (k.equals(event.getDeviceId()) && tag.equals(storedData.getTag())) {
-                                        // we can skip one DB call, because we already put actual storedData to dataForExpression
-                                    } else {
-                                        StoredData lastStoredData = storedDataRepository.findFirstStoredDataByDeviceIdAndTagOrderByMeasureAddDesc(k, tag);
-                                        if (lastStoredData != null) {
-                                            dataForExpression.put(lastStoredData.getDeviceId() + lastStoredData.getTag(), lastStoredData.getValue());
-                                        } else {
-                                            throw new InvalidOperationException("Notification with id: " + notification.getId() + " can not be evaluated, because of missing Stored Data for tag: " + tag);
+                    // FILTERING
+                    // check, if notification is active only in some days
+                    if (notification.getActiveAtDay().isEmpty() || notification.getActiveAtDay().contains(actualDayOfWeek)) {
+                        // check, if notification is active only at some hours
+                        if (notification.getActiveAtHour().isEmpty() || notification.getActiveAtHour().contains(actualHour)) {
+                            // check, if notification associated with deviceId should be evaluating for this storedData
+                            if (notification.getDeviceAndTag().get(event.getDeviceId()).contains(storedData.getTag())) {
+                                // check, if notification is muted
+                                if (notification.getMutedUntil() == null || (Instant.now().toEpochMilli() > notification.getMutedUntil())) {
+                                    Map<String, List<String>> mapDeviceAndTag = notification.getDeviceAndTag();
+                                    dataForExpression.put(storedData.getDeviceId() + storedData.getTag(), storedData.getValue());
+                                    mapDeviceAndTag.forEach((k, v) -> {
+                                        for (String tag : v) {
+                                            if (k.equals(event.getDeviceId()) && tag.equals(storedData.getTag())) {
+                                                // we can skip one DB call, because we already put actual storedData to dataForExpression
+                                            } else {
+                                                StoredData lastStoredData = storedDataRepository.findFirstStoredDataByDeviceIdAndTagOrderByMeasureAddDesc(k, tag);
+                                                if (lastStoredData != null) {
+                                                    dataForExpression.put(lastStoredData.getDeviceId() + lastStoredData.getTag(), lastStoredData.getValue());
+                                                } else {
+                                                    throw new InvalidOperationException("Notification with id: " + notification.getId() + " can not be evaluated, because of missing Stored Data for tag: " + tag);
+                                                }
+                                            }
+
                                         }
+                                    });
+                                    System.out.println("triggered");
+                                    // desatinne cisla musia byt pisane s . -> 4.1
+                                    String result = (String) jsonLogic.apply(notification.getRules(), dataForExpression);
+                                    if (notification.getMutedUntil() != null) {
+                                        notification.setMutedUntil(null);
                                     }
-
+                                    if (result.contains(EventConstants.NO_ACTION)) {
+                                        System.out.println("no action");
+                                    } else if (result.contains(EventConstants.FOR_TIME)) {
+                                        handleNotificationForTime(notification, result);
+                                    } else if (result.contains(EventConstants.NOTIFICATION_MESSAGE)) {
+                                        handleNotificationMessage(notification, result);
+                                    } else if (result.contains(EventConstants.JOB)) {
+                                        handleNotificationJob(notification, result);
+                                    } else {
+                                        throw new InvalidOperationException("Result: " + result + " not recognized.");
+                                    }
+                                    dataForExpression.clear();
                                 }
-                            });
-
-                            // desatinne cisla musia byt pisane s . -> 4.1
-                            String result = (String) jsonLogic.apply(notification.getRules(), dataForExpression);
-                            if (notification.getMutedUntil() != null) {
-                                notification.setMutedUntil(null);
                             }
-                            if (result.contains(EventConstants.NO_ACTION)) {
-                                System.out.println("no action");
-                            } else if (result.contains(EventConstants.FOR_TIME)) {
-                                handleNotificationForTime(notification, result);
-                            } else if (result.contains(EventConstants.NOTIFICATION_MESSAGE)) {
-                                handleNotificationMessage(notification, result);
-                            } else if (result.contains(EventConstants.JOB)) {
-                                handleNotificationJob(notification, result);
-                            } else {
-                                throw new InvalidOperationException("Result: " + result + " not recognized.");
-                            }
-                            dataForExpression.clear();
                         }
                     }
                 }
@@ -175,7 +184,9 @@ public class NotificationProcessor {
             }
         } else if (forTimeSubType.equals(EventConstants.FOR_TIME_RESET)) {
             String notificationReturnStatement = result.split(":")[2] + ":" + result.split(":")[3];
-            notification.getForTimeCountingActivatedAt().remove(notificationReturnStatement);
+            if(!notification.getForTimeCountingActivatedAt().isEmpty()){
+                notification.getForTimeCountingActivatedAt().remove(notificationReturnStatement);
+            }
             notificationService.editNotification(notification);
         }
     }

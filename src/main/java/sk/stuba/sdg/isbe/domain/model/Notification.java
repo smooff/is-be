@@ -3,6 +3,7 @@ package sk.stuba.sdg.isbe.domain.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -91,6 +92,25 @@ public class Notification {
      * This map holds all jobs that notification returned (triggered) and time when trigger happened.
      */
     private Map<String, List<Long>> jobAndTriggerTime = new HashMap<>();
+
+    /**
+     * This list define which days is notification active - able to evaluate.
+     * Range is 1-7.
+     * SUNDAY: This value is equal to 1.
+     * MONDAY: This value is equal to 2.
+     * TUESDAY: This value is equal to 3.
+     * WEDNESDAY: This value is equal to 4.
+     * THURSDAY: This value is equal to 5.
+     * FRIDAY: This value is equal to 6.
+     * SATURDAY: This value is equal to 7.
+     */
+    private List<Integer> activeAtDay = new ArrayList<>();
+
+    /**
+     * This list define which hour of the day is notification active - able to evaluate.
+     * Range is 0-23.
+     */
+    private List<Integer> activeAtHour = new ArrayList<>();
 
     public Map<String, List<String>> getDeviceAndTag() {
         return deviceAndTag;
@@ -202,6 +222,22 @@ public class Notification {
 
     public void setJobAndTriggerTime(Map<String, List<Long>> jobAndTriggerTime) {
         this.jobAndTriggerTime = jobAndTriggerTime;
+    }
+
+    public List<Integer> getActiveAtDay() {
+        return activeAtDay;
+    }
+
+    public void setActiveAtDay(List<Integer> activeAtDay) {
+        this.activeAtDay = activeAtDay;
+    }
+
+    public List<Integer> getActiveAtHour() {
+        return activeAtHour;
+    }
+
+    public void setActiveAtHour(List<Integer> activeAtHour) {
+        this.activeAtHour = activeAtHour;
     }
 
     @Override

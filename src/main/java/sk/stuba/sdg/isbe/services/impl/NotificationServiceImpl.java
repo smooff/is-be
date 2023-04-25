@@ -105,15 +105,24 @@ public class NotificationServiceImpl implements NotificationService {
         validateNotification(notification);
 
         existingNotification.setName(notification.getName());
-        existingNotification.setDevices(notification.getDevices());
+        existingNotification.getDevices().clear();
+        existingNotification.getDevices().addAll(notification.getDevices());
         existingNotification.setDeactivated(notification.getDeactivated());
         existingNotification.setRules(notification.getRules());
         existingNotification.setAlreadyTriggered(notification.getAlreadyTriggered());
         existingNotification.setMutedUntil(notification.getMutedUntil());
-        existingNotification.setForTimeCountingActivatedAt(notification.getForTimeCountingActivatedAt());
-        existingNotification.setMessageMultiplicityCounter(notification.getMessageMultiplicityCounter());
-        existingNotification.setMessageAndTriggerTime(notification.getMessageAndTriggerTime());
-        existingNotification.setJobAndTriggerTime(notification.getJobAndTriggerTime());
+        existingNotification.getForTimeCountingActivatedAt().clear();
+        existingNotification.getForTimeCountingActivatedAt().putAll(notification.getForTimeCountingActivatedAt());
+        existingNotification.getMessageMultiplicityCounter().clear();
+        existingNotification.getMessageMultiplicityCounter().putAll(notification.getMessageMultiplicityCounter());
+        existingNotification.getMessageAndTriggerTime().clear();
+        existingNotification.getMessageAndTriggerTime().putAll(notification.getMessageAndTriggerTime());
+        existingNotification.getJobAndTriggerTime().clear();
+        existingNotification.getJobAndTriggerTime().putAll(notification.getJobAndTriggerTime());
+        existingNotification.getActiveAtDay().clear();
+        existingNotification.getActiveAtDay().addAll(notification.getActiveAtDay());
+        existingNotification.getActiveAtHour().clear();
+        existingNotification.getActiveAtHour().addAll(notification.getActiveAtHour());
 
         return notificationRepository.save(existingNotification);
     }
