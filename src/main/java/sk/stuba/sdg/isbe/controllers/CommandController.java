@@ -18,7 +18,7 @@ public class CommandController {
     private CommandService commandService;
 
     @Operation(summary = "Create a command in database using object")
-    @PostMapping("create")
+    @PostMapping("createCommand")
     public Command createCommand(@Valid @RequestBody Command command) {
         return commandService.createCommand(command);
     }
@@ -51,7 +51,7 @@ public class CommandController {
     }
 
     @Operation(summary = "Get command by device-type optionally with sorting")
-    @GetMapping("getCommandByDeviceType/{deviceType}/{sortBy}/{sortDirection}")
+    @GetMapping("getCommandsByDeviceType/{deviceType}/{sortBy}/{sortDirection}")
     public List<Command> getCommandsByDeviceType(@PathVariable String deviceType,
                                                  @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortBy,
                                                  @PathVariable @Parameter(description = "Unsorted -> NONE or NULL") String sortDirection) {
@@ -67,13 +67,13 @@ public class CommandController {
     }
 
     @Operation(summary = "Delete command by ID")
-    @DeleteMapping("delete/{commandId}")
+    @DeleteMapping("deleteCommand/{commandId}")
     public Command deleteCommand(@PathVariable String commandId) {
         return commandService.deleteCommand(commandId);
     }
 
     @Operation(summary = "Update command by ID using command object")
-    @PutMapping("update/{commandId}")
+    @PutMapping("updateCommand/{commandId}")
     public Command updateCommand(@PathVariable String commandId, @Valid @RequestBody Command updateCommand) {
         return commandService.updateCommand(commandId, updateCommand);
     }

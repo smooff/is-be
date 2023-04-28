@@ -14,7 +14,7 @@ public interface JobService {
 
     Job getJobById(String jobId);
 
-    Job getJobByName(String name);
+    List<Job> getJobsByName(String name);
 
     Job skipCycle(String jobId);
 

@@ -13,20 +13,20 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import sk.stuba.sdg.isbe.services.NotificationService;
-import sk.stuba.sdg.isbe.services.StoredResolvedNotificationService;
+import sk.stuba.sdg.isbe.services.ScenarioService;
+import sk.stuba.sdg.isbe.services.StoredResolvedScenarioService;
 
 
 @Component
 @EnableScheduling
 @EnableSchedulerLock(defaultLockAtMostFor = "5m")
-public class NotificationScheduler {
+public class ScenarioScheduler {
 
     @Autowired
-    private NotificationService notificationService;
+    private ScenarioService scenarioService;
 
     @Autowired
-    StoredResolvedNotificationService storedResolvedNotificationService;
+    StoredResolvedScenarioService storedResolvedScenarioService;
 
     @Value("${spring.data.mongodb.database}")
     private String mongoDbName;
@@ -39,16 +39,16 @@ public class NotificationScheduler {
 
     // execute every 24 hours
     @Scheduled(cron = "0 0 0 * * ?")
-    @SchedulerLock(name = "scheduledTaskStoreNotificationJobTriggers", lockAtMostFor = "20m", lockAtLeastFor = "1m")
-    public void storeNotificationJobTriggers() {
-        this.notificationService.storeNotificationJobTriggers();
+    @SchedulerLock(name = "scheduledTaskStoreScenarioJobTriggers", lockAtMostFor = "20m", lockAtLeastFor = "1m")
+    public void storeScenarioJobTriggers() {
+        this.scenarioService.storeScenarioJobTriggers();
     }
 
     // execute once every week - Monday
     @Scheduled(cron = "0 0 0 * * 1")
-    @SchedulerLock(name = "scheduledTaskRemoveOldStoredNotificationData", lockAtMostFor = "20m", lockAtLeastFor = "1m")
-    public void removeOldStoredNotificationData() {
-        storedResolvedNotificationService.removeOldStoredNotificationData();
+    @SchedulerLock(name = "scheduledTaskRemoveOldStoredScenarioData", lockAtMostFor = "20m", lockAtLeastFor = "1m")
+    public void removeOldStoredScenarioData() {
+        storedResolvedScenarioService.removeOldStoredScenarioData();
     }
 
 }

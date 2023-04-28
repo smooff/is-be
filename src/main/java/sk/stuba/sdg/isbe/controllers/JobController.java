@@ -17,7 +17,7 @@ public class JobController {
     private JobService jobService;
 
     @Operation(summary = "Run a job created from a recipe with n repetitions")
-    @PostMapping("runFromRecipe/{recipeId}/{deviceId}/{repetitions}")
+    @PostMapping("runJobFromRecipe/{recipeId}/{deviceId}/{repetitions}")
     public Job createJobFromRecipe(@PathVariable String recipeId, @PathVariable String deviceId, @PathVariable int repetitions) {
         return jobService.runJobFromRecipe(recipeId, deviceId, repetitions);
     }
@@ -40,10 +40,10 @@ public class JobController {
         return jobService.getJobById(jobId);
     }
 
-    @Operation(summary = "Get job by its name")
-    @GetMapping("getJobByName/{name}")
-    public Job getJobByName(@PathVariable String name) {
-        return jobService.getJobByName(name);
+    @Operation(summary = "Get jobs by name")
+    @GetMapping("getJobsByName/{name}")
+    public List<Job> getJobByName(@PathVariable String name) {
+        return jobService.getJobsByName(name);
     }
 
     @Operation(summary = "Skip cycle in a job")

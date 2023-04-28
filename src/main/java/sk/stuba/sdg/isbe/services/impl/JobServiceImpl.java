@@ -74,18 +74,17 @@ public class JobServiceImpl implements JobService {
         //save job to get an ID for it
         job = jobRepository.save(job);
 
-        job.setStatus(creteJobStatusForJob(device, job));
+        job.setStatus(createJobStatusForJob(device, job));
         job.setDeviceId(deviceId);
         job.setCurrentStatus(JobStatusEnum.JOB_PENDING);
         job.setCreatedAt(Instant.now().toEpochMilli());
-        jobRepository.save(job);
 
         // add job as running on device by device uid
         deviceService.addJobToDevice(deviceId, job.getUid());
-        return job;
+        return jobRepository.save(job);
     }
 
-    private JobStatus creteJobStatusForJob(Device device, Job job) {
+    private JobStatus createJobStatusForJob(Device device, Job job) {
         JobStatus jobStatus = new JobStatus();
         jobStatus.setCode(JobStatusEnum.JOB_PENDING);
 
@@ -104,7 +103,7 @@ public class JobServiceImpl implements JobService {
         jobStatusRepository.delete(job.getStatus());
 
         job.setCurrentStatus(JobStatusEnum.JOB_PENDING);
-        job.setStatus(creteJobStatusForJob(device, job));
+        job.setStatus(createJobStatusForJob(device, job));
 
         job.setCreatedAt(Instant.now().toEpochMilli());
         jobRepository.save(job);
@@ -278,12 +277,12 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public Job getJobByName(String name) {
-        Optional<Job> optionalJob = jobRepository.getJobByName(name);
-        if (optionalJob.isEmpty()) {
-            throw new NotFoundCustomException("Job with name: '" + name + "' was not found!");
+    public List<Job> getJobsByName(String name) {
+        List<Job> jobs = jobRepository.getJobsByName(name);
+        if (jobs.isEmpty()) {
+            throw new NotFoundCustomException("Jobs with name: '" + name + "' were not found!");
         }
-        return optionalJob.get();
+        return jobs;
     }
 
     @Override
