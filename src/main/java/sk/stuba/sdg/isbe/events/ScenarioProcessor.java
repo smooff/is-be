@@ -8,25 +8,25 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import sk.stuba.sdg.isbe.domain.enums.JobStatusEnum;
 import sk.stuba.sdg.isbe.domain.model.Job;
-import sk.stuba.sdg.isbe.domain.model.Notification;
+import sk.stuba.sdg.isbe.domain.model.Scenario;
 import sk.stuba.sdg.isbe.domain.model.StoredData;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidOperationException;
-import sk.stuba.sdg.isbe.repositories.NotificationRepository;
+import sk.stuba.sdg.isbe.repositories.ScenarioRepository;
 import sk.stuba.sdg.isbe.repositories.StoredDataRepository;
 import sk.stuba.sdg.isbe.services.JobService;
-import sk.stuba.sdg.isbe.services.NotificationService;
+import sk.stuba.sdg.isbe.services.ScenarioService;
 
 import java.time.Instant;
 import java.util.*;
 
 @Component
-public class NotificationProcessor {
+public class ScenarioProcessor {
 
     @Autowired
-    NotificationService notificationService;
+    ScenarioService scenarioService;
 
     @Autowired
-    NotificationRepository notificationRepository;
+    ScenarioRepository scenarioRepository;
 
     @Autowired
     StoredDataRepository storedDataRepository;
@@ -43,21 +43,21 @@ public class NotificationProcessor {
         int actualDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
         int actualHour = calendar.get(Calendar.HOUR_OF_DAY);
 
-        List<Notification> notifications = notificationRepository.getNotificationByDevicesContainingAndDeactivated(event.getDeviceId(), false);
-        if (notifications != null) {
+        List<Scenario> scenarios = scenarioRepository.getScenarioByDevicesContainingAndDeactivated(event.getDeviceId(), false);
+        if (scenarios != null) {
             for (StoredData storedData : event.getStoredData()) {
                 Map<String, Double> dataForExpression = new HashMap<>();
-                for (Notification notification : notifications) {
+                for (Scenario scenario : scenarios) {
                     // FILTERING
-                    // check, if notification is active only in some days
-                    if (notification.getActiveAtDay().isEmpty() || notification.getActiveAtDay().contains(actualDayOfWeek)) {
-                        // check, if notification is active only at some hours
-                        if (notification.getActiveAtHour().isEmpty() || notification.getActiveAtHour().contains(actualHour)) {
-                            // check, if notification associated with deviceId should be evaluating for this storedData
-                            if (notification.getDeviceAndTag().get(event.getDeviceId()).contains(storedData.getTag())) {
-                                // check, if notification is muted
-                                if (notification.getMutedUntil() == null || (Instant.now().toEpochMilli() > notification.getMutedUntil())) {
-                                    Map<String, List<String>> mapDeviceAndTag = notification.getDeviceAndTag();
+                    // check, if scenario is active only in some days
+                    if (scenario.getActiveAtDay().isEmpty() || scenario.getActiveAtDay().contains(actualDayOfWeek)) {
+                        // check, if scenario is active only at some hours
+                        if (scenario.getActiveAtHour().isEmpty() || scenario.getActiveAtHour().contains(actualHour)) {
+                            // check, if scenario associated with deviceId should be evaluating for this storedData
+                            if (scenario.getDeviceAndTag().get(event.getDeviceId()).contains(storedData.getTag())) {
+                                // check, if scenario is muted
+                                if (scenario.getMutedUntil() == null || (Instant.now().toEpochMilli() > scenario.getMutedUntil())) {
+                                    Map<String, List<String>> mapDeviceAndTag = scenario.getDeviceAndTag();
                                     dataForExpression.put(storedData.getDeviceId() + storedData.getTag(), storedData.getValue());
                                     mapDeviceAndTag.forEach((k, v) -> {
                                         for (String tag : v) {
@@ -68,7 +68,7 @@ public class NotificationProcessor {
                                                 if (lastStoredData != null) {
                                                     dataForExpression.put(lastStoredData.getDeviceId() + lastStoredData.getTag(), lastStoredData.getValue());
                                                 } else {
-                                                    throw new InvalidOperationException("Notification with id: " + notification.getId() + " can not be evaluated, because of missing Stored Data for tag: " + tag);
+                                                    throw new InvalidOperationException("Scenario with id: " + scenario.getId() + " can not be evaluated, because of missing Stored Data for tag: " + tag);
                                                 }
                                             }
 
@@ -76,18 +76,18 @@ public class NotificationProcessor {
                                     });
                                     System.out.println("triggered");
                                     // desatinne cisla musia byt pisane s . -> 4.1
-                                    String result = (String) jsonLogic.apply(notification.getRules(), dataForExpression);
-                                    if (notification.getMutedUntil() != null) {
-                                        notification.setMutedUntil(null);
+                                    String result = (String) jsonLogic.apply(scenario.getRules(), dataForExpression);
+                                    if (scenario.getMutedUntil() != null) {
+                                        scenario.setMutedUntil(null);
                                     }
                                     if (result.contains(EventConstants.NO_ACTION)) {
                                         System.out.println("no action");
                                     } else if (result.contains(EventConstants.FOR_TIME)) {
-                                        handleNotificationForTime(notification, result);
+                                        handleScenarioForTime(scenario, result);
                                     } else if (result.contains(EventConstants.NOTIFICATION_MESSAGE)) {
-                                        handleNotificationMessage(notification, result);
+                                        handleNotificationMessage(scenario, result);
                                     } else if (result.contains(EventConstants.JOB)) {
-                                        handleNotificationJob(notification, result);
+                                        handleScenarioJob(scenario, result);
                                     } else {
                                         throw new InvalidOperationException("Result: " + result + " not recognized.");
                                     }
@@ -113,81 +113,81 @@ public class NotificationProcessor {
         return activatedAt + timeToAdd;
     }
 
-    public void handleNotificationMessage(Notification notification, String result) {
+    public void handleNotificationMessage(Scenario scenario, String result) {
 
         String message = result.split(":")[1];
 
         //trigger time (multiple values) for certain message
-        if (notification.getMessageAndTriggerTime().containsKey(message)) {
-            notification.getMessageAndTriggerTime().get(message).add(Instant.now().toEpochMilli());
+        if (scenario.getMessageAndTriggerTime().containsKey(message)) {
+            scenario.getMessageAndTriggerTime().get(message).add(Instant.now().toEpochMilli());
         } else {
             List<Long> triggeredAt = new ArrayList<>();
             triggeredAt.add(Instant.now().toEpochMilli());
-            notification.getMessageAndTriggerTime().put(message, triggeredAt);
+            scenario.getMessageAndTriggerTime().put(message, triggeredAt);
         }
         //trigger count for certain message
-        if (notification.getMessageMultiplicityCounter().containsKey(message)) {
-            notification.getMessageMultiplicityCounter().put(message, notification.getMessageMultiplicityCounter().get(message) + 1);
+        if (scenario.getMessageMultiplicityCounter().containsKey(message)) {
+            scenario.getMessageMultiplicityCounter().put(message, scenario.getMessageMultiplicityCounter().get(message) + 1);
         } else {
-            notification.getMessageMultiplicityCounter().put(message, 1);
+            scenario.getMessageMultiplicityCounter().put(message, 1);
         }
 
-        if (!notification.getAlreadyTriggered()) {
-            notification.setAlreadyTriggered(true);
+        if (!scenario.getAlreadyTriggered()) {
+            scenario.setAlreadyTriggered(true);
         }
-        notificationService.editNotification(notification);
+        scenarioService.editScenario(scenario);
     }
 
-    public void handleNotificationJob(Notification notification, String result) {
+    public void handleScenarioJob(Scenario scenario, String result) {
         String jobId = result.split(":")[1];
 
         Job job = jobService.getJobById(jobId);
         if (job.getCurrentStatus().equals(JobStatusEnum.JOB_DONE) || job.getCurrentStatus().equals(JobStatusEnum.JOB_ERR)) {
             jobService.resetJob(jobId);
             //trigger time (multiple values) for certain job
-            if (notification.getJobAndTriggerTime().containsKey(jobId)) {
-                notification.getJobAndTriggerTime().get(jobId).add(Instant.now().toEpochMilli());
+            if (scenario.getJobAndTriggerTime().containsKey(jobId)) {
+                scenario.getJobAndTriggerTime().get(jobId).add(Instant.now().toEpochMilli());
             } else {
                 List<Long> triggeredAt = new ArrayList<>();
                 triggeredAt.add(Instant.now().toEpochMilli());
-                notification.getJobAndTriggerTime().put(jobId, triggeredAt);
+                scenario.getJobAndTriggerTime().put(jobId, triggeredAt);
             }
-            if (!notification.getAlreadyTriggered()) {
-                notification.setAlreadyTriggered(true);
+            if (!scenario.getAlreadyTriggered()) {
+                scenario.setAlreadyTriggered(true);
             }
-            notificationService.editNotification(notification);
+            scenarioService.editScenario(scenario);
         }
     }
 
-    public void handleNotificationForTime(Notification notification, String result) {
+    public void handleScenarioForTime(Scenario scenario, String result) {
 
         String forTimeSubType = result.split(":")[1];
 
         if (forTimeSubType.equals(EventConstants.FOR_TIME_SET)) {
 
-            String notificationReturnStatement = result.split(":")[4] + ":" + result.split(":")[5];
+            String scenarioReturnStatement = result.split(":")[4] + ":" + result.split(":")[5];
 
             //check if return statement was ever triggered
-            if (notification.getForTimeCountingActivatedAt().containsKey(notificationReturnStatement)) {
-                Long timeUntil = calculateUntilTime(notification.getForTimeCountingActivatedAt().get(notificationReturnStatement), Long.valueOf(result.split(":")[2]), result.split(":")[3]);
+            if (scenario.getForTimeCountingActivatedAt().containsKey(scenarioReturnStatement)) {
+                Long timeUntil = calculateUntilTime(scenario.getForTimeCountingActivatedAt().get(scenarioReturnStatement), Long.valueOf(result.split(":")[2]), result.split(":")[3]);
 
                 if (Instant.now().toEpochMilli() >= timeUntil) {
                     if (result.contains(EventConstants.NOTIFICATION_MESSAGE)) {
-                        handleNotificationMessage(notification, notificationReturnStatement);
+                        handleNotificationMessage(scenario, scenarioReturnStatement);
                     } else if (result.contains(EventConstants.JOB)) {
-                        handleNotificationJob(notification, notificationReturnStatement);
+                        handleScenarioJob(scenario, scenarioReturnStatement);
                     }
                 }
             } else {
-                notification.getForTimeCountingActivatedAt().put(notificationReturnStatement, Instant.now().toEpochMilli());
-                notificationService.editNotification(notification);
+                scenario.getForTimeCountingActivatedAt().put(scenarioReturnStatement, Instant.now().toEpochMilli());
+                scenarioService.editScenario(scenario);
             }
         } else if (forTimeSubType.equals(EventConstants.FOR_TIME_RESET)) {
-            String notificationReturnStatement = result.split(":")[2] + ":" + result.split(":")[3];
-            if(!notification.getForTimeCountingActivatedAt().isEmpty()){
-                notification.getForTimeCountingActivatedAt().remove(notificationReturnStatement);
+            String scenarioReturnStatement = result.split(":")[2] + ":" + result.split(":")[3];
+            if(!scenario.getForTimeCountingActivatedAt().isEmpty()){
+                scenario.getForTimeCountingActivatedAt().remove(scenarioReturnStatement);
             }
-            notificationService.editNotification(notification);
+            scenarioService.editScenario(scenario);
         }
     }
 }

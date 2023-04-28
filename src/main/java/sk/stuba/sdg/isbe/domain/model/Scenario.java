@@ -9,12 +9,12 @@ import java.util.List;
 import java.util.Map;
 
 @Document
-public class Notification {
+public class Scenario {
 
-    public Notification() {
+    public Scenario() {
     }
 
-    public Notification(String name, List<String> devices, Boolean deactivated, String rules) {
+    public Scenario(String name, List<String> devices, Boolean deactivated, String rules) {
         this.name = name;
         this.devices = devices;
         this.deactivated = deactivated;
@@ -25,32 +25,32 @@ public class Notification {
     private String id;
 
     /**
-     * Rules (Expressions) defined in notification.
+     * Rules (Expressions) defined in Scenario.
      */
     private String rules;
 
     /**
-     * Notification name.
+     * Scenario name.
      */
     private String name;
 
     /**
-     * Devices associated with notification.
+     * Devices associated with Scenario.
      */
     private List<String> devices;
 
     /**
-     * Define if notification is active.
+     * Define if Scenario is active.
      */
     private Boolean deactivated;
 
     /**
-     * Define if the notification was already triggered - sent to user. This reset if users interact with notification.
+     * Define if the Scenario was already triggered - sent to user. This reset if users interact with Scenario.
      */
     private Boolean isAlreadyTriggered;
 
     /**
-     * Define time until the notification is muted.
+     * Define time until the Scenario is muted.
      */
     private Long mutedUntil;
 
@@ -60,41 +60,41 @@ public class Notification {
     private Long createdAt;
 
     /**
-     * Define if the notification (which contains forTime) has been triggered. Especially we need provide, which forTime return
-     * statement was triggered (notification can have multiple forTime and each one of them needs own counter).
-     * This map also define time when was notification first time triggered.
-     * Final state (message for user/run job) of notification will trigger after
-     * forTimeCounterActivatedAt+forTime(defined by user) has passed and all data sent to notification meet the
+     * Define if the Scenario (which contains forTime) has been triggered. Especially we need provide, which forTime return
+     * statement was triggered (scenario can have multiple forTime and each one of them needs own counter).
+     * This map also define time when was scenario first time triggered.
+     * Final state (message for user/run job) of scenario will trigger after
+     * forTimeCounterActivatedAt+forTime(defined by user) has passed and all data sent to scenario meet the
      * requirements to run the counting (requirements are NOT met, when data triggers forTimeReset - then
      * forTimeCountingActivatedAt resets).
-     * This resets if notification is validating data, and these data does not meet the requirements of notification - then
-     * notification's else statement of IF-check is executed and forTime is reset.
-     * ForTime means: data validation in time - multiple data sent in certain time interval to trigger final state of notification.
+     * This resets if scenario is validating data, and these data does not meet the requirements of scenario - then
+     * scenario's else statement of IF-check is executed and forTime is reset.
+     * ForTime means: data validation in time - multiple data sent in certain time interval to trigger final state of scenario.
      */
     private Map<String, Long> forTimeCountingActivatedAt = new HashMap<>();
 
     /**
-     * This map holds all messages that notification returned (triggered) and time when trigger happened.
+     * This map holds all messages that Scenario returned (triggered) and time when trigger happened.
      */
     private Map<String, List<Long>> messageAndTriggerTime = new HashMap<>();
 
     /**
-     * This map holds all messages that notification returned (triggered) and counter - how many times was message sent (triggered).
+     * This map holds all messages that Scenario returned (triggered) and counter - how many times was message sent (triggered).
      */
     private Map<String, Integer> messageMultiplicityCounter = new HashMap<>();
 
     /**
-     * This map holds all tags (DataPointTag) for every device used in certain notification.
+     * This map holds all tags (DataPointTag) for every device used in certain Scenario.
      */
     private Map<String, List<String>> deviceAndTag = new HashMap<>();
 
     /**
-     * This map holds all jobs that notification returned (triggered) and time when trigger happened.
+     * This map holds all jobs that Scenario returned (triggered) and time when trigger happened.
      */
     private Map<String, List<Long>> jobAndTriggerTime = new HashMap<>();
 
     /**
-     * This list define which days is notification active - able to evaluate.
+     * This list define which days is Scenario active - able to evaluate.
      * Range is 1-7.
      * SUNDAY: This value is equal to 1.
      * MONDAY: This value is equal to 2.
@@ -107,7 +107,7 @@ public class Notification {
     private List<Integer> activeAtDay = new ArrayList<>();
 
     /**
-     * This list define which hour of the day is notification active - able to evaluate.
+     * This list define which hour of the day is Scenario active - able to evaluate.
      * Range is 0-23.
      */
     private List<Integer> activeAtHour = new ArrayList<>();
@@ -242,7 +242,7 @@ public class Notification {
 
     @Override
     public String toString() {
-        return "Notification{" +
+        return "Scenario{" +
                 "id='" + id + '\'' +
                 ", rules='" + rules + '\'' +
                 ", name='" + name + '\'' +

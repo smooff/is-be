@@ -1,6 +1,6 @@
 package sk.stuba.sdg.isbe.domain.enums;
 
-public enum NotificationActionType {
+public enum ScenarioActionType {
 
     MESSAGE,
 

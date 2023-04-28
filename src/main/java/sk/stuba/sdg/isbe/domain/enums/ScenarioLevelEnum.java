@@ -1,6 +1,6 @@
 package sk.stuba.sdg.isbe.domain.enums;
 
-public enum NotificationLevelEnum {
+public enum ScenarioLevelEnum {
 
     NOT_SOLVED,
     SOLUTION_IN_PROGRESS,
