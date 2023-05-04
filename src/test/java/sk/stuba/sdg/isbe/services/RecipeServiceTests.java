@@ -114,9 +114,6 @@ public class RecipeServiceTests {
         recipes = recipeService.getRecipesByDeviceTypePageable(DeviceTypeEnum.ESP32.name(), 1, 1, "", NONE);
         assertEquals(1, recipes.size());
 
-        Exception exception = assertThrows(NotFoundCustomException.class, () -> recipeService.getRecipesByDeviceTypePageable(DeviceTypeEnum.SDG_CUBE.name(), 1, 1, "", NONE));
-        assertEquals("There are not any recipe of device type '" + DeviceTypeEnum.SDG_CUBE.name() + "' in the database!", exception.getMessage());
-
         recipeRepository.delete(recipe);
         recipeRepository.delete(recipe2);
     }

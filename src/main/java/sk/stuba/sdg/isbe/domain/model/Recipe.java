@@ -38,7 +38,7 @@ public class Recipe {
     /**
      * Flag that indicates if the recipe is only a sub-recipe. Sub-recipe can't be run as stand-alone.
      */
-    private Boolean isSubRecipe;
+    private Boolean subRecipe;
 
     /**
      * Recipe's creation date - set when the user saves the recipe.
@@ -52,10 +52,10 @@ public class Recipe {
 
     public Recipe() {}
 
-    public Recipe(String name, DeviceTypeEnum deviceType, Boolean isSubRecipe) {
+    public Recipe(String name, DeviceTypeEnum deviceType, Boolean subRecipe) {
         this.name = name;
         this.deviceType = deviceType;
-        this.isSubRecipe = isSubRecipe;
+        this.subRecipe = subRecipe;
     }
 
     public String getId() {
@@ -91,11 +91,11 @@ public class Recipe {
     }
 
     public Boolean isSubRecipe() {
-        return isSubRecipe;
+        return subRecipe;
     }
 
     public void setSubRecipe(Boolean subRecipe) {
-        isSubRecipe = subRecipe;
+        this.subRecipe = subRecipe;
     }
 
     public List<Recipe> getSubRecipes() {

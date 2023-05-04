@@ -22,9 +22,9 @@ public interface RecipeRepository extends MongoRepository<Recipe, String> {
 
     List<Recipe> getRecipesByDeviceTypeAndDeactivated(DeviceTypeEnum deviceType, boolean deactivated, Pageable pageable);
 
-    List<Recipe> getRecipesByIsSubRecipeAndDeviceTypeAndDeactivated(boolean isSubRecipe, DeviceTypeEnum deviceType, boolean deactivated, Sort sort);
+    List<Recipe> getRecipesBySubRecipeAndDeviceTypeAndDeactivated(boolean isSubRecipe, DeviceTypeEnum deviceType, boolean deactivated, Sort sort);
 
-    List<Recipe> getRecipesByIsSubRecipeAndDeviceTypeAndDeactivated(boolean isSubRecipe, DeviceTypeEnum deviceType, boolean deactivated, Pageable pageable);
+    List<Recipe> getRecipesBySubRecipeAndDeviceTypeAndDeactivated(boolean isSubRecipe, DeviceTypeEnum deviceType, boolean deactivated, Pageable pageable);
 
     Optional<Recipe> getRecipeByNameAndDeactivated(String name, boolean deactivated);
 

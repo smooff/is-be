@@ -278,7 +278,7 @@ public class RecipeServiceImpl implements RecipeService {
 
     private List<Recipe> getFullOrSubRecipes(String deviceType, boolean isSubRecipe, String sortBy, String sortDirection) {
         DeviceTypeEnum deviceTypeEnum = DeviceTypeUtils.getDeviceTypeEnum(deviceType);
-        List<Recipe> recipes = recipeRepository.getRecipesByIsSubRecipeAndDeviceTypeAndDeactivated(isSubRecipe, deviceTypeEnum, false, SortingUtils.getSort(Recipe.class, sortBy, sortDirection));
+        List<Recipe> recipes = recipeRepository.getRecipesBySubRecipeAndDeviceTypeAndDeactivated(isSubRecipe, deviceTypeEnum, false, SortingUtils.getSort(Recipe.class, sortBy, sortDirection));
         if (recipes.isEmpty()) {
             String recipeType = isSubRecipe ? "sub-recipes" : "recipes";
             throw new NotFoundCustomException("There are not any " + recipeType + " in the database yet!");
@@ -300,13 +300,13 @@ public class RecipeServiceImpl implements RecipeService {
         DeviceTypeEnum deviceTypeEnum = DeviceTypeUtils.getDeviceTypeEnum(deviceType);
         Pageable pageable = SortingUtils.getFirstEntry(Recipe.class);
         String recipeType = isSubRecipe ? "sub-recipes" : "recipes";
-        List<Recipe> recipes = recipeRepository.getRecipesByIsSubRecipeAndDeviceTypeAndDeactivated(isSubRecipe, deviceTypeEnum, false, pageable);
+        List<Recipe> recipes = recipeRepository.getRecipesBySubRecipeAndDeviceTypeAndDeactivated(isSubRecipe, deviceTypeEnum, false, pageable);
         if (recipes.isEmpty()) {
             throw new NotFoundCustomException("There are not any " + recipeType + " in the database of type of device: " + deviceType + "!");
         }
 
         pageable = SortingUtils.getPagination(Recipe.class, sortBy, sortDirection, page, pageSize);
-        recipes = recipeRepository.getRecipesByIsSubRecipeAndDeviceTypeAndDeactivated(isSubRecipe, deviceTypeEnum, false, pageable);
+        recipes = recipeRepository.getRecipesBySubRecipeAndDeviceTypeAndDeactivated(isSubRecipe, deviceTypeEnum, false, pageable);
         if (recipes.isEmpty()) {
             throw new NotFoundCustomException("There are not any " + recipeType + " of type of device: " + deviceType + " on page " + page + "!");
         }
