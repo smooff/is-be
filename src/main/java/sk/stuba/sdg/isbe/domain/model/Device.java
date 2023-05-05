@@ -21,15 +21,13 @@ public class Device {
     private List<Job> jobs = new ArrayList<>();
     @DBRef
     private List<DataPointTag> dataPointTags = new ArrayList<>();
-    private Long responseTime;
+    private Long responseTime = 10L;
     private Long addTime;
     private Long initExpireTime;
     private String initApiKey;
     private boolean deactivated;
 
-    public Device() {
-        this.responseTime = 10L;
-    }
+    public Device() {}
 
     public Device(String name, String mac, DeviceTypeEnum type) {
         this.name = name;
