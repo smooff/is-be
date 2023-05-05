@@ -85,11 +85,7 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Override
     public Long initExpireTime(String deviceId) {
-        Device device = deviceRepository.getDeviceByUidAndDeactivated(deviceId, false);
-        if (device == null) {
-            throw new EntityExistsException("Device with id: '" + deviceId + "' was not found!");
-        }
-
+        Device device = getDeviceById(deviceId);
         Long time = Instant.now().plus(Duration.ofMinutes(1)).toEpochMilli();
         device.setInitExpireTime(time);
 
@@ -104,7 +100,7 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Override
     public Device getDeviceById(String deviceId){
-        Optional<Device> optionalDevice = deviceRepository.findById(deviceId);
+        Optional<Device> optionalDevice = deviceRepository.getDeviceByUidAndDeactivated(deviceId, false);
         if (optionalDevice.isEmpty()) {
             throw new NotFoundCustomException("Device with ID: '" + deviceId + "' was not found!");
         }
@@ -142,12 +138,7 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Override
     public List<Job> getAllDeviceJobs(String deviceId){
-
-        Optional<Device> optionalDevice = deviceRepository.findById(deviceId);
-        if (optionalDevice.isEmpty()) {
-            throw new NotFoundCustomException("Device with ID: '" + deviceId + "' was not found!");
-        }
-        Device device = optionalDevice.get();
+        Device device = getDeviceById(deviceId);
 
         if (device.getJobs().isEmpty()){
             throw new EntityExistsException("No jobs for device already exists!");
@@ -163,10 +154,11 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Override
     public String getDeviceStatus(String deviceId) {
+        Device device = getDeviceById(deviceId);
         List<Job> runningJobs = jobService.getAllJobsByStatus(deviceId, JobStatusEnum.JOB_PROCESSING.name(), NONE, NONE);
         LocalDateTime lastUpdated = runningJobs.get(0).getStatus().getLastUpdated();
 
-        if (LocalDateTime.now().minusSeconds(10).isAfter(lastUpdated)) {
+        if (LocalDateTime.now().minusSeconds(device.getResponseTime()).isAfter(lastUpdated)) {
             throw new DeviceErrorException("Device job last updated at: " + lastUpdated.toString().replace("T", " - ")
                     + ". Device may be disconnected!");
         }

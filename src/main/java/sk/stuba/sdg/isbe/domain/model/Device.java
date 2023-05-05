@@ -27,7 +27,9 @@ public class Device {
     private String initApiKey;
     private boolean deactivated;
 
-    public Device() {}
+    public Device() {
+        this.responseTime = 10L;
+    }
 
     public Device(String name, String mac, DeviceTypeEnum type) {
         this.name = name;
