@@ -85,7 +85,7 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Override
     public Long initExpireTime(String deviceId) {
-        Device device = deviceRepository.findDeviceByUid(deviceId);
+        Device device = deviceRepository.getDeviceByUidAndDeactivated(deviceId, false);
         if (device == null) {
             throw new EntityExistsException("Device with id: '" + deviceId + "' was not found!");
         }
@@ -99,8 +99,7 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Override
     public List<Device> getDevices() {
-
-        return deviceRepository.findAll();
+        return deviceRepository.getDevicesByDeactivated(false);
     }
 
     @Override
