@@ -47,9 +47,6 @@ public class JobServiceImpl implements JobService {
         if (recipe.isDeactivated()) {
             throw new InvalidEntityException("Recipe is deactivated, can't create a job from it!");
         }
-        if (recipe.isSubRecipe()) {
-            throw new InvalidEntityException("Recipe is only a sub-recipe, can't create a job from it!");
-        }
 
         Job job = new Job(recipe.getName(), getCommandsFromRecipes(recipe));
         return runJob(job, deviceId, repetitions);
