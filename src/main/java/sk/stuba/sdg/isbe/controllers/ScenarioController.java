@@ -2,6 +2,7 @@ package sk.stuba.sdg.isbe.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import sk.stuba.sdg.isbe.domain.model.Scenario;
 import sk.stuba.sdg.isbe.services.ScenarioService;
@@ -12,11 +13,8 @@ import java.util.List;
 @RequestMapping("api/scenarios")
 public class ScenarioController {
 
-    private final ScenarioService scenarioService;
-
-    public ScenarioController(ScenarioService scenarioService) {
-        this.scenarioService = scenarioService;
-    }
+    @Autowired
+    ScenarioService scenarioService;
 
     @GetMapping("/all")
     @Operation(summary = "Get all Scenarios")
@@ -36,19 +34,19 @@ public class ScenarioController {
         return this.scenarioService.createScenario(scenario);
     }
 
-    @PostMapping(value = "/getScenarioById/{scenarioId}")
+    @GetMapping(value = "/getScenarioById/{scenarioId}")
     @Operation(summary = "Get Scenario by id")
     public Scenario getScenarioById(@PathVariable("scenarioId") String scenarioId) {
         return this.scenarioService.getScenarioById(scenarioId);
     }
 
-    @PostMapping(value = "/getScenarioByDeviceIdAndTag/{deviceId}/{tag}")
+    @GetMapping(value = "/getScenarioByDeviceIdAndTag/{deviceId}/{tag}")
     @Operation(summary = "Get Scenario by DeviceId and Tag (Tag in DataPointTag)")
     public List<Scenario> getScenarioByDeviceAndTag(@PathVariable("deviceId") String deviceId, @PathVariable("tag") String tag) {
         return this.scenarioService.getScenarioByDeviceAndTag(deviceId, tag);
     }
 
-    @PostMapping(value = "/getScenarioByDeviceId/{deviceId}")
+    @GetMapping(value = "/getScenarioByDeviceId/{deviceId}")
     @Operation(summary = "Get Scenario by associated Device id")
     public List<Scenario> getScenarioByDevice(@PathVariable("deviceId") String id) {
         return this.scenarioService.getScenariosAssociatedWithDevice(id);
@@ -78,7 +76,7 @@ public class ScenarioController {
         return this.scenarioService.getScenariosWithMessage();
     }
 
-    @PostMapping(value = "/resolveScenario/{scenarioId}/{scenarioLevel}")
+    @PutMapping(value = "/resolveScenario/{scenarioId}/{scenarioLevel}")
     @Operation(summary = "Resolve certain Scenario.")
     public Scenario resolveScenario(@PathVariable("scenarioId") String scenarioId, @PathVariable("scenarioLevel") String scenarioLevel) {
         return this.scenarioService.resolveScenario(scenarioId, scenarioLevel);
@@ -90,25 +88,25 @@ public class ScenarioController {
         this.scenarioService.storeScenarioJobTriggers();
     }
 
-    @PostMapping(value = "/setScenarioActiveAtHour/{scenarioId}/{activeHours}")
+    @PutMapping(value = "/setScenarioActiveAtHour/{scenarioId}/{activeHours}")
     @Operation(summary = "Set active hours (hours when Scenario is evaluating) for Scenario.")
     public void setScenarioActiveAtHour(@PathVariable("scenarioId") String scenarioId, @PathVariable("activeHours") List<Integer> activeHours) {
         this.scenarioService.setScenarioActiveAtHour(scenarioId, activeHours);
     }
 
-    @PostMapping(value = "/setScenarioActiveAtDay/{scenarioId}/{activeDays}")
+    @PutMapping(value = "/setScenarioActiveAtDay/{scenarioId}/{activeDays}")
     @Operation(summary = "Set active days (days when Scenario is evaluating) for Scenario.")
     public void setScenarioActiveAtDay(@PathVariable("scenarioId") String scenarioId, @PathVariable("activeDays") List<Integer> activeDays) {
         this.scenarioService.setScenarioActiveAtDay(scenarioId, activeDays);
     }
 
-    @GetMapping(value = "/removeScenarioActiveAtHour/{scenarioId}")
+    @PutMapping(value = "/removeScenarioActiveAtHour/{scenarioId}")
     @Operation(summary = "Remove active hours (hours when Scenario is evaluating) for Scenario.")
     public void removeScenarioActiveAtHour(@PathVariable("scenarioId") String scenarioId) {
         this.scenarioService.removeScenarioActiveAtHour(scenarioId);
     }
 
-    @GetMapping(value = "/removeScenarioActiveAtDay/{scenarioId}")
+    @PutMapping(value = "/removeScenarioActiveAtDay/{scenarioId}")
     @Operation(summary = "Remove active days (days when Scenario is evaluating) for Scenario.")
     public void removeScenarioActiveAtDay(@PathVariable("scenarioId") String scenarioId) {
         this.scenarioService.removeScenarioActiveAtDay(scenarioId);

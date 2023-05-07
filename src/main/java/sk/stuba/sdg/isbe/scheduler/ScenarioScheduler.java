@@ -48,7 +48,7 @@ public class ScenarioScheduler {
     @Scheduled(cron = "0 0 0 * * 1")
     @SchedulerLock(name = "scheduledTaskRemoveOldStoredScenarioData", lockAtMostFor = "20m", lockAtLeastFor = "1m")
     public void removeOldStoredScenarioData() {
-        storedResolvedScenarioService.removeOldStoredScenarioData();
+        this.storedResolvedScenarioService.removeOldStoredScenarioData();
     }
 
 }
