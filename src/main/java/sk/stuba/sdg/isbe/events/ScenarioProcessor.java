@@ -21,6 +21,7 @@ import sk.stuba.sdg.isbe.services.LastStoredDataService;
 import sk.stuba.sdg.isbe.services.ScenarioService;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -114,6 +115,9 @@ public class ScenarioProcessor {
                 }
             }
         }
+        Instant time2 = Instant.now();
+        long millisecondsBetween = ChronoUnit.MILLIS.between(event.getTime(), time2);
+        logger.debug("TIME DIFFERENCE:" + millisecondsBetween);
     }
 
     public Long calculateUntilTime(Long activatedAt, Long forTime, String timeUnit) {

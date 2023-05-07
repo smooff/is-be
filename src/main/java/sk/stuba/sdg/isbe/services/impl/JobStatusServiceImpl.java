@@ -16,8 +16,8 @@ import sk.stuba.sdg.isbe.services.JobService;
 import sk.stuba.sdg.isbe.services.JobStatusService;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -102,7 +102,8 @@ public class JobStatusServiceImpl implements JobStatusService {
                     storedDataRepository.save(storedData);
                     listStoredData.add(storedData);
                 }
-                DataStoredEvent dataStoredEvent = new DataStoredEvent(this, listStoredData, deviceId);
+                Instant time = Instant.now();
+                DataStoredEvent dataStoredEvent = new DataStoredEvent(this, listStoredData, deviceId, time);
                 eventPublisher.publishEvent(dataStoredEvent);
             }
         }
