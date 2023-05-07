@@ -2,26 +2,31 @@ package sk.stuba.sdg.isbe.events;
 
 import io.github.jamsesso.jsonlogic.JsonLogic;
 import io.github.jamsesso.jsonlogic.JsonLogicException;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import sk.stuba.sdg.isbe.domain.enums.JobStatusEnum;
 import sk.stuba.sdg.isbe.domain.model.Job;
+import sk.stuba.sdg.isbe.domain.model.LastStoredData;
 import sk.stuba.sdg.isbe.domain.model.Scenario;
 import sk.stuba.sdg.isbe.domain.model.StoredData;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidOperationException;
+import sk.stuba.sdg.isbe.repositories.LastStoredDataRepository;
 import sk.stuba.sdg.isbe.repositories.ScenarioRepository;
 import sk.stuba.sdg.isbe.repositories.StoredDataRepository;
 import sk.stuba.sdg.isbe.services.JobService;
+import sk.stuba.sdg.isbe.services.LastStoredDataService;
 import sk.stuba.sdg.isbe.services.ScenarioService;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Component
 public class ScenarioProcessor {
-
+    private static final Logger logger = Logger.getLogger(ScenarioProcessor.class);
     @Autowired
     ScenarioService scenarioService;
 
@@ -30,6 +35,12 @@ public class ScenarioProcessor {
 
     @Autowired
     StoredDataRepository storedDataRepository;
+
+    @Autowired
+    LastStoredDataService lastStoredDataService;
+
+    @Autowired
+    LastStoredDataRepository lastStoredDataRepository;
 
     @Autowired
     JobService jobService;
@@ -46,9 +57,12 @@ public class ScenarioProcessor {
         List<Scenario> scenarios = scenarioRepository.getScenarioByDevicesContainingAndDeactivated(event.getDeviceId(), false);
         if (scenarios != null) {
             for (StoredData storedData : event.getStoredData()) {
+                lastStoredDataService.updateLastStoredData(storedData.getTag(), storedData.getValue(), storedData.getDeviceId());
                 Map<String, Double> dataForExpression = new HashMap<>();
                 for (Scenario scenario : scenarios) {
                     // FILTERING
+                    //check, if scenario has all data needed for evaluation
+                    AtomicBoolean hasAllDataForEvaluation = new AtomicBoolean(true);
                     // check, if scenario is active only in some days
                     if (scenario.getActiveAtDay().isEmpty() || scenario.getActiveAtDay().contains(actualDayOfWeek)) {
                         // check, if scenario is active only at some hours
@@ -64,32 +78,33 @@ public class ScenarioProcessor {
                                             if (k.equals(event.getDeviceId()) && tag.equals(storedData.getTag())) {
                                                 // we can skip one DB call, because we already put actual storedData to dataForExpression
                                             } else {
-                                                StoredData lastStoredData = storedDataRepository.findFirstStoredDataByDeviceIdAndTagOrderByMeasureAddDesc(k, tag);
-                                                if (lastStoredData != null) {
-                                                    dataForExpression.put(lastStoredData.getDeviceId() + lastStoredData.getTag(), lastStoredData.getValue());
+                                                LastStoredData lastStoredData1 = lastStoredDataRepository.findByDeviceIdAndTag(k, tag);
+                                                if (lastStoredData1 != null) {
+                                                    dataForExpression.put(lastStoredData1.getDeviceId() + lastStoredData1.getTag(), lastStoredData1.getValue());
                                                 } else {
-                                                    throw new InvalidOperationException("Scenario with id: " + scenario.getId() + " can not be evaluated, because of missing Stored Data for tag: " + tag);
+                                                    hasAllDataForEvaluation.set(false);
                                                 }
                                             }
 
                                         }
                                     });
-                                    System.out.println("triggered");
-                                    // desatinne cisla musia byt pisane s . -> 4.1
-                                    String result = (String) jsonLogic.apply(scenario.getRules(), dataForExpression);
-                                    if (scenario.getMutedUntil() != null) {
-                                        scenario.setMutedUntil(null);
-                                    }
-                                    if (result.contains(EventConstants.NO_ACTION)) {
-                                        System.out.println("no action");
-                                    } else if (result.contains(EventConstants.FOR_TIME)) {
-                                        handleScenarioForTime(scenario, result);
-                                    } else if (result.contains(EventConstants.NOTIFICATION_MESSAGE)) {
-                                        handleNotificationMessage(scenario, result);
-                                    } else if (result.contains(EventConstants.JOB)) {
-                                        handleScenarioJob(scenario, result);
-                                    } else {
-                                        throw new InvalidOperationException("Result: " + result + " not recognized.");
+
+                                    if (hasAllDataForEvaluation.get()) {
+                                        // desatinne cisla musia byt pisane s . -> 4.1
+                                        String result = (String) jsonLogic.apply(scenario.getRules(), dataForExpression);
+                                        if (scenario.getMutedUntil() != null) {
+                                            scenario.setMutedUntil(null);
+                                        }
+                                        if (result.contains(EventConstants.NO_ACTION)) {
+                                        } else if (result.contains(EventConstants.FOR_TIME)) {
+                                            handleScenarioForTime(scenario, result);
+                                        } else if (result.contains(EventConstants.NOTIFICATION_MESSAGE)) {
+                                            handleNotificationMessage(scenario, result);
+                                        } else if (result.contains(EventConstants.JOB)) {
+                                            handleScenarioJob(scenario, result);
+                                        } else {
+                                            throw new InvalidOperationException("Result: " + result + " not recognized.");
+                                        }
                                     }
                                     dataForExpression.clear();
                                 }
@@ -184,7 +199,7 @@ public class ScenarioProcessor {
             }
         } else if (forTimeSubType.equals(EventConstants.FOR_TIME_RESET)) {
             String scenarioReturnStatement = result.split(":")[2] + ":" + result.split(":")[3];
-            if(!scenario.getForTimeCountingActivatedAt().isEmpty()){
+            if (!scenario.getForTimeCountingActivatedAt().isEmpty()) {
                 scenario.getForTimeCountingActivatedAt().remove(scenarioReturnStatement);
             }
             scenarioService.editScenario(scenario);
