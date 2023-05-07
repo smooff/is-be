@@ -17,48 +17,48 @@ public class ScenarioController {
     ScenarioService scenarioService;
 
     @GetMapping("/all")
-    @Operation(summary = "Get all Scenarios")
+    @Operation(summary = "Get all Scenarios.")
     public List<Scenario> getScenarios() {
         return this.scenarioService.getScenarios();
     }
 
     @GetMapping("/active")
-    @Operation(summary = "Get only active Scenarios")
+    @Operation(summary = "Get only active Scenarios.")
     public List<Scenario> getActiveScenarios() {
         return this.scenarioService.getActiveScenarios();
     }
 
     @PostMapping(value = "/create")
-    @Operation(summary = "Create new Scenario")
+    @Operation(summary = "Create new Scenario.")
     public Scenario createScenario(@Valid @RequestBody Scenario scenario) {
         return this.scenarioService.createScenario(scenario);
     }
 
     @GetMapping(value = "/getScenarioById/{scenarioId}")
-    @Operation(summary = "Get Scenario by id")
+    @Operation(summary = "Get Scenario by id.")
     public Scenario getScenarioById(@PathVariable("scenarioId") String scenarioId) {
         return this.scenarioService.getScenarioById(scenarioId);
     }
 
     @GetMapping(value = "/getScenarioByDeviceIdAndTag/{deviceId}/{tag}")
-    @Operation(summary = "Get Scenario by DeviceId and Tag (Tag in DataPointTag)")
+    @Operation(summary = "Get Scenario by DeviceId and Tag (Tag in DataPointTag).")
     public List<Scenario> getScenarioByDeviceAndTag(@PathVariable("deviceId") String deviceId, @PathVariable("tag") String tag) {
         return this.scenarioService.getScenarioByDeviceAndTag(deviceId, tag);
     }
 
     @GetMapping(value = "/getScenarioByDeviceId/{deviceId}")
-    @Operation(summary = "Get Scenario by associated Device id")
+    @Operation(summary = "Get Scenario by associated Device id.")
     public List<Scenario> getScenarioByDevice(@PathVariable("deviceId") String id) {
         return this.scenarioService.getScenariosAssociatedWithDevice(id);
     }
 
     @PutMapping(value = "/edit")
-    @Operation(summary = "Edit existing Scenario")
+    @Operation(summary = "Edit existing Scenario.")
     public Scenario editScenario(@Valid @RequestBody Scenario scenario) {
         return this.scenarioService.editScenario(scenario);
     }
 
-    @Operation(summary = "Delete Scenario by uid")
+    @Operation(summary = "Delete Scenario by uid.")
     @DeleteMapping("/delete/{scenarioId}")
     public Scenario deleteScenario(@PathVariable("scenarioId") String scenarioId) {
         return this.scenarioService.deleteScenario(scenarioId);
