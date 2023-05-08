@@ -1,6 +1,11 @@
 package sk.stuba.sdg.isbe.services.impl;
 
+import com.mongodb.client.result.UpdateResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import sk.stuba.sdg.isbe.domain.enums.ScenarioActionType;
 import sk.stuba.sdg.isbe.domain.enums.ScenarioLevelEnum;
@@ -29,6 +34,9 @@ public class ScenarioServiceImpl implements ScenarioService {
     @Autowired
     private StoredResolvedScenarioRepository storedResolvedScenarioRepository;
 
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
     @Override
     public Scenario createScenario(Scenario scenario) {
 
@@ -39,12 +47,11 @@ public class ScenarioServiceImpl implements ScenarioService {
         }
 
         validateScenario(scenario);
-
         scenario.setCreatedAt(Instant.now().toEpochMilli());
         scenario.setMutedUntil(null);
         scenario.setForTimeCountingActivatedAt(null);
 
-        return scenarioRepository.save(scenario);
+        return upsertScenario(scenario);
     }
 
     @Override
@@ -108,6 +115,8 @@ public class ScenarioServiceImpl implements ScenarioService {
         existingScenario.getDevices().clear();
         existingScenario.getDevices().addAll(scenario.getDevices());
         existingScenario.setDeactivated(scenario.getDeactivated());
+        existingScenario.getDeviceAndTag().clear();
+        existingScenario.getDeviceAndTag().putAll(scenario.getDeviceAndTag());
         existingScenario.setRules(scenario.getRules());
         existingScenario.setAlreadyTriggered(scenario.getAlreadyTriggered());
         existingScenario.setMutedUntil(scenario.getMutedUntil());
@@ -124,7 +133,7 @@ public class ScenarioServiceImpl implements ScenarioService {
         existingScenario.getActiveAtHour().clear();
         existingScenario.getActiveAtHour().addAll(scenario.getActiveAtHour());
 
-        return scenarioRepository.save(existingScenario);
+        return upsertScenario(existingScenario);
     }
 
     @Override
@@ -134,7 +143,7 @@ public class ScenarioServiceImpl implements ScenarioService {
 
         Scenario scenarioToDelete = getScenarioById(scenarioId);
         scenarioToDelete.setDeactivated(true);
-        return scenarioRepository.save(scenarioToDelete);
+        return upsertScenario(scenarioToDelete);
     }
 
     @Override
@@ -150,7 +159,7 @@ public class ScenarioServiceImpl implements ScenarioService {
         long muteTimeConverted = minutes * 60 * 1000;
         scenarioToMute.setMutedUntil(Instant.now().plusMillis(muteTimeConverted).toEpochMilli());
 
-        return scenarioRepository.save(scenarioToMute);
+        return upsertScenario(scenarioToMute);
     }
 
     @Override
@@ -183,7 +192,7 @@ public class ScenarioServiceImpl implements ScenarioService {
         scenarioToResolve.getMessageAndTriggerTime().clear();
         scenarioToResolve.getMessageMultiplicityCounter().clear();
 
-        scenarioRepository.save(scenarioToResolve);
+        upsertScenario(scenarioToResolve);
 
         storedResolvedScenarioRepository.save(storedResolvedScenario);
 
@@ -212,7 +221,7 @@ public class ScenarioServiceImpl implements ScenarioService {
 
         if (!storedResolvedScenarioList.isEmpty()) {
             storedResolvedScenarioRepository.saveAll(storedResolvedScenarioList);
-            scenarioRepository.saveAll(scenarios);
+            saveAll(scenarios);
         }
     }
 
@@ -225,7 +234,7 @@ public class ScenarioServiceImpl implements ScenarioService {
         scenario.getActiveAtHour().clear();
         scenario.getActiveAtHour().addAll(hours);
 
-        return scenarioRepository.save(scenario);
+        return upsertScenario(scenario);
     }
 
     @Override
@@ -237,7 +246,7 @@ public class ScenarioServiceImpl implements ScenarioService {
         scenario.getActiveAtDay().clear();
         scenario.getActiveAtDay().addAll(days);
 
-        return scenarioRepository.save(scenario);
+        return upsertScenario(scenario);
     }
 
     @Override
@@ -248,7 +257,7 @@ public class ScenarioServiceImpl implements ScenarioService {
 
         scenario.getActiveAtHour().clear();
 
-        return scenarioRepository.save(scenario);
+        return upsertScenario(scenario);
     }
 
     @Override
@@ -259,7 +268,7 @@ public class ScenarioServiceImpl implements ScenarioService {
 
         scenario.getActiveAtDay().clear();
 
-        return scenarioRepository.save(scenario);
+        return upsertScenario(scenario);
     }
 
     @Override
@@ -282,5 +291,50 @@ public class ScenarioServiceImpl implements ScenarioService {
         if (scenarioId == null || scenarioId.isEmpty()) {
             throw new InvalidEntityException("Scenario id is not valid.");
         }
+    }
+
+    public Scenario upsertScenario(Scenario scenario) {
+        Query query = new Query(Criteria.where("id").is(scenario.getId()));
+        Update update = new Update()
+                .set("rules", scenario.getRules())
+                .set("name", scenario.getName())
+                .set("devices", scenario.getDevices())
+                .set("deactivated", scenario.getDeactivated())
+                .set("isAlreadyTriggered", scenario.getAlreadyTriggered())
+                .set("mutedUntil", scenario.getMutedUntil())
+                .set("createdAt", scenario.getCreatedAt())
+                .set("forTimeCountingActivatedAt", scenario.getForTimeCountingActivatedAt())
+                .set("messageAndTriggerTime", scenario.getMessageAndTriggerTime())
+                .set("messageMultiplicityCounter", scenario.getMessageMultiplicityCounter())
+                .set("deviceAndTag", scenario.getDeviceAndTag())
+                .set("jobAndTriggerTime", scenario.getJobAndTriggerTime())
+                .set("activeAtDay", scenario.getActiveAtDay())
+                .set("activeAtHour", scenario.getActiveAtHour());
+
+        UpdateResult updateResult = mongoTemplate.updateFirst(query, update, Scenario.class);
+
+        if (updateResult.getMatchedCount() == 0) {
+            // if no matching document found, insert a new document
+            mongoTemplate.insert(scenario);
+        } else {
+            // if a matching document is found, update the scenario object with the latest data
+            scenario = mongoTemplate.findOne(query, Scenario.class);
+        }
+
+        return scenario;
+    }
+
+    /**
+     * Custom implementation for saveAll Scenarios - with upsert - for sharding.
+     */
+    public List<Scenario> saveAll(List<Scenario> scenarios) {
+        List<Scenario> savedScenarios = new ArrayList<>();
+
+        for (Scenario scenario : scenarios) {
+            Scenario savedScenario = upsertScenario(scenario);
+            savedScenarios.add(savedScenario);
+        }
+
+        return savedScenarios;
     }
 }

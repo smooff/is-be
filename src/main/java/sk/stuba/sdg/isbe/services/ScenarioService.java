@@ -8,6 +8,8 @@ public interface ScenarioService {
 
     Scenario createScenario(Scenario scenario);
 
+    Scenario upsertScenario(Scenario scenario);
+
     void validateScenario(Scenario scenario);
 
     void validateScenarioId(String scenarioId);
