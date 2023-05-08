@@ -10,4 +10,6 @@ public interface JobStatusService {
     JobStatus updateJobStatus(String jobStatusId, JobStatus changeJobStatus, String deviceId, int currstep);
 
     void validateJobStatus(JobStatus jobStatus);
+
+    JobStatus upsertJobStatus(JobStatus jobStatus);
 }

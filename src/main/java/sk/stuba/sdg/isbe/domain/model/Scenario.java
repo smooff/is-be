@@ -11,6 +11,10 @@ import java.util.Map;
 @Document
 public class Scenario {
 
+    /**
+     *  WARNING: when changing field names, do NOT forget to change field names also in method upsertScenario()
+     */
+
     public Scenario() {
     }
 

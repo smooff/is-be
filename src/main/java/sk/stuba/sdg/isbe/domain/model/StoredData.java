@@ -3,6 +3,11 @@ package sk.stuba.sdg.isbe.domain.model;
 import org.springframework.data.annotation.Id;
 
 public class StoredData {
+
+    /**
+     *  WARNING: when changing field names, do NOT forget to change field names also in method upsertStoredData()
+     */
+
     @Id
     private String uid;
     private String dataPointTagId;

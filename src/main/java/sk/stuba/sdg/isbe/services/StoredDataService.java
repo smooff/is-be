@@ -14,4 +14,6 @@ public interface StoredDataService {
     StoredData updateStoredData(String dataPointSaveId, StoredData changeDataSaveTag);
 
     StoredData deleteStoredData(String dataPointSaveId);
+
+    StoredData upsertStoredData(StoredData storedData);
 }

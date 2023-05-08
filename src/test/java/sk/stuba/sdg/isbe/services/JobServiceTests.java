@@ -51,6 +51,9 @@ public class JobServiceTests {
     @Autowired
     private JobStatusRepository jobStatusRepository;
 
+    @Autowired
+    private JobStatusService jobStatusService;
+
     private static final String NONE = "NONE";
 
     @Test
@@ -141,7 +144,7 @@ public class JobServiceTests {
 
         jobService.runJob(job, device.getUid(), 0);
         job.getStatus().setCurrentCycle(1);
-        jobStatusRepository.save(job.getStatus());
+        jobStatusService.upsertJobStatus(job.getStatus());
         Job jobDb = jobService.skipCycle(job.getUid());
         assertNotNull(jobDb);
         assertEquals(2, jobDb.getStatus().getCurrentCycle());
@@ -163,7 +166,7 @@ public class JobServiceTests {
         jobService.runJob(job, device.getUid(), 0);
         job.getStatus().setTotalSteps(3);
         job.getStatus().setCurrentStep(1);
-        jobStatusRepository.save(job.getStatus());
+        jobStatusService.upsertJobStatus(job.getStatus());
         Job jobDb = jobService.skipStep(job.getUid());
         assertNotNull(jobDb);
         assertEquals(2, jobDb.getStatus().getCurrentStep());

@@ -1,7 +1,12 @@
 package sk.stuba.sdg.isbe.services.impl;
 
+import com.mongodb.client.result.UpdateResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import sk.stuba.sdg.isbe.domain.enums.JobStatusEnum;
 import sk.stuba.sdg.isbe.domain.model.*;
@@ -14,6 +19,7 @@ import sk.stuba.sdg.isbe.repositories.StoredDataRepository;
 import sk.stuba.sdg.isbe.services.DeviceService;
 import sk.stuba.sdg.isbe.services.JobService;
 import sk.stuba.sdg.isbe.services.JobStatusService;
+import sk.stuba.sdg.isbe.services.StoredDataService;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -44,11 +50,17 @@ public class JobStatusServiceImpl implements JobStatusService {
     @Autowired
     private JobService jobService;
 
+    @Autowired
+    StoredDataService storedDataService;
+
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
     @Override
     public JobStatus createJobStatus(JobStatus jobStatus){
         jobStatus.setCreatedAt(Instant.now().toEpochMilli());
         jobStatus.setLastUpdated(LocalDateTime.now());
-        return jobStatusRepository.save(jobStatus);
+        return upsertJobStatus(jobStatus);
     }
 
     @Override
@@ -103,7 +115,7 @@ public class JobStatusServiceImpl implements JobStatusService {
                     storedData.setValue(dataPoint.getValue());
                     storedData.setMeasureAdd(Instant.now().toEpochMilli());
                     storedData.setDeviceId(deviceId);
-                    storedDataRepository.save(storedData);
+                    storedDataService.upsertStoredData(storedData);
                     listStoredData.add(storedData);
                 }
 //                Instant time = Instant.now();
@@ -114,7 +126,7 @@ public class JobStatusServiceImpl implements JobStatusService {
         }
 
         jobStatus.setLastUpdated(LocalDateTime.now());
-        return jobStatusRepository.save(jobStatus);
+        return upsertJobStatus(jobStatus);
     }
 
     private void changeJobsCurrentStatus(String jobId, JobStatusEnum jobStatus) {
@@ -126,5 +138,32 @@ public class JobStatusServiceImpl implements JobStatusService {
     @Override
     public void validateJobStatus(JobStatus jobStatus) {
 
+    }
+
+    @Override
+    public JobStatus upsertJobStatus(JobStatus jobStatus) {
+        Query query = new Query(Criteria.where("uid").is(jobStatus.getUid()));
+        Update update = new Update()
+                .set("jobId", jobStatus.getJobId())
+                .set("retCode", jobStatus.getRetCode())
+                .set("code", jobStatus.getCode())
+                .set("currentStep", jobStatus.getCurrentStep())
+                .set("totalSteps", jobStatus.getTotalSteps())
+                .set("currentCycle", jobStatus.getCurrentCycle())
+                .set("data", jobStatus.getData())
+                .set("createdAt", jobStatus.getCreatedAt())
+                .set("lastUpdated", jobStatus.getLastUpdated());
+
+        UpdateResult updateResult = mongoTemplate.updateFirst(query, update, JobStatus.class);
+
+        if (updateResult.getMatchedCount() == 0) {
+            // if no matching document found, insert a new document
+            mongoTemplate.insert(jobStatus);
+        } else {
+            // if a matching document is found, update the scenario object with the latest data
+            jobStatus = mongoTemplate.findOne(query, JobStatus.class);
+        }
+
+        return jobStatus;
     }
 }

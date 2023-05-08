@@ -152,7 +152,7 @@ public class JobServiceImpl implements JobService {
             throw new InvalidOperationException("Last cycle is under process, can't skip current one!");
         }
         job.getStatus().setCurrentCycle(currentCycle + 1);
-        jobStatusRepository.save(job.getStatus());
+        jobStatusService.upsertJobStatus(job.getStatus());
 
         return job;
     }
@@ -167,7 +167,7 @@ public class JobServiceImpl implements JobService {
             throw new InvalidOperationException("Last step is under process, can't skip current one!");
         }
         job.getStatus().setCurrentStep(currentStep + 1);
-        jobStatusRepository.save(job.getStatus());
+        jobStatusService.upsertJobStatus(job.getStatus());
 
         return job;
     }

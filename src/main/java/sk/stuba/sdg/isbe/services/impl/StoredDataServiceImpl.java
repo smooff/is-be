@@ -1,6 +1,11 @@
 package sk.stuba.sdg.isbe.services.impl;
 
+import com.mongodb.client.result.UpdateResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import sk.stuba.sdg.isbe.domain.model.StoredData;
 import sk.stuba.sdg.isbe.handlers.exceptions.InvalidEntityException;
@@ -16,6 +21,9 @@ public class StoredDataServiceImpl implements StoredDataService {
     @Autowired
     private StoredDataRepository storedDataRepository;
 
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
     @Override
     public StoredData createStoredData(StoredData storedData){
         if (!storedData.isValid()) {
@@ -23,7 +31,7 @@ public class StoredDataServiceImpl implements StoredDataService {
         }
 
         storedData.setMeasureAdd(Instant.now().toEpochMilli());
-        return storedDataRepository.save(storedData);
+        return upsertStoredData(storedData);
     }
 
     @Override
@@ -60,14 +68,38 @@ public class StoredDataServiceImpl implements StoredDataService {
             storedData.setValue(changeStoredData.getValue());
         }
 
-        return storedDataRepository.save(storedData);
+        return upsertStoredData(storedData);
     }
 
     @Override
     public StoredData deleteStoredData(String storedDataId) {
         StoredData storedData = getStoredDataById(storedDataId);
         storedData.setDeactivated(true);
-        storedDataRepository.save(storedData);
+        upsertStoredData(storedData);
+        return storedData;
+    }
+
+    @Override
+    public StoredData upsertStoredData(StoredData storedData) {
+        Query query = new Query(Criteria.where("uid").is(storedData.getUid()));
+        Update update = new Update()
+                .set("dataPointTagId", storedData.getDataPointTagId())
+                .set("value", storedData.getValue())
+                .set("measureAdd", storedData.getMeasureAdd())
+                .set("deactivated", storedData.isDeactivated())
+                .set("deviceId", storedData.getDeviceId())
+                .set("tag", storedData.getTag());
+
+        UpdateResult updateResult = mongoTemplate.updateFirst(query, update, StoredData.class);
+
+        if (updateResult.getMatchedCount() == 0) {
+            // if no matching document found, insert a new document
+            mongoTemplate.insert(storedData);
+        } else {
+            // if a matching document is found, update the scenario object with the latest data
+            storedData = mongoTemplate.findOne(query, StoredData.class);
+        }
+
         return storedData;
     }
 }
