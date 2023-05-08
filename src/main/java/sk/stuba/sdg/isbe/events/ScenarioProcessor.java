@@ -167,7 +167,7 @@ public class ScenarioProcessor {
 
         Job job = jobService.getJobById(jobId);
         if (job.getCurrentStatus().equals(JobStatusEnum.JOB_DONE) || job.getCurrentStatus().equals(JobStatusEnum.JOB_ERR)) {
-            jobService.resetJob(jobId);
+//            jobService.resetJob(jobId);
             //trigger time (multiple values) for certain job
             if (scenario.getJobAndTriggerTime().containsKey(jobId)) {
                 scenario.getJobAndTriggerTime().get(jobId).add(Instant.now().toEpochMilli());
