@@ -122,7 +122,7 @@ public class ScenarioProcessor {
         String time2 = now.format(formatter);
 //        Instant time2 = Instant.now();
 //        long millisecondsBetween = ChronoUnit.MILLIS.between(event.getTime(), time2);
-        logger.debug(event.getDeviceId() + " = " + "! "+ event.getCurrStep()+ " ! " + "RECEIVE TIME:" + event.getTime() +", FINISH TIME:"+time2);
+        logger.debug(event.getDeviceId() + " = " + "! " + event.getCurrStep() + " ! " + "RECEIVE TIME:" + event.getTime() + ", FINISH TIME:" + time2);
     }
 
     public Long calculateUntilTime(Long activatedAt, Long forTime, String timeUnit) {
@@ -166,20 +166,22 @@ public class ScenarioProcessor {
         String jobId = result.split(":")[1];
 
         Job job = jobService.getJobById(jobId);
-        if (job.getCurrentStatus().equals(JobStatusEnum.JOB_DONE) || job.getCurrentStatus().equals(JobStatusEnum.JOB_ERR)) {
+        if (job != null) {
+            if (job.getCurrentStatus().equals(JobStatusEnum.JOB_DONE) || job.getCurrentStatus().equals(JobStatusEnum.JOB_ERR)) {
 //            jobService.resetJob(jobId);
-            //trigger time (multiple values) for certain job
-            if (scenario.getJobAndTriggerTime().containsKey(jobId)) {
-                scenario.getJobAndTriggerTime().get(jobId).add(Instant.now().toEpochMilli());
-            } else {
-                List<Long> triggeredAt = new ArrayList<>();
-                triggeredAt.add(Instant.now().toEpochMilli());
-                scenario.getJobAndTriggerTime().put(jobId, triggeredAt);
+                //trigger time (multiple values) for certain job
+                if (scenario.getJobAndTriggerTime().containsKey(jobId)) {
+                    scenario.getJobAndTriggerTime().get(jobId).add(Instant.now().toEpochMilli());
+                } else {
+                    List<Long> triggeredAt = new ArrayList<>();
+                    triggeredAt.add(Instant.now().toEpochMilli());
+                    scenario.getJobAndTriggerTime().put(jobId, triggeredAt);
+                }
+                if (!scenario.getAlreadyTriggered()) {
+                    scenario.setAlreadyTriggered(true);
+                }
+                scenarioService.editScenario(scenario);
             }
-            if (!scenario.getAlreadyTriggered()) {
-                scenario.setAlreadyTriggered(true);
-            }
-            scenarioService.editScenario(scenario);
         }
     }
 
