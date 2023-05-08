@@ -2,6 +2,7 @@ package sk.stuba.sdg.isbe.domain.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Sharded;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 @Document
+@Sharded(shardKey = { "devices" })
 public class Scenario {
 
     public Scenario() {
