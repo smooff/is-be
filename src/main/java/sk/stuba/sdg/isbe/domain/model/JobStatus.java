@@ -9,6 +9,11 @@ import java.util.List;
 
 @Document
 public class JobStatus {
+
+    /**
+     *  WARNING: when changing field names, do NOT forget to change field names also in method upsertJobStatus()
+     */
+
     @Id
     private String uid;
     private String jobId;
