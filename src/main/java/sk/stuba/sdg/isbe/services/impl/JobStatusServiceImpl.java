@@ -17,6 +17,7 @@ import sk.stuba.sdg.isbe.services.JobStatusService;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -60,7 +61,10 @@ public class JobStatusServiceImpl implements JobStatusService {
     }
 
     @Override
-    public JobStatus updateJobStatus(String jobStatusId, JobStatus changeJobStatus, String deviceId) {
+    public JobStatus updateJobStatus(String jobStatusId, JobStatus changeJobStatus, String deviceId, int currStep) {
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS");
+        String time = now.format(formatter);
         JobStatus jobStatus = getJobStatus(jobStatusId);
 
         if (changeJobStatus == null) {
@@ -102,8 +106,9 @@ public class JobStatusServiceImpl implements JobStatusService {
                     storedDataRepository.save(storedData);
                     listStoredData.add(storedData);
                 }
-                Instant time = Instant.now();
-                DataStoredEvent dataStoredEvent = new DataStoredEvent(this, listStoredData, deviceId, time);
+//                Instant time = Instant.now();
+
+                DataStoredEvent dataStoredEvent = new DataStoredEvent(this, listStoredData, deviceId, time, currStep);
                 eventPublisher.publishEvent(dataStoredEvent);
             }
         }

@@ -79,11 +79,11 @@ public class DeviceController {
     }
 
     @Operation(summary = "Update JobStatus by device uid")
-    @PostMapping("/updateJobStatus/{deviceId}/{jobStatusId}")
-    public JobStatus updateJobStatus(@PathVariable String deviceId, @PathVariable String jobStatusId, @Valid @RequestBody JobStatus changeJobStatus) {
+    @PostMapping("/updateJobStatus/{deviceId}/{jobStatusId}/{currStep}")
+    public JobStatus updateJobStatus(@PathVariable String deviceId, @PathVariable String jobStatusId, @Valid @RequestBody JobStatus changeJobStatus, @PathVariable("currStep") int currStep) {
         deviceService.getDeviceById(deviceId);
 
-        return jobStatusService.updateJobStatus(jobStatusId, changeJobStatus, deviceId);
+        return jobStatusService.updateJobStatus(jobStatusId, changeJobStatus, deviceId, currStep);
     }
 
     @Operation(summary = "Get status of the device")

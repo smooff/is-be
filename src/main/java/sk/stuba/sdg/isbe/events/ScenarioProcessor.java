@@ -21,6 +21,8 @@ import sk.stuba.sdg.isbe.services.LastStoredDataService;
 import sk.stuba.sdg.isbe.services.ScenarioService;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -104,7 +106,7 @@ public class ScenarioProcessor {
                                         } else if (result.contains(EventConstants.JOB)) {
                                             handleScenarioJob(scenario, result);
                                         } else {
-                                            throw new InvalidOperationException("Result: " + result + " not recognized.");
+//                                            throw new InvalidOperationException("Result: " + result + " not recognized.");
                                         }
                                     }
                                     dataForExpression.clear();
@@ -115,9 +117,12 @@ public class ScenarioProcessor {
                 }
             }
         }
-        Instant time2 = Instant.now();
-        long millisecondsBetween = ChronoUnit.MILLIS.between(event.getTime(), time2);
-        logger.debug("TIME DIFFERENCE:" + millisecondsBetween);
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS");
+        String time2 = now.format(formatter);
+//        Instant time2 = Instant.now();
+//        long millisecondsBetween = ChronoUnit.MILLIS.between(event.getTime(), time2);
+        logger.debug(event.getDeviceId() + " = " + "! "+ event.getCurrStep()+ " ! " + "RECEIVE TIME:" + event.getTime() +", FINISH TIME:"+time2);
     }
 
     public Long calculateUntilTime(Long activatedAt, Long forTime, String timeUnit) {
