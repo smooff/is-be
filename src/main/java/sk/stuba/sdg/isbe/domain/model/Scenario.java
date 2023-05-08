@@ -1,5 +1,6 @@
 package sk.stuba.sdg.isbe.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -18,11 +19,12 @@ public class Scenario {
     public Scenario() {
     }
 
-    public Scenario(String name, List<String> devices, Boolean deactivated, String rules) {
+    public Scenario(String name, List<String> devices, Boolean deactivated, String rules, Boolean isAlreadyTriggered) {
         this.name = name;
         this.devices = devices;
         this.deactivated = deactivated;
         this.rules = rules;
+        this.isAlreadyTriggered = isAlreadyTriggered;
     }
 
     @Id
@@ -51,6 +53,7 @@ public class Scenario {
     /**
      * Define if the Scenario was already triggered - sent to user. This reset if users interact with Scenario.
      */
+    @JsonProperty("isAlreadyTriggered")
     private Boolean isAlreadyTriggered;
 
     /**
