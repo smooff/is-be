@@ -74,6 +74,11 @@ public class Job {
      */
     private Long finishedAt;
 
+    /**
+     * Days on which the job should be run.
+     */
+    private List<Integer> scheduledDays;
+
     public Job() {}
 
     public Job(String name, List<Command> commands) {
@@ -184,5 +189,13 @@ public class Job {
 
     public void setFinishedAt(Long finishedAt) {
         this.finishedAt = finishedAt;
+    }
+
+    public List<Integer> getScheduledDays() {
+        return scheduledDays;
+    }
+
+    public void setScheduledDays(List<Integer> scheduledDays) {
+        this.scheduledDays = scheduledDays;
     }
 }

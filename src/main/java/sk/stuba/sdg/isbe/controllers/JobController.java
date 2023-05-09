@@ -2,6 +2,7 @@ package sk.stuba.sdg.isbe.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import sk.stuba.sdg.isbe.domain.model.Job;
@@ -23,8 +24,8 @@ public class JobController {
     }
 
     @Operation(summary = "Run a job on given device with n repetitions")
-    @PostMapping("runJob/{job}/{deviceId}/{repetitions}")
-    public Job runJob(@PathVariable Job job, @PathVariable String deviceId, @PathVariable int repetitions) {
+    @PostMapping("runJob/{deviceId}/{repetitions}")
+    public Job runJob(@Valid @RequestBody Job job, @PathVariable String deviceId, @PathVariable int repetitions) {
         return jobService.runJob(job, deviceId, repetitions);
     }
 
