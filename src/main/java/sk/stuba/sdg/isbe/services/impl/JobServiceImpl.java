@@ -322,5 +322,14 @@ public class JobServiceImpl implements JobService {
         if (job.getNoOfReps() == null || job.getNoOfReps() < 0) {
             throw new InvalidEntityException("Repetitions must be equal to or greater than 0!");
         }
+
+        job.setScheduledDays(job.getScheduledDays().stream().filter(Objects::nonNull).toList());
+        for(Integer day : job.getScheduledDays()) {
+            if (day < 1 || day > 7) {
+                int dayIndex = job.getScheduledDays().indexOf(day);
+                throw new InvalidEntityException("Scheduled day on index '" + dayIndex + "' is" +
+                        " not valid. Day("+ dayIndex +") = " + day);
+            }
+        }
     }
 }
