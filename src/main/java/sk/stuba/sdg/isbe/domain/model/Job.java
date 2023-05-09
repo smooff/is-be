@@ -79,6 +79,16 @@ public class Job {
      */
     private List<Integer> scheduledDays;
 
+    /**
+     * Hour in which the job should be run.
+     */
+    private Integer scheduledHour;
+
+    /**
+     * Minute in which the job should be run.
+     */
+    private Integer scheduledMinute;
+
     public Job() {}
 
     public Job(String name, List<Command> commands) {
@@ -197,5 +207,21 @@ public class Job {
 
     public void setScheduledDays(List<Integer> scheduledDays) {
         this.scheduledDays = scheduledDays;
+    }
+
+    public Integer getScheduledHour() {
+        return scheduledHour;
+    }
+
+    public void setScheduledHour(Integer scheduledHour) {
+        this.scheduledHour = scheduledHour;
+    }
+
+    public Integer getScheduledMinute() {
+        return scheduledMinute;
+    }
+
+    public void setScheduledMinute(Integer scheduledMinute) {
+        this.scheduledMinute = scheduledMinute;
     }
 }
