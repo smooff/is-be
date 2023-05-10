@@ -81,9 +81,11 @@ public class ScenarioProcessor {
                                             if (k.equals(event.getDeviceId()) && tag.equals(storedData.getTag())) {
                                                 // we can skip one DB call, because we already put actual storedData to dataForExpression
                                             } else {
-                                                LastStoredData lastStoredData1 = lastStoredDataRepository.findByDeviceIdAndTag(k, tag);
-                                                if (lastStoredData1 != null) {
-                                                    dataForExpression.put(lastStoredData1.getDeviceId() + lastStoredData1.getTag(), lastStoredData1.getValue());
+                                                //test
+                                                StoredData lastStoredData = storedDataRepository.findFirstStoredDataByDeviceIdAndTagOrderByMeasureAddDesc(k, tag);
+//                                                LastStoredData lastStoredData1 = lastStoredDataRepository.findByDeviceIdAndTag(k, tag);
+                                                if (lastStoredData != null) {
+                                                    dataForExpression.put(lastStoredData.getDeviceId() + lastStoredData.getTag(), lastStoredData.getValue());
                                                 } else {
                                                     hasAllDataForEvaluation.set(false);
                                                 }
