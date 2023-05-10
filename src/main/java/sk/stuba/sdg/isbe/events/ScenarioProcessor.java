@@ -57,6 +57,10 @@ public class ScenarioProcessor {
         int actualDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
         int actualHour = calendar.get(Calendar.HOUR_OF_DAY);
 
+        LocalDateTime nowX = LocalDateTime.now();
+        DateTimeFormatter formatterX = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS");
+        String timeX = nowX.format(formatterX);
+
         List<Scenario> scenarios = scenarioRepository.getScenarioByDevicesContainingAndDeactivated(event.getDeviceId(), false);
         if (scenarios != null) {
             for (StoredData storedData : event.getStoredData()) {
@@ -81,11 +85,9 @@ public class ScenarioProcessor {
                                             if (k.equals(event.getDeviceId()) && tag.equals(storedData.getTag())) {
                                                 // we can skip one DB call, because we already put actual storedData to dataForExpression
                                             } else {
-                                                //test
-                                                StoredData lastStoredData = storedDataRepository.findFirstStoredDataByDeviceIdAndTagOrderByMeasureAddDesc(k, tag);
-//                                                LastStoredData lastStoredData1 = lastStoredDataRepository.findByDeviceIdAndTag(k, tag);
-                                                if (lastStoredData != null) {
-                                                    dataForExpression.put(lastStoredData.getDeviceId() + lastStoredData.getTag(), lastStoredData.getValue());
+                                                LastStoredData lastStoredData1 = lastStoredDataRepository.findByDeviceIdAndTag(k, tag);
+                                                if (lastStoredData1 != null) {
+                                                    dataForExpression.put(lastStoredData1.getDeviceId() + lastStoredData1.getTag(), lastStoredData1.getValue());
                                                 } else {
                                                     hasAllDataForEvaluation.set(false);
                                                 }
@@ -124,7 +126,7 @@ public class ScenarioProcessor {
         String time2 = now.format(formatter);
 //        Instant time2 = Instant.now();
 //        long millisecondsBetween = ChronoUnit.MILLIS.between(event.getTime(), time2);
-        logger.debug(event.getDeviceId() + " = " + "! " + event.getCurrStep() + " ! " + "RECEIVE TIME:" + event.getTime() + ", FINISH TIME:" + time2);
+        logger.debug(event.getDeviceId() + " = " + "! " + event.getCurrStep() + " ! " + "RECEIVE TIME:" + event.getTime() + ", SCENARIO START TIME:" + timeX + ", FINISH TIME:" + time2);
     }
 
     public Long calculateUntilTime(Long activatedAt, Long forTime, String timeUnit) {
