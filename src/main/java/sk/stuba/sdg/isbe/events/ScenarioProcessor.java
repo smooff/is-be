@@ -2,7 +2,6 @@ package sk.stuba.sdg.isbe.events;
 
 import io.github.jamsesso.jsonlogic.JsonLogic;
 import io.github.jamsesso.jsonlogic.JsonLogicException;
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
@@ -21,15 +20,12 @@ import sk.stuba.sdg.isbe.services.LastStoredDataService;
 import sk.stuba.sdg.isbe.services.ScenarioService;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Component
 public class ScenarioProcessor {
-    private static final Logger logger = Logger.getLogger(ScenarioProcessor.class);
+
     @Autowired
     ScenarioService scenarioService;
 
@@ -57,10 +53,6 @@ public class ScenarioProcessor {
         int actualDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
         int actualHour = calendar.get(Calendar.HOUR_OF_DAY);
 
-        LocalDateTime nowX = LocalDateTime.now();
-        DateTimeFormatter formatterX = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS");
-        String timeX = nowX.format(formatterX);
-
         List<Scenario> scenarios = scenarioRepository.getScenarioByDevicesContainingAndDeactivated(event.getDeviceId(), false);
         if (scenarios != null) {
             for (StoredData storedData : event.getStoredData()) {
@@ -85,9 +77,9 @@ public class ScenarioProcessor {
                                             if (k.equals(event.getDeviceId()) && tag.equals(storedData.getTag())) {
                                                 // we can skip one DB call, because we already put actual storedData to dataForExpression
                                             } else {
-                                                LastStoredData lastStoredData1 = lastStoredDataRepository.findByDeviceIdAndTag(k, tag);
-                                                if (lastStoredData1 != null) {
-                                                    dataForExpression.put(lastStoredData1.getDeviceId() + lastStoredData1.getTag(), lastStoredData1.getValue());
+                                                LastStoredData lastStoredData = lastStoredDataRepository.findByDeviceIdAndTag(k, tag);
+                                                if (lastStoredData != null) {
+                                                    dataForExpression.put(lastStoredData.getDeviceId() + lastStoredData.getTag(), lastStoredData.getValue());
                                                 } else {
                                                     hasAllDataForEvaluation.set(false);
                                                 }
@@ -110,7 +102,7 @@ public class ScenarioProcessor {
                                         } else if (result.contains(EventConstants.JOB)) {
                                             handleScenarioJob(scenario, result);
                                         } else {
-//                                            throw new InvalidOperationException("Result: " + result + " not recognized.");
+                                            throw new InvalidOperationException("Result: " + result + " not recognized.");
                                         }
                                     }
                                     dataForExpression.clear();
@@ -121,12 +113,6 @@ public class ScenarioProcessor {
                 }
             }
         }
-        LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS");
-        String time2 = now.format(formatter);
-//        Instant time2 = Instant.now();
-//        long millisecondsBetween = ChronoUnit.MILLIS.between(event.getTime(), time2);
-        logger.debug(event.getDeviceId() + " = " + "! " + event.getCurrStep() + " ! " + "RECEIVE TIME:" + event.getTime() + ", SCENARIO START TIME:" + timeX + ", FINISH TIME:" + time2);
     }
 
     public Long calculateUntilTime(Long activatedAt, Long forTime, String timeUnit) {
@@ -172,7 +158,7 @@ public class ScenarioProcessor {
         Job job = jobService.getJobById(jobId);
         if (job != null) {
             if (job.getCurrentStatus().equals(JobStatusEnum.JOB_DONE) || job.getCurrentStatus().equals(JobStatusEnum.JOB_ERR)) {
-//            jobService.resetJob(jobId);
+                jobService.resetJob(jobId);
                 //trigger time (multiple values) for certain job
                 if (scenario.getJobAndTriggerTime().containsKey(jobId)) {
                     scenario.getJobAndTriggerTime().get(jobId).add(Instant.now().toEpochMilli());

@@ -11,20 +11,10 @@ public class DataStoredEvent extends ApplicationEvent {
 
     private final String deviceId;
 
-    private final String time;
-
-    private final int currStep;
-
-    public DataStoredEvent(Object source, List<StoredData> storedData, String deviceId, String time, int currStep) {
+    public DataStoredEvent(Object source, List<StoredData> storedData, String deviceId) {
         super(source);
         this.storedData = storedData;
         this.deviceId = deviceId;
-        this.time = time;
-        this.currStep = currStep;
-    }
-
-    public int getCurrStep() {
-        return currStep;
     }
 
     public List<StoredData> getStoredData() {
@@ -35,7 +25,4 @@ public class DataStoredEvent extends ApplicationEvent {
         return deviceId;
     }
 
-    public String getTime() {
-        return time;
-    }
 }

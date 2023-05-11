@@ -73,10 +73,7 @@ public class JobStatusServiceImpl implements JobStatusService {
     }
 
     @Override
-    public JobStatus updateJobStatus(String jobStatusId, JobStatus changeJobStatus, String deviceId, int currStep) {
-        LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS");
-        String time = now.format(formatter);
+    public JobStatus updateJobStatus(String jobStatusId, JobStatus changeJobStatus, String deviceId) {
         JobStatus jobStatus = getJobStatus(jobStatusId);
 
         if (changeJobStatus == null) {
@@ -118,9 +115,7 @@ public class JobStatusServiceImpl implements JobStatusService {
                     storedDataService.upsertStoredData(storedData);
                     listStoredData.add(storedData);
                 }
-//                Instant time = Instant.now();
-
-                DataStoredEvent dataStoredEvent = new DataStoredEvent(this, listStoredData, deviceId, time, currStep);
+                DataStoredEvent dataStoredEvent = new DataStoredEvent(this, listStoredData, deviceId);
                 eventPublisher.publishEvent(dataStoredEvent);
             }
         }
