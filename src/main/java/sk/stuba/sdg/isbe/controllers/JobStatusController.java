@@ -27,9 +27,9 @@ public class JobStatusController {
     }
 
     @Operation(summary = "Update JobStatus")
-    @PostMapping("/updateJobStatus/{jobStatusId}/{currStep}")
-    public JobStatus updateJobStatus(@PathVariable String jobStatusId, @Valid @RequestBody JobStatus changeJobStatus, @PathVariable("currStep") int currStep) {
-        return jobStatusService.updateJobStatus(jobStatusId, changeJobStatus, null, currStep);
+    @PostMapping("/updateJobStatus/{jobStatusId}")
+    public JobStatus updateJobStatus(@PathVariable String jobStatusId, @Valid @RequestBody JobStatus changeJobStatus) {
+        return jobStatusService.updateJobStatus(jobStatusId, changeJobStatus, null);
     }
 
 }
