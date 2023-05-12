@@ -18,15 +18,17 @@ public class JobController {
     private JobService jobService;
 
     @Operation(summary = "Run a job created from a recipe with n repetitions")
-    @PostMapping("runJobFromRecipe/{recipeId}/{deviceId}/{repetitions}")
-    public Job createJobFromRecipe(@PathVariable String recipeId, @PathVariable String deviceId, @PathVariable int repetitions) {
-        return jobService.runJobFromRecipe(recipeId, deviceId, repetitions);
+    @PostMapping("runJobFromRecipe/{recipeId}/{deviceId}/{repetitions}/{scheduledDays}/{scheduledHour}/{scheduledMinute}")
+    public Job createJobFromRecipe(@PathVariable String recipeId, @PathVariable String deviceId, @PathVariable int repetitions,
+                                   @PathVariable List<Integer> scheduledDays, @PathVariable Integer scheduledHour, @PathVariable Integer scheduledMinute) {
+        return jobService.runJobFromRecipe(recipeId, deviceId, repetitions, scheduledDays, scheduledHour, scheduledMinute);
     }
 
     @Operation(summary = "Run a job on given device with n repetitions")
-    @PostMapping("runJob/{deviceId}/{repetitions}")
-    public Job runJob(@Valid @RequestBody Job job, @PathVariable String deviceId, @PathVariable int repetitions) {
-        return jobService.runJob(job, deviceId, repetitions);
+    @PostMapping("runJob/{deviceId}/{repetitions}/{scheduledDays}/{scheduledHour}/{scheduledMinute}")
+    public Job runJob(@Valid @RequestBody Job job, @PathVariable String deviceId, @PathVariable int repetitions,
+                      @PathVariable List<Integer> scheduledDays, @PathVariable Integer scheduledHour, @PathVariable Integer scheduledMinute) {
+        return jobService.runJob(job, deviceId, repetitions, scheduledDays, scheduledHour, scheduledMinute);
     }
 
     @Operation(summary = "Reset a job's status")

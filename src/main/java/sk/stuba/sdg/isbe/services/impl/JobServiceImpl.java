@@ -42,23 +42,26 @@ public class JobServiceImpl implements JobService {
     private JobStatusRepository jobStatusRepository;
 
     @Override
-    public Job runJobFromRecipe(String recipeId, String deviceId, int repetitions) {
+    public Job runJobFromRecipe(String recipeId, String deviceId, int repetitions, List<Integer> scheduledDays, Integer scheduledHour, Integer scheduledMinute) {
         Recipe recipe = recipeService.getRecipeById(recipeId);
         if (recipe.isDeactivated()) {
             throw new InvalidEntityException("Recipe is deactivated, can't create a job from it!");
         }
 
         Job job = new Job(recipe.getName(), getCommandsFromRecipes(recipe));
-        return runJob(job, deviceId, repetitions);
+        return runJob(job, deviceId, repetitions, scheduledDays, scheduledHour, scheduledMinute);
     }
 
     @Override
-    public Job runJob(Job job, String deviceId, int repetitions) {
+    public Job runJob(Job job, String deviceId, int repetitions, List<Integer> scheduledDays, Integer scheduledHour, Integer scheduledMinute) {
         if (repetitions < 0) {
             throw new InvalidOperationException("Repetitions must be equal to or greater than 0!");
         }
 
         job.setNoOfReps(repetitions);
+        job.setScheduledDays(scheduledDays);
+        job.setScheduledHour(scheduledHour);
+        job.setScheduledMinute(scheduledMinute);
         validateJob(job);
 
         Device device = deviceService.getDeviceById(deviceId);
@@ -323,7 +326,23 @@ public class JobServiceImpl implements JobService {
             throw new InvalidEntityException("Repetitions must be equal to or greater than 0!");
         }
 
+        if (job.getScheduledDays() == null) {
+            return;
+        }
         job.setScheduledDays(job.getScheduledDays().stream().filter(Objects::nonNull).toList());
+        if (job.getScheduledDays().isEmpty()) {
+            return;
+        }
+        if (job.getScheduledHour() != null) {
+            if (job.getScheduledHour() < 0 || job.getScheduledHour() > 23) {
+                throw new InvalidEntityException("Scheduled hour is invalid: " + job.getScheduledHour() + "!");
+            }
+        }
+        if (job.getScheduledMinute() != null) {
+            if (job.getScheduledMinute() < 0 || job.getScheduledMinute() > 23) {
+                throw new InvalidEntityException("Scheduled minute is invalid: " + job.getScheduledMinute() + "!");
+            }
+        }
         for(Integer day : job.getScheduledDays()) {
             if (day < 1 || day > 7) {
                 int dayIndex = job.getScheduledDays().indexOf(day);

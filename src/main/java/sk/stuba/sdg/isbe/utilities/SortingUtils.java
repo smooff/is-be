@@ -14,6 +14,7 @@ import java.util.List;
 public final class SortingUtils {
 
     private static final String NO_SORT = "NONE";
+    private static final String NO_SORT_NULL = "NULL";
 
     public static SortDirectionEnum getSortDirection(String sortDirection) {
         try {
@@ -57,7 +58,8 @@ public final class SortingUtils {
     }
 
     public static Sort getSort(Class<?> klass, String sortBy, String sortDirection) {
-        if (sortBy == null || NO_SORT.equals(sortBy) || sortDirection == null || SortDirectionEnum.NONE == getSortDirection(sortDirection)) {
+        if (sortBy == null || NO_SORT.equalsIgnoreCase(sortBy) || NO_SORT_NULL.equalsIgnoreCase(sortBy) ||
+                NO_SORT_NULL.equalsIgnoreCase(sortDirection) || sortDirection == null || SortDirectionEnum.NONE == getSortDirection(sortDirection)) {
             return Sort.unsorted();
         }
         return getDirectedSorting(Sort.by(getValidSortingField(sortBy, klass)), sortDirection);

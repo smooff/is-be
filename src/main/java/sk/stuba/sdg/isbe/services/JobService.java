@@ -6,9 +6,9 @@ import java.util.List;
 
 public interface JobService {
 
-    Job runJobFromRecipe(String recipeId, String deviceId, int repetitions);
+    Job runJobFromRecipe(String recipeId, String deviceId, int repetitions, List<Integer> scheduledDays, Integer scheduledHour, Integer scheduledMinute);
 
-    Job runJob(Job job, String deviceId, int repetitions);
+    Job runJob(Job job, String deviceId, int repetitions, List<Integer> scheduledDays, Integer scheduledHour, Integer scheduledMinute);
 
     Job resetJob(String jobId);
 
