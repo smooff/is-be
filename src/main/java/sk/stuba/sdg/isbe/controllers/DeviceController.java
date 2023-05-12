@@ -79,7 +79,7 @@ public class DeviceController {
     }
 
     @Operation(summary = "Update JobStatus by device uid")
-    @PostMapping("/updateJobStatus/{deviceId}/{jobStatusId}}")
+    @PostMapping("/updateJobStatus/{deviceId}/{jobStatusId}")
     public JobStatus updateJobStatus(@PathVariable String deviceId, @PathVariable String jobStatusId, @Valid @RequestBody JobStatus changeJobStatus) {
         deviceService.getDeviceById(deviceId);
 
