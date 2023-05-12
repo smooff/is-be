@@ -64,12 +64,9 @@ public class JobServiceTests {
         Device device = new Device("device1" + Instant.now().toEpochMilli(), "ABCD", DeviceTypeEnum.ESP32);
         deviceService.createDevice(device);
 
-        Exception exception = assertThrows(InvalidEntityException.class, () -> jobService.runJobFromRecipe(recipe.getId(), device.getUid(), 0));
-        assertEquals("Recipe is only a sub-recipe, can't create a job from it!", exception.getMessage());
-
         recipe.setSubRecipe(false);
         recipeService.updateRecipe(recipe.getId(), recipe);
-        exception = assertThrows(InvalidEntityException.class, () -> jobService.runJobFromRecipe(recipe.getId(), device.getUid(), 1));
+        Exception exception = assertThrows(InvalidEntityException.class, () -> jobService.runJobFromRecipe(recipe.getId(), device.getUid(), 1, null, null, null));
         assertEquals("The recipe and its sub-recipes do not contain any commands!", exception.getMessage());
 
         Command command = new Command("Command" + Instant.now().toEpochMilli(), List.of(1,2,3), DeviceTypeEnum.ESP32);
@@ -86,7 +83,7 @@ public class JobServiceTests {
         recipe.setCommands(List.of(command));
         recipeService.updateRecipe(recipe.getId(), recipe);
 
-        exception = assertThrows(InvalidOperationException.class, () -> jobService.runJobFromRecipe(recipe.getId(), device.getUid(), -1));
+        exception = assertThrows(InvalidOperationException.class, () -> jobService.runJobFromRecipe(recipe.getId(), device.getUid(), -1, null, null, null));
         assertEquals("Repetitions must be equal to or greater than 0!", exception.getMessage());
 
         Recipe subRecipe = new Recipe("SubRecipe" + Instant.now().toEpochMilli(), DeviceTypeEnum.ESP32, true);
@@ -100,7 +97,7 @@ public class JobServiceTests {
         recipeService.createRecipe(subSubRecipe);
         recipeService.addSubRecipeToRecipe(subRecipe.getId(), subSubRecipe.getId());
 
-        Job job = jobService.runJobFromRecipe(recipe.getId(), device.getUid(), 1);
+        Job job = jobService.runJobFromRecipe(recipe.getId(), device.getUid(), 1, null, null, null);
         assertEquals(5, job.getNoOfCmds());
 
         commandRepository.delete(command);
@@ -124,7 +121,7 @@ public class JobServiceTests {
 
         Job job = new Job("Job " + Instant.now().toEpochMilli(), List.of(command));
 
-        jobService.runJob(job, device.getUid(), 1);
+        jobService.runJob(job, device.getUid(), 1, null, null, null);
         job = jobService.resetJob(job.getUid());
 
         jobStatusRepository.delete(job.getStatus());
@@ -142,7 +139,7 @@ public class JobServiceTests {
 
         Job job = new Job("Job" + Instant.now().toEpochMilli(), List.of(command));
 
-        jobService.runJob(job, device.getUid(), 0);
+        jobService.runJob(job, device.getUid(), 0, null, null, null);
         job.getStatus().setCurrentCycle(1);
         jobStatusService.upsertJobStatus(job.getStatus());
         Job jobDb = jobService.skipCycle(job.getUid());
@@ -163,7 +160,7 @@ public class JobServiceTests {
 
         Job job = new Job("Job" + Instant.now().toEpochMilli(), List.of(command));
 
-        jobService.runJob(job, device.getUid(), 0);
+        jobService.runJob(job, device.getUid(), 0, null, null, null);
         job.getStatus().setTotalSteps(3);
         job.getStatus().setCurrentStep(1);
         jobStatusService.upsertJobStatus(job.getStatus());
@@ -186,8 +183,8 @@ public class JobServiceTests {
         Job job = new Job("Job" + Instant.now().toEpochMilli(), List.of(command));
         Job job2 = new Job("Job" + Instant.now().toEpochMilli(), List.of(command));
 
-        jobService.runJob(job, device.getUid(), 0);
-        jobService.runJob(job2, device.getUid(), 0);
+        jobService.runJob(job, device.getUid(), 0, null, null, null);
+        jobService.runJob(job2, device.getUid(), 0, null, null, null);
 
         Exception exception = assertThrows(NotFoundCustomException.class, () -> jobService.getAllJobsByStatus(device.getUid(), "WRONG_STATUS", NONE, NONE));
         assertEquals("Job status type: '" + "WRONG_STATUS" + "' does not exist!", exception.getMessage());
