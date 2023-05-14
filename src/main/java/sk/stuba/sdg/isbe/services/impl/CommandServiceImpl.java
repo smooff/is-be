@@ -37,9 +37,6 @@ public class CommandServiceImpl implements CommandService {
         if (commandWithNameExists(command.getName())) {
             throw new EntityExistsException("Command with name: '" + command.getName() + "' already exists!");
         }
-        if (command.getParams() == null || command.getParams().isEmpty()) {
-            throw new InvalidEntityException("Command does not contain any parameters!");
-        }
         if (command.getDeviceType() == null) {
             throw new InvalidEntityException("Type of device for command must be set!");
         }

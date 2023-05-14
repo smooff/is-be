@@ -343,9 +343,6 @@ public class RecipeServiceImpl implements RecipeService {
         if (command.getName() == null || command.getName().isEmpty()) {
             throw new InvalidOperationException("Command does not have any name set!");
         }
-        if (command.getParams() == null || command.getParams().isEmpty()) {
-            throw new InvalidOperationException("Command does not have any parameters!");
-        }
 
         if (recipe.getCommands() == null) {
             recipe.setCommands(new ArrayList<>());
