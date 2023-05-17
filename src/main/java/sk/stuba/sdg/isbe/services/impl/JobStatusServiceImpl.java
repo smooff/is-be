@@ -121,7 +121,7 @@ public class JobStatusServiceImpl implements JobStatusService {
 //                Instant time = Instant.now();
 
                 DataStoredEvent dataStoredEvent = new DataStoredEvent(this, listStoredData, deviceId, time, currStep);
-                eventPublisher.publishEvent(dataStoredEvent);
+//                eventPublisher.publishEvent(dataStoredEvent);
             }
         }
 
