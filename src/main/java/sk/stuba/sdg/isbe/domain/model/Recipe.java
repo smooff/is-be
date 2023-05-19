@@ -1,5 +1,6 @@
 package sk.stuba.sdg.isbe.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -48,6 +49,7 @@ public class Recipe {
     /**
      * Flag that is set when the user deletes a recipe. It provides the option to retrieve deleted recipes from the database.
      */
+    @JsonIgnore
     private boolean deactivated;
 
     public Recipe() {}

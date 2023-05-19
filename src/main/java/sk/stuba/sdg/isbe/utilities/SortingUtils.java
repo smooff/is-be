@@ -41,7 +41,7 @@ public final class SortingUtils {
                 return field;
             }
         }
-        throw new NotFoundCustomException("Sorting field: '" + sortBy + "' can't be found in " + klass.getName() + " class!" +
+        throw new NotFoundCustomException("Sorting field: '" + sortBy + "' can't be found in " + klass.getSimpleName() + " class!" +
                 " Possible sorting fields: " + String.join(", ", sortingFields));
     }
 

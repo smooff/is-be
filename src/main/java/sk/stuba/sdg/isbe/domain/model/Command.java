@@ -1,5 +1,6 @@
 package sk.stuba.sdg.isbe.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import sk.stuba.sdg.isbe.domain.enums.DeviceTypeEnum;
@@ -35,6 +36,7 @@ public class Command {
     /**
      * Flag that is set when the user deletes a command. It provides the option to retrieve deleted commands from the database.
      */
+    @JsonIgnore
     private boolean deactivated;
 
 
